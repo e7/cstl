@@ -2,6 +2,5 @@
 // author: e7, ryuuzaki.uchiha@gmail.com
 
 
-#include "mem.c"
-
-
+#include "mem.h"
+#include "list.h"
