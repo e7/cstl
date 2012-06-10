@@ -59,4 +59,7 @@ typedef unsigned long ulong_t;
                 const typeof( ((type *)0)->member ) *p_mptr = (ptr);\
                 (type *)((char *)p_mptr - OFFSET_OF(type, member));\
             })
+#define ARRAY_COUNT(a)      (sizeof(a) / sizeof(a[0]))
+
+#define NONE                ((void)0)
 #endif // __STD__COMMON_H__
