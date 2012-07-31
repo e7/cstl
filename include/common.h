@@ -9,5 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 #include "config.h"
 #endif // __COMMON_H__
