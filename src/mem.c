@@ -6,8 +6,18 @@
 #include "list.h"
 
 
-typedef void object_t;
-typedef void page_t;
+// ******************** 对象页 ********************
+typedef struct s_object_t {
+    struct s_object_t *mp_next;
+    char m_obj[0];
+} object_t; // 对象类型
+
+typedef void page_t; // 页类型
+
+typedef struct {
+    char mpa_objects[0];
+} page_header_t; // 页头
+
 static int const OBJS_PER_PAGE = 64;
 
 static page_t *alloc_page(int const OBJ_SIZE)
