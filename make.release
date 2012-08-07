@@ -11,4 +11,4 @@ autoconf &&
 automake --add-missing &&
 
 ./configure &&
-make CFLAGS="-Wall -g -O0 -std=c99" LDFLAGS="-L${PWD}/src/.libs"
+make CFLAGS="-Wall -Werror -std=c99" LDFLAGS="-L${PWD}/src/.libs"
