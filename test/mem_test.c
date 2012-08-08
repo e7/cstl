@@ -10,6 +10,7 @@ int main(int argc, char *argv[])
         rslt = -1;
         goto FINAL;
     }
+    fprintf(stderr, "init success!\n");
     mempool_exit();
 
 FINAL:

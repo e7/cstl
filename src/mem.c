@@ -31,7 +31,7 @@ static page_t *alloc_page(int const OBJ_SIZE)
 
     // 分配页
     p_page = malloc(PAGE_SIZE);
-    if (NULL != p_page)
+    if (NULL == p_page)
     {
         goto FINAL;
     }
