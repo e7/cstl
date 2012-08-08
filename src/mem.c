@@ -7,36 +7,47 @@
 
 
 // ******************** 对象页 ********************
-typedef struct s_object_t {
-    struct s_object_t *mp_next;
+typedef void object_t; // 对象类型
+typedef struct {
+    object_t *mp_next;
     char m_obj[0];
-} object_t; // 对象类型
-
+} obj_shell_t; // 对象壳类型
 typedef void page_t; // 页类型
 
 typedef struct {
-    char mpa_objects[0];
+    obj_shell_t *mp_free_obj_shs; // 空闲对象壳链
 } page_header_t; // 页头
 
 static int const OBJS_PER_PAGE = 64;
 
 static page_t *alloc_page(int const OBJ_SIZE)
 {
+    int const OBJ_SHELL_SIZE = sizeof(obj_shell_t) + OBJ_SIZE;
+    int const PAGE_SIZE = sizeof(page_header_t)
+                              + OBJ_SHELL_SIZE * OBJS_PER_PAGE;
     void *p_page = NULL;
-    int element_size = OBJ_SIZE + sizeof(object_t *);
-    byte_t *p_tmp = NULL;
+    page_header_t *p_header = NULL;
+    obj_shell_t *p_next_obj_sh = NULL;
 
-    p_page = calloc(OBJS_PER_PAGE, element_size);
-    ASSERT(NULL != p_page);
-
-    // 串连对象
-    p_tmp = (byte_t *)p_page;
-    for (int i = 0; i < (OBJS_PER_PAGE - 1); ++i) {
-        p_tmp += OBJ_SIZE;
-
-        *(object_t **)p_tmp = p_tmp + sizeof(object_t *);
+    // 分配页
+    p_page = malloc(PAGE_SIZE);
+    if (NULL != p_page)
+    {
+        goto FINAL;
     }
 
+    // 页初始化
+    memset(p_page, 0, PAGE_SIZE);
+    p_header = (page_header_t *)p_page;
+    p_header->mp_free_obj_shs = (obj_shell_t *)(p_header + 1); // 第一个对象壳
+    p_next_obj_sh = p_header->mp_free_obj_shs;
+    for (int i = 0; i < (OBJS_PER_PAGE - 1); ++i) {
+        p_next_obj_sh->mp_next
+            = (object_t *)((byte_t *)&p_next_obj_sh->mp_next + OBJ_SIZE);
+        ++p_next_obj_sh;
+    }
+
+FINAL:
     return p_page;
 }
 
