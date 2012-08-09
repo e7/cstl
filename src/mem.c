@@ -8,10 +8,11 @@
 
 // ******************** 对象页 ********************
 typedef void object_t; // 对象类型
-typedef struct {
-    object_t *mp_next;
+typedef struct s_obj_shell_t obj_shell_t;
+struct s_obj_shell_t {
+    obj_shell_t *mp_next;
     char m_obj[0];
-} obj_shell_t; // 对象壳类型
+}; // 对象壳类型
 typedef void page_t; // 页类型
 
 typedef struct {
@@ -25,7 +26,7 @@ static page_t *alloc_page(int const OBJ_SIZE)
     int const OBJ_SHELL_SIZE = sizeof(obj_shell_t) + OBJ_SIZE;
     int const PAGE_SIZE = sizeof(page_header_t)
                               + OBJ_SHELL_SIZE * OBJS_PER_PAGE;
-    void *p_page = NULL;
+    page_t *p_page = NULL;
     page_header_t *p_header = NULL;
     obj_shell_t *p_next_obj_sh = NULL;
 
@@ -43,8 +44,8 @@ static page_t *alloc_page(int const OBJ_SIZE)
     p_next_obj_sh = p_header->mp_free_obj_shs;
     for (int i = 0; i < (OBJS_PER_PAGE - 1); ++i) {
         p_next_obj_sh->mp_next
-            = (object_t *)((byte_t *)&p_next_obj_sh->mp_next + OBJ_SIZE);
-        ++p_next_obj_sh;
+            = (obj_shell_t *)((byte_t *)p_next_obj_sh + OBJ_SHELL_SIZE);
+        p_next_obj_sh = p_next_obj_sh->mp_next;
     }
 
 FINAL:
