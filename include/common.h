@@ -53,13 +53,13 @@ typedef unsigned long ulong_t;
     #define ASSERT(cond)        ((void)0)
 #endif // DEBUG_EDITION
 
-#define OFFSET_OF(s, m)     ( (size_t)&( ((s *)0 )->m ) )
+#define OFFSET_OF(s, m)         ((size_t)&(((s *)0)->m ))
 #define CONTAINER_OF(ptr, type, member)     \
             ({\
-                const typeof( ((type *)0)->member ) *p_mptr = (ptr);\
+                const typeof(((type *)0)->member) *p_mptr = (ptr);\
                 (type *)((char *)p_mptr - OFFSET_OF(type, member));\
             })
-#define ARRAY_COUNT(a)      (sizeof(a) / sizeof(a[0]))
+#define ARRAY_COUNT(a)          (sizeof(a) / sizeof((a)[0]))
 
-#define NONE                ((void)0)
+#define HOWMANY(x, y)           (((x) + ((y) - 1)) / (y))
 #endif // __STD__COMMON_H__

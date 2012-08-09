@@ -7,10 +7,13 @@
 
 
 // ******************** 对象页 ********************
+#define OBJS_PER_PAGE               64
+
 typedef void object_t; // 对象类型
 typedef struct s_obj_shell_t obj_shell_t;
 struct s_obj_shell_t {
     obj_shell_t *mp_next;
+    char m_inuse[HOWMANY(OBJS_PER_PAGE, sizeof(char))]; // 对象使用情况位图
     char m_obj[0];
 }; // 对象壳类型
 typedef void page_t; // 页类型
@@ -19,7 +22,6 @@ typedef struct {
     obj_shell_t *mp_free_obj_shs; // 空闲对象壳链
 } page_header_t; // 页头
 
-static int const OBJS_PER_PAGE = 64;
 
 static page_t *alloc_page(int const OBJ_SIZE)
 {
@@ -55,11 +57,10 @@ FINAL:
 static void free_page(page_t *p_page)
 {
     free(p_page);
-
-    return NONE;
 }
 
 
+// ******************** 对象池 ********************
 typedef struct {
     void *mp_page_partial;
     void *mp_page_full;
