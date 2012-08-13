@@ -10,26 +10,31 @@
 #define OBJS_PER_PAGE               64
 
 typedef void object_t; // 对象类型
-typedef struct s_obj_shell_t obj_shell_t;
-struct s_obj_shell_t {
+typedef struct s_obj_shell obj_shell_t;
+struct s_obj_shell {
     obj_shell_t *mp_next;
-    char m_inuse[HOWMANY(OBJS_PER_PAGE, sizeof(char))]; // 对象使用情况位图
     char m_obj[0];
 }; // 对象壳类型
-typedef void page_t; // 页类型
 
-typedef struct {
+
+typedef struct s_page_header page_header_t;
+struct s_page_header {
+    char m_inuse[HOWMANY(OBJS_PER_PAGE, sizeof(char))]; // 对象使用情况位图
     obj_shell_t *mp_free_obj_shs; // 空闲对象壳链
-} page_header_t; // 页头
+}; // 页头
+
+typedef struct s_page page_t;
+struct s_page {
+    page_header_t m_header; // 页头
+    page_t *mp_next; // 下一页
+}; // 对象页
 
 
 static page_t *alloc_page(int const OBJ_SIZE)
 {
     int const OBJ_SHELL_SIZE = sizeof(obj_shell_t) + OBJ_SIZE;
-    int const PAGE_SIZE = sizeof(page_header_t)
-                              + OBJ_SHELL_SIZE * OBJS_PER_PAGE;
+    int const PAGE_SIZE = sizeof(page_t) + OBJ_SHELL_SIZE * OBJS_PER_PAGE;
     page_t *p_page = NULL;
-    page_header_t *p_header = NULL;
     obj_shell_t *p_next_obj_sh = NULL;
 
     // 分配页
@@ -41,9 +46,8 @@ static page_t *alloc_page(int const OBJ_SIZE)
 
     // 页初始化
     memset(p_page, 0, PAGE_SIZE);
-    p_header = (page_header_t *)p_page;
-    p_header->mp_free_obj_shs = (obj_shell_t *)(p_header + 1); // 第一个对象壳
-    p_next_obj_sh = p_header->mp_free_obj_shs;
+    p_page->m_header.mp_free_obj_shs = (obj_shell_t *)(p_page + 1);
+    p_next_obj_sh = p_page->m_header.mp_free_obj_shs;
     for (int i = 0; i < (OBJS_PER_PAGE - 1); ++i) {
         p_next_obj_sh->mp_next
             = (obj_shell_t *)((byte_t *)p_next_obj_sh + OBJ_SHELL_SIZE);
@@ -64,17 +68,17 @@ static void free_page(page_t *p_page)
 typedef struct {
     void *mp_page_partial;
     void *mp_page_full;
-} std_page_cache;
+} page_cache_t;
 
 typedef struct {
     void *mp_page;
     void *mp_object_free;
-} std_obj_cache;
+} obj_cache_t;
 
 static struct {
     int const M_OBJ_SIZE;
-    std_obj_cache m_obj_cache;
-    std_page_cache m_page_cache;
+    obj_cache_t m_obj_cache;
+    page_cache_t m_page_cache;
 } sa_mem_cache[] = {
     {
         1 << 3,
