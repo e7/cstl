@@ -3,31 +3,6 @@
 
 
 #include "mem.h"
-#include "list.h"
-
-
-// ******************** 对象页 ********************
-#define OBJS_PER_PAGE               64
-
-typedef void object_t; // 对象类型
-typedef struct s_obj_shell obj_shell_t;
-struct s_obj_shell {
-    obj_shell_t *mp_next;
-    char m_obj[0];
-}; // 对象壳类型
-
-
-typedef struct s_page_header page_header_t;
-struct s_page_header {
-    char m_inuse[HOWMANY(OBJS_PER_PAGE, sizeof(char))]; // 对象使用情况位图
-    obj_shell_t *mp_free_obj_shs; // 空闲对象壳链
-}; // 页头
-
-typedef struct s_page page_t;
-struct s_page {
-    page_header_t m_header; // 页头
-    page_t *mp_next; // 下一页
-}; // 对象页
 
 
 static page_t *alloc_page(int const OBJ_SIZE)
@@ -37,10 +12,14 @@ static page_t *alloc_page(int const OBJ_SIZE)
     page_t *p_page = NULL;
     obj_shell_t *p_next_obj_sh = NULL;
 
+    // 检验对象大小
+    if (OBJ_SIZE > MAX_OBJ_SIZE) {
+        goto FINAL;
+    }
+
     // 分配页
     p_page = malloc(PAGE_SIZE);
-    if (NULL == p_page)
-    {
+    if (NULL == p_page) {
         goto FINAL;
     }
 
@@ -64,73 +43,57 @@ static void free_page(page_t *p_page)
 }
 
 
-// ******************** 对象池 ********************
-typedef struct {
-    void *mp_page_partial;
-    void *mp_page_full;
-} page_cache_t;
-
-typedef struct {
-    void *mp_page;
-    void *mp_object_free;
-} obj_cache_t;
-
-static struct {
-    int const M_OBJ_SIZE;
-    obj_cache_t m_obj_cache;
-    page_cache_t m_page_cache;
-} sa_mem_cache[] = {
-    {
-        1 << 3,
-    },
-    {
-        1 << 4,
-    },
-    {
-        1 << 5,
-    },
-    {
-        1 << 6,
-    },
-    {
-        (1 << 6) + (1 << 5),
-    },
-    {
-        1 << 7,
-    },
-    {
-        (1 << 7) + (1 << 6),
-    },
-    {
-        1 << 8,
-    },
-    {
-        1 << 9,
-    },
-    {
-        1 << 10,
-    },
-    {
-        1 << 11,
-    },
-};
-
-int mempool_init(void)
+// ******************** 内存池接口 ********************
+int mempool_build(mempool_t *p_mempool)
 {
     int rslt = 0;
-    int obj_size = 0;
 
-    for (int i = 0; i < ARRAY_COUNT(sa_mem_cache); ++i) {
-        obj_size = sa_mem_cache[i].M_OBJ_SIZE;
-
-        sa_mem_cache[i].m_obj_cache.mp_page = alloc_page(obj_size);
+    if (NULL == p_mempool) {
+        rslt = -1;
+        goto FINAL;
     }
 
+    for (int i = 0; i < OBJ_SIZE_NUM; ++i) {
+        p_mempool->ma_obj_cache[i].mp_page_partial = NULL;
+        p_mempool->ma_obj_cache[i].mp_page_full = NULL;
+        p_mempool->ma_obj_cache[i].mp_page_current= NULL;
+    }
+    init_ldlist_node(&p_mempool->m_big_obj_list);
+
+FINAL:
     return rslt;
 }
 
-void mempool_exit(void)
+void *mempool_alloc(mempool_t *p_mempool, int obj_size)
 {
-    for (int i = 0; i < ARRAY_COUNT(sa_mem_cache); ++i) {
+    void *p_rslt = NULL;
+
+    if ((NULL == p_mempool) || (obj_size < MIN_OBJ_SIZE)) {
+        goto FINAL;
     }
+    if (obj_size > MAX_OBJ_SIZE) {
+        int total_size = sizeof(big_obj_t) + obj_size;
+        big_obj_t *p_big_obj = 0;
+
+        p_big_obj = malloc(total_size);
+        if (NULL == p_big_obj) {
+            ASSERT(NULL == p_rslt);
+            goto FINAL;
+        }
+        p_big_obj->m_obj_size = obj_size;
+        ldlist_add_head(&p_mempool->m_big_obj_list, &p_big_obj->m_ldlist_node);
+    } else {
+        // 对象大小取整
+    }
+
+FINAL:
+    return p_rslt;
+}
+
+void mempool_free(mempool_t *p_mempool, void *p_obj)
+{
+}
+
+void mempool_destroy(mempool_t *p_mempool)
+{
 }
