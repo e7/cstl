@@ -75,6 +75,9 @@ typedef struct {
 } mempool_t;
 extern int mempool_build(mempool_t *p_mempool);
 extern void *mempool_alloc(mempool_t *p_mempool, int obj_size);
+extern void *mempool_array_alloc(mempool_t *p_mempool,
+                                 int obj_size,
+                                 int obj_count);
 extern void mempool_free(mempool_t *p_mempool, void *p_obj);
 extern void mempool_destroy(mempool_t *p_mempool);
 #endif // __MEM_H__

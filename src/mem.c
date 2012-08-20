@@ -66,12 +66,19 @@ FINAL:
 
 void *mempool_alloc(mempool_t *p_mempool, int obj_size)
 {
+    return mempool_array_alloc(p_mempool, obj_size, 1);
+}
+
+void *mempool_array_alloc(mempool_t *p_mempool,
+                          int obj_size,
+                          int obj_count)
+{
     void *p_rslt = NULL;
 
     if ((NULL == p_mempool) || (obj_size < MIN_OBJ_SIZE)) {
         goto FINAL;
     }
-    if (obj_size > MAX_OBJ_SIZE) {
+    if ((obj_size * obj_count)> MAX_OBJ_SIZE) { // 大对象
         int total_size = sizeof(big_obj_t) + obj_size;
         big_obj_t *p_big_obj = 0;
 
