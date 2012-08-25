@@ -1,0 +1,15 @@
+#! /bin/bash
+
+if [ ! -x "m4" ]; then
+    mkdir m4 &&
+
+    aclocal &&
+    autoheader &&
+    libtoolize &&
+    autoconf &&
+    automake --add-missing &&
+
+    ./configure
+fi
+
+make CFLAGS="-Wall -Werror -std=c99" LDFLAGS="-L${PWD}/src/.libs"
