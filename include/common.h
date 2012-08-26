@@ -23,6 +23,8 @@
 
 
 // common headers
+#include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,6 +46,9 @@ typedef signed int int_t;
 typedef unsigned int uint_t;
 typedef signed long long_t;
 typedef unsigned long ulong_t;
+
+#define FALSE           (0)
+#define TRUE            (!FALSE)
 
 
 // common macros
