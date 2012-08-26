@@ -34,9 +34,7 @@ static int const A_OBJ_SIZE_SURPPORT[] = {
 
 typedef struct s_big_obj_t big_obj_t;
 struct s_big_obj_t {
-    int m_obj_size;
-    big_obj_t *mp_next;
-    ldlist_node_st m_ldlist_node;
+    int m_obj_size; // 对象大小
     char m_obj[0];
 }; // 大对象类型
 
@@ -46,17 +44,12 @@ struct s_obj_shell {
     char m_obj[0];
 }; // 对象壳类型
 
-typedef struct s_page_header page_header_t;
-struct s_page_header {
-    char m_inuse[HOWMANY(OBJS_PER_PAGE, sizeof(char))]; // 对象使用情况位图
-    obj_shell_t *mp_free_obj_shs; // 空闲对象壳链
-}; // 页头
-
 typedef struct s_page page_t;
 struct s_page {
     int m_obj_size; // 该页对象大小
-    page_header_t m_header; // 页头
-    page_t *mp_next; // 下一页
+    char m_inuse[HOWMANY(OBJS_PER_PAGE, sizeof(char))]; // 对象使用情况位图
+    obj_shell_t *mp_free_obj_shs; // 空闲对象壳链
+    ldlist_node_st m_ldlist_node;
 }; // 对象页
 
 

@@ -25,8 +25,8 @@ static page_t *alloc_page(int const OBJ_SIZE)
 
     // 页初始化
     memset(p_page, 0, PAGE_SIZE);
-    p_page->m_header.mp_free_obj_shs = (obj_shell_t *)(p_page + 1);
-    p_next_obj_sh = p_page->m_header.mp_free_obj_shs;
+    p_page->mp_free_obj_shs = (obj_shell_t *)(p_page + 1);
+    p_next_obj_sh = p_page->mp_free_obj_shs;
     for (int i = 0; i < (OBJS_PER_PAGE - 1); ++i) {
         p_next_obj_sh->mp_next
             = (obj_shell_t *)((byte_t *)p_next_obj_sh + OBJ_SHELL_SIZE);
@@ -79,16 +79,14 @@ void *mempool_array_alloc(mempool_t *p_mempool,
         goto FINAL;
     }
     if ((obj_size * obj_count)> MAX_OBJ_SIZE) { // 大对象
-        int total_size = sizeof(big_obj_t) + obj_size;
         big_obj_t *p_big_obj = 0;
 
-        p_big_obj = malloc(total_size);
+        p_big_obj = malloc(sizeof(big_obj_t) + obj_size);
         if (NULL == p_big_obj) {
             ASSERT(NULL == p_rslt);
             goto FINAL;
         }
         p_big_obj->m_obj_size = obj_size;
-        ldlist_add_head(&p_mempool->m_big_obj_list, &p_big_obj->m_ldlist_node);
     } else {
         // 对象大小取整
     }

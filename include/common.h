@@ -47,6 +47,9 @@ typedef unsigned int uint_t;
 typedef signed long long_t;
 typedef unsigned long ulong_t;
 
+#define FALSE           (0)
+#define TRUE            (!FALSE)
+
 
 // common macros
 #if DEBUG_EDITION
