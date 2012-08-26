@@ -50,6 +50,9 @@ typedef unsigned long ulong_t;
 #define FALSE           (0)
 #define TRUE            (!FALSE)
 
+#define EXEC_SUCCEED    (0)
+#define EXEC_FAILURE    (-1)
+
 
 // common macros
 #if DEBUG_EDITION
