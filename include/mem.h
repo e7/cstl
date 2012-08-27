@@ -49,23 +49,21 @@ struct s_page {
     int m_obj_size; // 该页对象大小
     char m_inuse[HOWMANY(OBJS_PER_PAGE, sizeof(char))]; // 对象使用情况位图
     obj_shell_t *mp_free_obj_shs; // 空闲对象壳链
-    ldlist_node_st m_ldlist_node;
+    ldlist_node_st m_ldlist_node; // 页节点
 }; // 对象页
-
-
-// ******************** 对象池 ********************
-typedef struct {
-    page_t *mp_page_partial;
-    page_t *mp_page_full; // 满页
-    page_t *mp_page_current; // 当前页
-} page_base_t;
 
 
 // ******************** 内存池接口 ********************
 typedef struct {
+    ldlist_head_st m_ldlist_patial; // 部分占用页
+    ldlist_head_st m_ldlist_full; // 满页
+    page_t *mp_page_current; // 当前页
+} page_base_t;
+
+typedef struct {
     page_base_t ma_obj_cache[OBJ_SIZE_NUM]; // 各类型页对象缓存
-    ldlist_head_st m_big_obj_list; // 大对象链
 } mempool_t;
+
 extern int mempool_build(mempool_t *p_mempool);
 extern void *mempool_alloc(mempool_t *p_mempool, int obj_size);
 extern void *mempool_array_alloc(mempool_t *p_mempool,

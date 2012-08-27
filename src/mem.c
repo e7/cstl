@@ -5,6 +5,18 @@
 #include "mem.h"
 
 
+// ******************** 对象页 ********************
+static void *provide_obj(page_t *p_page)
+{
+    void *rslt = NULL;
+
+    return rslt;
+}
+
+static void recycle_obj(page_t *p_page, void const *pc_obj)
+{
+}
+
 static page_t *alloc_page(int const OBJ_SIZE)
 {
     int const OBJ_SHELL_SIZE = sizeof(obj_shell_t) + OBJ_SIZE;
@@ -13,9 +25,7 @@ static page_t *alloc_page(int const OBJ_SIZE)
     obj_shell_t *p_next_obj_sh = NULL;
 
     // 检验对象大小
-    if (OBJ_SIZE > MAX_OBJ_SIZE) {
-        goto FINAL;
-    }
+    ASSERT(OBJ_SIZE > MAX_OBJ_SIZE);
 
     // 分配页
     p_page = malloc(PAGE_SIZE);
@@ -23,18 +33,29 @@ static page_t *alloc_page(int const OBJ_SIZE)
         goto FINAL;
     }
 
-    // 页初始化
+    // ***** 页初始化 *****
     memset(p_page, 0, PAGE_SIZE);
-    p_page->mp_free_obj_shs = (obj_shell_t *)(p_page + 1);
+    p_page->m_obj_size = OBJ_SIZE; // 对象大小
+    p_page->mp_free_obj_shs = (obj_shell_t *)(p_page + 1); // 空闲链
+
+    // 对象大小
     p_next_obj_sh = p_page->mp_free_obj_shs;
     for (int i = 0; i < (OBJS_PER_PAGE - 1); ++i) {
         p_next_obj_sh->mp_next
             = (obj_shell_t *)((byte_t *)p_next_obj_sh + OBJ_SHELL_SIZE);
         p_next_obj_sh = p_next_obj_sh->mp_next;
     }
+    init_ldlist_node(&p_page->m_ldlist_node); // 页节点
 
 FINAL:
     return p_page;
+}
+
+static int is_page_full(page_t *p_page)
+{
+    ASSERT(NULL != p_page);
+
+    return (NULL == p_page->mp_free_obj_shs);
 }
 
 static void free_page(page_t *p_page)
@@ -54,11 +75,10 @@ int mempool_build(mempool_t *p_mempool)
     }
 
     for (int i = 0; i < OBJ_SIZE_NUM; ++i) {
-        p_mempool->ma_obj_cache[i].mp_page_partial = NULL;
-        p_mempool->ma_obj_cache[i].mp_page_full = NULL;
+        init_ldlist_node(&p_mempool->ma_obj_cache[i].m_ldlist_patial);       
+        init_ldlist_node(&p_mempool->ma_obj_cache[i].m_ldlist_full);
         p_mempool->ma_obj_cache[i].mp_page_current= NULL;
     }
-    init_ldlist_node(&p_mempool->m_big_obj_list);
 
 FINAL:
     return rslt;
@@ -74,11 +94,17 @@ void *mempool_array_alloc(mempool_t *p_mempool,
                           int obj_count)
 {
     void *p_rslt = NULL;
+    int total_size = obj_size * obj_count;
 
-    if ((NULL == p_mempool) || (obj_size < MIN_OBJ_SIZE)) {
+    if (NULL == p_mempool){
         goto FINAL;
     }
-    if ((obj_size * obj_count)> MAX_OBJ_SIZE) { // 大对象
+
+    if (obj_size < MIN_OBJ_SIZE) {
+        goto FINAL;
+    }
+
+    if (total_size > MAX_OBJ_SIZE) { // 大对象
         big_obj_t *p_big_obj = 0;
 
         p_big_obj = malloc(sizeof(big_obj_t) + obj_size);
@@ -88,7 +114,36 @@ void *mempool_array_alloc(mempool_t *p_mempool,
         }
         p_big_obj->m_obj_size = obj_size;
     } else {
+        int index = 0;
+        int mem_size = 0;
+        page_t *p_page_current = NULL;
+
         // 对象大小取整
+        for (index = 0; index < OBJ_SIZE_NUM; ++index) {
+            if (total_size < A_OBJ_SIZE_SURPPORT[index]) {
+                mem_size = A_OBJ_SIZE_SURPPORT[index];
+            } else {
+                break;
+            }
+        }
+        ASSERT(index <= OBJ_SIZE_NUM);
+
+        // 分配对象页
+        if (NULL == p_mempool->ma_obj_cache[index].mp_page_current) {
+            p_mempool->ma_obj_cache[index].mp_page_current
+                = alloc_page(mem_size);
+        }
+        if (NULL == p_mempool->ma_obj_cache[index].mp_page_current) {
+            goto FINAL;
+        }
+
+        // 从对象页中分配对象
+        ASSERT(NULL != p_mempool->ma_obj_cache[index].mp_page_current);
+        p_page_current = p_mempool->ma_obj_cache[index].mp_page_current;
+        p_rslt = provide_obj(p_page_current);
+        if (is_page_full(p_page_current)) { // 页已满
+            
+        }
     }
 
 FINAL:
@@ -97,6 +152,21 @@ FINAL:
 
 void mempool_free(mempool_t *p_mempool, void *p_obj)
 {
+    if (NULL == p_mempool) {
+        goto FINAL;
+    }
+
+    if (NULL == p_obj) {
+        goto FINAL;
+    }
+
+    if (*(int *)p_obj > MAX_OBJ_SIZE) { // 大对象，直接释放
+        free(p_obj);
+    } else {
+    }
+
+FINAL:
+    return;
 }
 
 void mempool_destroy(mempool_t *p_mempool)
