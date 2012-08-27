@@ -75,7 +75,7 @@ int mempool_build(mempool_t *p_mempool)
     }
 
     for (int i = 0; i < OBJ_SIZE_NUM; ++i) {
-        init_ldlist_node(&p_mempool->ma_obj_cache[i].m_ldlist_patial);       
+        init_ldlist_node(&p_mempool->ma_obj_cache[i].m_ldlist_partial);
         init_ldlist_node(&p_mempool->ma_obj_cache[i].m_ldlist_full);
         p_mempool->ma_obj_cache[i].mp_page_current= NULL;
     }
@@ -142,7 +142,11 @@ void *mempool_array_alloc(mempool_t *p_mempool,
         p_page_current = p_mempool->ma_obj_cache[index].mp_page_current;
         p_rslt = provide_obj(p_page_current);
         if (is_page_full(p_page_current)) { // 页已满
-            
+            ldlist_add_head(&p_mempool->ma_obj_cache[index].m_ldlist_full,
+                            &p_page_current->m_ldlist_node); // 加入满页链表
+            p_mempool->ma_obj_cache[index].mp_page_current
+                = ldlist_del_head(
+                      &p_mempool->ma_obj_cache[index].m_ldlist_partial);
         }
     }
 

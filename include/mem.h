@@ -49,14 +49,14 @@ struct s_page {
     int m_obj_size; // 该页对象大小
     char m_inuse[HOWMANY(OBJS_PER_PAGE, sizeof(char))]; // 对象使用情况位图
     obj_shell_t *mp_free_obj_shs; // 空闲对象壳链
-    ldlist_node_st m_ldlist_node; // 页节点
+    ldlist_node_t m_ldlist_node; // 页节点
 }; // 对象页
 
 
 // ******************** 内存池接口 ********************
 typedef struct {
-    ldlist_head_st m_ldlist_patial; // 部分占用页
-    ldlist_head_st m_ldlist_full; // 满页
+    ldlist_head_t m_ldlist_partial; // 部分占用页
+    ldlist_head_t m_ldlist_full; // 满页
     page_t *mp_page_current; // 当前页
 } page_base_t;
 
