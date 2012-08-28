@@ -10,11 +10,15 @@ static void *provide_obj(page_t *p_page)
 {
     void *rslt = NULL;
 
+    ASSERT(NULL != p_page);
+
     return rslt;
 }
 
 static void recycle_obj(page_t *p_page, void const *pc_obj)
 {
+    ASSERT(NULL != p_page);
+    ASSERT(NULL != pc_obj);
 }
 
 static page_t *alloc_page(int const OBJ_SIZE)
@@ -130,6 +134,9 @@ void *mempool_array_alloc(mempool_t *p_mempool,
 
         // 分配对象页
         if (NULL == p_mempool->ma_obj_cache[index].mp_page_current) {
+            // 部分页链肯定是空的
+            ASSERT(ldlist_node_alone(
+                       &p_mempool->ma_obj_cache[index].m_ldlist_partial));
             p_mempool->ma_obj_cache[index].mp_page_current
                 = alloc_page(mem_size);
         }
@@ -142,8 +149,12 @@ void *mempool_array_alloc(mempool_t *p_mempool,
         p_page_current = p_mempool->ma_obj_cache[index].mp_page_current;
         p_rslt = provide_obj(p_page_current);
         if (is_page_full(p_page_current)) { // 页已满
+
+            // 加入满页链表
             ldlist_add_head(&p_mempool->ma_obj_cache[index].m_ldlist_full,
-                            &p_page_current->m_ldlist_node); // 加入满页链表
+                            &p_page_current->m_ldlist_node);
+
+            // 从部分页调入
             p_mempool->ma_obj_cache[index].mp_page_current
                 = ldlist_del_head(
                       &p_mempool->ma_obj_cache[index].m_ldlist_partial);
