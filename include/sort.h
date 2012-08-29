@@ -8,7 +8,7 @@
 // 排序接口
 typedef struct {
     int (*mf_sort)(int [], int const);
-};
+} sort_t;
 
 
 // 常用排序实现

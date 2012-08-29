@@ -26,7 +26,7 @@ FINAL:
 }
 
 // 二分查找
-int binary_search(int const A_BUF[], int size, int const KEY)
+int binary_search(int const A_BUF[], int const SIZE, int const KEY)
 {
     int index = INVALID_INDEX;
     int tmp_size = 0;
@@ -36,11 +36,11 @@ int binary_search(int const A_BUF[], int size, int const KEY)
         goto FINAL;
     }
 
-    if (size < 1) {
+    if (SIZE < 1) {
         goto FINAL;
     }
     
-    tmp_size = size;
+    tmp_size = SIZE;
     p_tmp_buf = A_BUF;
     while (tmp_size > 0) {
         int i = tmp_size / 2;
