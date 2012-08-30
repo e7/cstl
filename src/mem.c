@@ -21,7 +21,7 @@ static void recycle_obj(page_t *p_page, void const *pc_obj)
     ASSERT(NULL != pc_obj);
 }
 
-static page_t *alloc_page(int const OBJ_SIZE)
+static page_t *new_page(int const OBJ_SIZE)
 {
     int const OBJ_SHELL_SIZE = sizeof(obj_shell_t) + OBJ_SIZE;
     int const PAGE_SIZE = sizeof(page_t) + OBJ_SHELL_SIZE * OBJS_PER_PAGE;
@@ -39,10 +39,9 @@ static page_t *alloc_page(int const OBJ_SIZE)
 
     // ***** 页初始化 *****
     memset(p_page, 0, PAGE_SIZE);
+
     p_page->m_obj_size = OBJ_SIZE; // 对象大小
     p_page->mp_free_obj_shs = (obj_shell_t *)(p_page + 1); // 空闲链
-
-    // 对象大小
     p_next_obj_sh = p_page->mp_free_obj_shs;
     for (int i = 0; i < (OBJS_PER_PAGE - 1); ++i) {
         p_next_obj_sh->mp_next
@@ -50,6 +49,8 @@ static page_t *alloc_page(int const OBJ_SIZE)
         p_next_obj_sh = p_next_obj_sh->mp_next;
     }
     init_ldlist_node(&p_page->m_ldlist_node); // 页节点
+    p_page->mp_objs_start = (obj_shell_t *)(p_page + 1); // 对象组起始
+    p_page->mp_objs_end = p_page->mp_objs_start + OBJS_PER_PAGE; // 对象组终止
 
 FINAL:
     return p_page;
@@ -62,7 +63,7 @@ static int is_page_full(page_t *p_page)
     return (NULL == p_page->mp_free_obj_shs);
 }
 
-static void free_page(page_t *p_page)
+static void del_page(page_t *p_page)
 {
     free(p_page);
 }
@@ -138,7 +139,7 @@ void *mempool_array_alloc(mempool_t *p_mempool,
             ASSERT(ldlist_node_alone(
                        &p_mempool->ma_obj_cache[index].m_ldlist_partial));
             p_mempool->ma_obj_cache[index].mp_page_current
-                = alloc_page(mem_size);
+                = new_page(mem_size);
         }
         if (NULL == p_mempool->ma_obj_cache[index].mp_page_current) {
             goto FINAL;
