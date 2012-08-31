@@ -10,7 +10,8 @@
 
 
 // ******************** 循环双链表框架 ********************
-typedef struct ldlist_node ldlist_head_t, ldlist_node_t;
+typedef struct ldlist_node ldlist_node_t;
+typedef struct ldlist_node ldlist_head_t;
 struct ldlist_node {
     ldlist_node_t *mp_prev;
     ldlist_node_t *mp_next;
@@ -120,6 +121,7 @@ static inline void ldlist_del_orig(ldlist_node_t *p_prev_node,
     ASSERT(NULL != p_next_node);
     ASSERT(p_prev_node->mp_next == p_next_node->mp_prev);
 
+    // 自旋
     p_next_node->mp_prev = p_prev_node;
     p_prev_node->mp_next = p_next_node;
 }
@@ -131,7 +133,7 @@ static inline void ldlist_del(ldlist_node_t *p_node)
     ldlist_del_orig(p_node->mp_prev, p_node->mp_next);
 }
 
-static inline ldlist_node_t *ldlist_del_head(ldlist_head_t *p_list)
+static inline ldlist_node_t *ldlist_del_head(ldlist_node_t *p_list)
 {
     ldlist_node_t *p_rslt = NULL;
 
@@ -143,7 +145,7 @@ static inline ldlist_node_t *ldlist_del_head(ldlist_head_t *p_list)
     return p_rslt;
 }
 
-static inline ldlist_node_t *ldlist_del_tail(ldlist_head_t *p_list)
+static inline ldlist_node_t *ldlist_del_tail(ldlist_node_t *p_list)
 {
     ldlist_node_t *p_rslt = NULL;
 

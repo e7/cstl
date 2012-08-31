@@ -33,35 +33,42 @@ static int const A_OBJ_SIZE_SURPPORT[] = {
 #define OBJS_PER_PAGE               64
 
 typedef struct s_big_obj_t big_obj_t;
+typedef struct s_obj_shell obj_shell_t;
+typedef struct s_page page_t;
+
 struct s_big_obj_t {
     int m_obj_size; // 对象大小
     char m_obj[0];
 }; // 大对象类型
 
-typedef struct s_obj_shell obj_shell_t;
 struct s_obj_shell {
-    obj_shell_t *mp_next;
+    union {
+        int m_size;
+        obj_shell_t *mp_next;
+    } m_intptr; // 对象大小或指向下一对象壳
     char m_obj[0];
 }; // 对象壳类型
 
-typedef struct s_page page_t;
 struct s_page {
-    int m_obj_size; // 该页对象大小
     ldlist_node_t m_ldlist_node; // 页节点
     int m_use_count; // 对象使用计数
-    obj_shell_t *mp_free_obj_shs; // 空闲对象壳链
+    obj_shell_t *mp_free_list; // 空闲对象壳链
     obj_shell_t *mp_objs_start; // 对象组起始地址
     obj_shell_t *mp_objs_end; // 对象组终止地址
+    char ma_objs[0];
 }; // 对象页
 
 
-// ******************** 内存池接口 ********************
+// ******************** 页仓库 ********************
 typedef struct {
+    int m_obj_size; // 该类型页对象大小
     ldlist_head_t m_ldlist_partial; // 部分占用页
     ldlist_head_t m_ldlist_full; // 满页
     page_t *mp_page_current; // 当前页
 } page_base_t;
 
+
+// ******************** 内存池接口 ********************
 typedef struct {
     page_base_t ma_obj_cache[OBJ_SIZE_NUM]; // 各类型页对象缓存
 } mempool_t;

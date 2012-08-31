@@ -37,6 +37,16 @@
 #endif
 
 
+#ifndef __GNUC__
+    #define __asm__     asm
+#endif
+#ifndef __GNUC__
+    #define __inline__  inline
+#endif
+#ifndef __GNUC__
+    #define __typeof__  typeof
+#endif
+
 // common types
 typedef signed char byte_t;
 typedef unsigned char ubyte_t;
@@ -61,8 +71,8 @@ typedef unsigned long ulong_t;
 #define OFFSET_OF(s, m)         ((size_t)&(((s *)0)->m ))
 #define CONTAINER_OF(ptr, type, member)     \
             ({\
-                const typeof(((type *)0)->member) *p_mptr = (ptr);\
-                (type *)((char *)p_mptr - OFFSET_OF(type, member));\
+                const __typeof__(((type *)0)->member) *p_mptr = (ptr);\
+                (type *)((byte_t *)p_mptr - OFFSET_OF(type, member));\
             })
 #define ARRAY_COUNT(a)          (sizeof(a) / sizeof((a)[0]))
 
