@@ -47,8 +47,9 @@ struct s_obj_shell {
 typedef struct s_page page_t;
 struct s_page {
     int m_obj_size; // 该页对象大小
-    obj_shell_t *mp_free_obj_shs; // 空闲对象壳链
     ldlist_node_t m_ldlist_node; // 页节点
+    int m_use_count; // 对象使用计数
+    obj_shell_t *mp_free_obj_shs; // 空闲对象壳链
     obj_shell_t *mp_objs_start; // 对象组起始地址
     obj_shell_t *mp_objs_end; // 对象组终止地址
 }; // 对象页
