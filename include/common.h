@@ -21,6 +21,10 @@
     #error macro DEBUG_EDITION undefined!
 #endif
 
+#if !defined(MEMPOOL_ISOLATION)
+    #error macro MEMPOOL_ISOLATION undefined!
+#endif
+
 
 // common headers
 #include <stddef.h>

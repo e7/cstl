@@ -10,8 +10,7 @@
 
 
 // ******************** 循环双链表框架 ********************
-typedef struct ldlist_node ldlist_node_t;
-typedef struct ldlist_node ldlist_head_t;
+typedef struct ldlist_node ldlist_node_t, ldlist_head_t;
 struct ldlist_node {
     ldlist_node_t *mp_prev;
     ldlist_node_t *mp_next;

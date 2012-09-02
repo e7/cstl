@@ -16,13 +16,13 @@ int main(int argc, char *argv[])
     mempool_t mempool_for_test;
     int *pa_x = NULL;
 
-    if (0 != mempool_build(&mempool_for_test)) {
+    if (0 != MEMPOOL_BUILD(&mempool_for_test)) {
         rslt = -1;
         goto FINAL;
     }
     fprintf(stderr, "init success!\n");
 
-    pa_x = mempool_array_alloc(&mempool_for_test, sizeof(int), 4096);
+    pa_x = MEMPOOL_ARRAY_ALLOC(&mempool_for_test, sizeof(int), 4096);
     pa_x[4095] = 23;
     pa_x[0] = 45;
     //pa_x[4096] = 50;
@@ -39,8 +39,8 @@ int main(int argc, char *argv[])
             (*search_obj.mf_search)(buf, 10, 4));
     fprintf(stderr, "index: %d\n",
             (*search_obj.mf_search)(buf, 10, 545));
-    mempool_free(&mempool_for_test, pa_x);
-    mempool_destroy(&mempool_for_test);
+    MEMPOOL_FREE(&mempool_for_test, pa_x);
+    MEMPOOL_DESTROY(&mempool_for_test);
 
 FINAL:
     return rslt;

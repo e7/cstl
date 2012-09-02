@@ -219,12 +219,12 @@ FINAL:
 
 void *mempool_alloc(mempool_t *p_mempool, int obj_size)
 {
-    return mempool_array_alloc(p_mempool, obj_size, 1);
+    return mempool_array_alloc(p_mempool, 1, obj_size);
 }
 
 void *mempool_array_alloc(mempool_t *p_mempool,
-                          int obj_size,
-                          int obj_count)
+                          int obj_count,
+                          int obj_size)
 {
     void *p_rslt = NULL;
     int const OBJS_SIZE = obj_size * obj_count;
@@ -280,9 +280,21 @@ void mempool_free(mempool_t *p_mempool, void *p_obj)
         goto FINAL;
     }
 
+    ASSERT(NULL != p_obj_sh);
     if (p_obj_sh->m_intptr.m_size > MAX_OBJ_SIZE) { // 大对象，直接释放
         free(p_obj_sh);
     } else {
+        int const OBJ_SIZE = p_obj_sh->m_intptr.m_size;
+        page_base_t *p_base = NULL;
+
+        for (int i = 0; i < OBJ_SIZE_NUM; ++i) {
+            if (OBJ_SIZE == p_mempool->ma_obj_cache[i].m_obj_size) {
+                p_base = &p_mempool->ma_obj_cache[i];
+            }
+        }
+
+        ASSERT(NULL != p_base);
+        recycle_obj_sh(p_base, p_obj_sh);
     }   
 
 FINAL:
@@ -291,4 +303,28 @@ FINAL:
 
 void mempool_destroy(mempool_t *p_mempool)
 {
+    ASSERT(NULL != p_mempool);
+
+    for (int i =0; i < OBJ_SIZE_NUM; ++i) {
+        ldlist_head_t *p_list = NULL;
+        ldlist_node_t *p_pos = NULL;
+        ldlist_node_t *p_cur_next = NULL;
+
+        del_page(p_mempool->ma_obj_cache[i].mp_page_current);
+        p_mempool->ma_obj_cache[i].mp_page_current = NULL;
+
+        p_list = &p_mempool->ma_obj_cache[i].m_ldlist_partial;
+        LDLIST_FOR_EACH_SAFE(p_pos, p_cur_next, p_list) {
+            page_t *p_page = LDLIST_ENTRY(p_pos, page_t, m_ldlist_node);
+            ldlist_del(p_pos);
+            del_page(p_page);
+        }
+
+        p_list = &p_mempool->ma_obj_cache[i].m_ldlist_full;
+        LDLIST_FOR_EACH_SAFE(p_pos, p_cur_next, p_list) {
+            page_t *p_page = LDLIST_ENTRY(p_pos, page_t, m_ldlist_node);
+            ldlist_del(p_pos);
+            del_page(p_page);
+        }
+    }
 }
