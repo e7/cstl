@@ -64,6 +64,9 @@ typedef unsigned long ulong_t;
 #define FALSE           (0)
 #define TRUE            (!FALSE)
 
+#define EXEC_SUCCEED    (0)
+#define EXEC_FAILURE    (-1)
+
 
 // common macros
 #if DEBUG_EDITION
@@ -81,4 +84,11 @@ typedef unsigned long ulong_t;
 #define ARRAY_COUNT(a)          (sizeof(a) / sizeof((a)[0]))
 
 #define HOWMANY(x, y)           (((x) + ((y) - 1)) / (y))
+
+#define SWAP(a, b)              \
+            do {\
+                a ^= b;\
+                b ^= a;\
+                a ^= b;\
+            } while (0)
 #endif // __STD__COMMON_H__

@@ -13,11 +13,15 @@
 #define INVALID_INDEX           (-1)
 
 typedef struct {
-    int (*mf_search)(int const [], int, int const);
+    int (*mf_search)(int const [], int const, int const);
 } search_t;
 
 
 // 常用查找实现
-extern int sequential_search(int const A_BUF[], int size, int const KEY); // 顺序查找
-extern int binary_search(int const A_BUF[], int size, int const KEY); // 二分查找
+extern int sequential_search(int const A_BUF[],
+                             int const size,
+                             int const KEY); // 顺序查找
+extern int binary_search(int const A_BUF[],
+                         int const size,
+                         int const KEY); // 二分查找
 #endif // __SEARCH_H__
