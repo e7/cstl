@@ -32,14 +32,8 @@ static int const A_OBJ_SIZE_SURPPORT[] = {
 // ******************** 对象页 ********************
 #define OBJS_PER_PAGE               64
 
-typedef struct s_big_obj_t big_obj_t;
 typedef struct s_obj_shell obj_shell_t;
 typedef struct s_page page_t;
-
-struct s_big_obj_t {
-    int m_obj_size; // 对象大小
-    char m_obj[0];
-}; // 大对象类型
 
 struct s_obj_shell {
     union {
@@ -55,7 +49,7 @@ struct s_page {
     obj_shell_t *mp_free_list; // 空闲对象壳链
     obj_shell_t *mp_objs_start; // 对象组起始地址
     obj_shell_t *mp_objs_end; // 对象组终止地址
-    char ma_objs[0];
+    char ma_obj_shs[0];
 }; // 对象页
 
 

@@ -140,7 +140,9 @@ static inline ldlist_node_t *ldlist_del_head(ldlist_node_t *p_list)
     ASSERT(NULL != p_list);
 
     p_rslt = ldlist_head(p_list);
-    ldlist_del(p_rslt);
+    if (NULL != p_rslt) {
+        ldlist_del(p_rslt);
+    }
 
     return p_rslt;
 }
@@ -152,7 +154,9 @@ static inline ldlist_node_t *ldlist_del_tail(ldlist_node_t *p_list)
     ASSERT(NULL != p_list);
 
     p_rslt = ldlist_tail(p_list);
-    ldlist_del(p_rslt);
+    if (NULL != p_rslt) {
+        ldlist_del(p_rslt);
+    }
 
     return p_rslt;
 }
