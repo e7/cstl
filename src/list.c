@@ -7,16 +7,29 @@ typedef struct std_ldlist_node {
 } std_ldlist_node_t;
 
 
-void std_init_ldlist(std_ldlist_t *const THIS)
+int ldlist_build(ldlist_t *const THIS, mempool_t *p_mempool)
 {
-    ASSERT(NULL != THIS);
+    int rslt = 0;
 
+    if (NULL == THIS) {
+        rslt = -1;
+        goto FINAL;
+    }
+
+    if (NULL == p_mempool) {
+        rslt = -1;
+        goto FINAL;
+    }
+
+    THIS->mp_mempool = p_mempool;
     init_ldlist_node(&THIS->m_head);
     THIS->m_size = 0;
+
+FINAL:
+    return rslt;
 }
 
-int std_ldlist_push_front(std_ldlist_t *const THIS,
-                          void const *pc_data)
+int ldlist_push_front(ldlist_t *const THIS, void const *pc_data)
 {
     int rslt = 0;
 
@@ -24,4 +37,8 @@ int std_ldlist_push_front(std_ldlist_t *const THIS,
     ASSERT(NULL != pc_data);
 
     return rslt;
+}
+
+void ldlist_destroy(ldlist_t *const THIS)
+{
 }

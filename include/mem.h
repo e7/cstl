@@ -67,31 +67,31 @@ typedef struct {
     page_base_t ma_obj_cache[OBJ_SIZE_NUM]; // 各类型页对象缓存
 } mempool_t;
 
-extern int mempool_build(mempool_t *p_mempool);
-extern void *mempool_alloc(mempool_t *p_mempool, int obj_size);
-extern void *mempool_array_alloc(mempool_t *p_mempool,
+extern int mempool_build(mempool_t *const THIS);
+extern void *mempool_alloc(mempool_t *const THIS, int obj_size);
+extern void *mempool_array_alloc(mempool_t *const THIS,
                                  int obj_count,
                                  int obj_size);
-extern void mempool_free(mempool_t *p_mempool, void *p_obj);
-extern void mempool_destroy(mempool_t *p_mempool);
+extern void mempool_free(mempool_t *const THIS, void *p_obj);
+extern void mempool_destroy(mempool_t *const THIS);
 
 #if MEMPOOL_ISOLATION 
     #define MEMPOOL_BUILD           mempool_build
-    #define MEMPOOL_ALLOC(p_mempool, obj_size)      \
+    #define MEMPOOL_ALLOC(pc_mempool, obj_size)      \
                 malloc(obj_size)
-    #define MEMPOOL_ARRAY_ALLOC(p_mempool, obj_count, obj_size)     \
+    #define MEMPOOL_ARRAY_ALLOC(pc_mempool, obj_count, obj_size)     \
                 calloc(obj_count, obj_size)
-    #define MEMPOOL_FREE(p_mempool, p_obj)          \
+    #define MEMPOOL_FREE(pc_mempool, p_obj)          \
                 free(p_obj)
     #define MEMPOOL_DESTROY         mempool_destroy
 #else
     #define MEMPOOL_BUILD           mempool_build
-    #define MEMPOOL_ALLOC(p_mempool, obj_size)      \
-                mempool_alloc(p_mempool, obj_size)
-    #define MEMPOOL_ARRAY_ALLOC(p_mempool, obj_count, obj_size)     \
-                mempool_array_alloc(p_mempool, obj_count, obj_size)
-    #define MEMPOOL_FREE(p_mempool, p_obj)          \
-                mempool_free(p_mempool, p_obj)
+    #define MEMPOOL_ALLOC(pc_mempool, obj_size)      \
+                mempool_alloc(pc_mempool, obj_size)
+    #define MEMPOOL_ARRAY_ALLOC(pc_mempool, obj_count, obj_size)     \
+                mempool_array_alloc(pc_mempool, obj_count, obj_size)
+    #define MEMPOOL_FREE(pc_mempool, p_obj)          \
+                mempool_free(pc_mempool, p_obj)
     #define MEMPOOL_DESTROY         mempool_destroy
 #endif // DEBUG_EDITION
 #endif // __MEM_H__
