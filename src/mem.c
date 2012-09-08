@@ -25,7 +25,7 @@ static page_t *new_page(int const OBJ_SIZE)
     // ***** 页初始化 *****
     memset(p_page, 0, PAGE_SIZE);
 
-    init_ldlist_node(&p_page->m_ldlist_node); // 页节点
+    init_ldlist_frame_node(&p_page->m_ldlist_node); // 页节点
 
     p_page->m_use_count = 0; // 对象使用计数
 
@@ -131,7 +131,7 @@ static obj_shell_t *provide_obj_sh(page_base_t *const THIS)
 
     if (is_page_full(p_page_home)) {
         // 加入到满页链表
-        ldlist_add_head(&THIS->m_ldlist_full, &p_page_home->m_ldlist_node);
+        ldlist_frame_add_head(&THIS->m_ldlist_full, &p_page_home->m_ldlist_node);
         THIS->mp_page_current = NULL;
     }
 
@@ -154,10 +154,11 @@ static void recycle_obj_sh(page_base_t *const THIS, obj_shell_t *p_obj_sh)
     } else {
         do {
             int found = FALSE;
-            ldlist_node_t *p_node = NULL;
+            ldlist_frame_node_t *p_node = NULL;
 
-            LDLIST_FOR_EACH(p_node, &THIS->m_ldlist_partial) {
-                p_page_home = LDLIST_ENTRY(p_node, page_t, m_ldlist_node);
+            LDLIST_FRAME_FOR_EACH(p_node, &THIS->m_ldlist_partial) {
+                p_page_home
+                    = LDLIST_FRAME_ENTRY(p_node, page_t, m_ldlist_node);
                 if ((p_obj_sh >= p_page_home->mp_objs_start)
                         && (p_obj_sh < p_page_home->mp_objs_end))
                 {
@@ -168,8 +169,8 @@ static void recycle_obj_sh(page_base_t *const THIS, obj_shell_t *p_obj_sh)
             if (found) {
                 break;
             }
-            LDLIST_FOR_EACH(p_node, &THIS->m_ldlist_partial) {
-                p_page_home = LDLIST_ENTRY(p_node, page_t, m_ldlist_node);
+            LDLIST_FRAME_FOR_EACH(p_node, &THIS->m_ldlist_partial) {
+                p_page_home = LDLIST_FRAME_ENTRY(p_node, page_t, m_ldlist_node);
                 if ((p_obj_sh >= p_page_home->mp_objs_start)
                         && (p_obj_sh < p_page_home->mp_objs_end))
                 {
@@ -182,15 +183,15 @@ static void recycle_obj_sh(page_base_t *const THIS, obj_shell_t *p_obj_sh)
     // 回收对象
     ASSERT(NULL != p_page_home);
     if (p_page_home != THIS->mp_page_current) {
-        ldlist_del(&p_page_home->m_ldlist_node);
-        ldlist_add_tail(&THIS->m_ldlist_partial,
-                        &p_page_home->m_ldlist_node);
+        ldlist_frame_del(&p_page_home->m_ldlist_node);
+        ldlist_frame_add_tail(&THIS->m_ldlist_partial,
+                              &p_page_home->m_ldlist_node);
     }
     do_recycle_obj_sh(p_page_home, p_obj_sh);
     if (is_page_empty(p_page_home)
             && (p_page_home != THIS->mp_page_current))
     {
-        ldlist_del(&p_page_home->m_ldlist_node);
+        ldlist_frame_del(&p_page_home->m_ldlist_node);
         del_page(p_page_home);
     }
 }
@@ -208,8 +209,8 @@ int mempool_build(mempool_t *const THIS)
 
     for (int i = 0; i < OBJ_SIZE_NUM; ++i) {
         THIS->ma_obj_cache[i].m_obj_size = A_OBJ_SIZE_SURPPORT[i];
-        init_ldlist_node(&THIS->ma_obj_cache[i].m_ldlist_partial);
-        init_ldlist_node(&THIS->ma_obj_cache[i].m_ldlist_full);
+        init_ldlist_frame_node(&THIS->ma_obj_cache[i].m_ldlist_partial);
+        init_ldlist_frame_node(&THIS->ma_obj_cache[i].m_ldlist_full);
         THIS->ma_obj_cache[i].mp_page_current= NULL;
     }
 
@@ -217,16 +218,25 @@ FINAL:
     return rslt;
 }
 
-void *mempool_alloc(mempool_t *const THIS, int obj_size)
+void *mempool_alloc(mempool_t *const THIS,
+                    int obj_size,
+                    char const *pc_file,
+                    int line)
 {
-    return mempool_array_alloc(THIS, 1, obj_size);
+    return mempool_array_alloc(THIS, 1, obj_size, pc_file, line);
 }
 
 void *mempool_array_alloc(mempool_t *const THIS,
                           int obj_count,
-                          int obj_size)
+                          int obj_size,
+                          char const *pc_file,
+                          int line)
 {
     void *p_rslt = NULL;
+
+#if MEMPOOL_ISOLATION
+    p_rslt = calloc(obj_count, obj_size);
+#else
     int const OBJS_SIZE = obj_size * obj_count;
 
     if (NULL == THIS){
@@ -263,14 +273,30 @@ void *mempool_array_alloc(mempool_t *const THIS,
                      provide_obj_sh(&THIS->ma_obj_cache[index])->m_obj
                  );
     }
+#endif // mempool_array_alloc's MEMPOOL_ISOLATION
+
+    ASSERT(NULL != pc_file);
+    ASSERT(NULL != p_rslt);
+    fprintf(stdout,
+            "[INFO] memory alloc in file %s at line %d: 0x%08x\n",
+            pc_file,
+            line,
+            p_rslt);
+    goto FINAL; // 为了内存池隔离版本消除警告
 
 FINAL:
     return p_rslt;
 }
 
-void mempool_free(mempool_t *const THIS, void *p_obj)
+void mempool_free(mempool_t *const THIS,
+                  void *p_obj,
+                  char const *pc_file,
+                  int line)
 {
-    obj_shell_t *p_obj_sh = CONTAINER_OF(p_obj, obj_shell_t, m_obj);
+#if MEMPOOL_ISOLATION
+    free(p_obj);
+#else
+    obj_shell_t *p_obj_sh = NULL;
 
     if (NULL == THIS) {
         goto FINAL;
@@ -280,6 +306,7 @@ void mempool_free(mempool_t *const THIS, void *p_obj)
         goto FINAL;
     }
 
+    p_obj_sh = CONTAINER_OF(p_obj, obj_shell_t, m_obj);
     ASSERT(NULL != p_obj_sh);
     if (p_obj_sh->m_intptr.m_size > MAX_OBJ_SIZE) { // 大对象，直接释放
         free(p_obj_sh);
@@ -295,7 +322,18 @@ void mempool_free(mempool_t *const THIS, void *p_obj)
 
         ASSERT(NULL != p_base);
         recycle_obj_sh(p_base, p_obj_sh);
-    }   
+    }
+
+#endif // mempool_free's MEMPOOL_ISOLATION
+
+    ASSERT(NULL != pc_file);
+    ASSERT(NULL != p_obj);
+    fprintf(stdout,
+            "[INFO] memory freed in file %s at line %d: 0x%08x\n",
+            pc_file,
+            line,
+            p_obj);
+    goto FINAL; // 为了内存池隔离版本消除警告
 
 FINAL:
     return;
@@ -306,24 +344,24 @@ void mempool_destroy(mempool_t *const THIS)
     ASSERT(NULL != THIS);
 
     for (int i =0; i < OBJ_SIZE_NUM; ++i) {
-        ldlist_head_t *p_list = NULL;
-        ldlist_node_t *p_pos = NULL;
-        ldlist_node_t *p_cur_next = NULL;
+        ldlist_frame_head_t *p_list = NULL;
+        ldlist_frame_node_t *p_pos = NULL;
+        ldlist_frame_node_t *p_cur_next = NULL;
 
         del_page(THIS->ma_obj_cache[i].mp_page_current);
         THIS->ma_obj_cache[i].mp_page_current = NULL;
 
         p_list = &THIS->ma_obj_cache[i].m_ldlist_partial;
-        LDLIST_FOR_EACH_SAFE(p_pos, p_cur_next, p_list) {
-            page_t *p_page = LDLIST_ENTRY(p_pos, page_t, m_ldlist_node);
-            ldlist_del(p_pos);
+        LDLIST_FRAME_FOR_EACH_SAFE(p_pos, p_cur_next, p_list) {
+            page_t *p_page = LDLIST_FRAME_ENTRY(p_pos, page_t, m_ldlist_node);
+            ldlist_frame_del(p_pos);
             del_page(p_page);
         }
 
         p_list = &THIS->ma_obj_cache[i].m_ldlist_full;
-        LDLIST_FOR_EACH_SAFE(p_pos, p_cur_next, p_list) {
-            page_t *p_page = LDLIST_ENTRY(p_pos, page_t, m_ldlist_node);
-            ldlist_del(p_pos);
+        LDLIST_FRAME_FOR_EACH_SAFE(p_pos, p_cur_next, p_list) {
+            page_t *p_page = LDLIST_FRAME_ENTRY(p_pos, page_t, m_ldlist_node);
+            ldlist_frame_del(p_pos);
             del_page(p_page);
         }
     }

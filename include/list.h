@@ -11,7 +11,7 @@
 // 循环双链表
 typedef struct ldlist {
     mempool_t *mp_mempool;
-    ldlist_head_t m_head;
+    ldlist_frame_head_t m_head;
     int m_size;
 } ldlist_t;
 

@@ -44,7 +44,7 @@ struct s_obj_shell {
 }; // 对象壳类型
 
 struct s_page {
-    ldlist_node_t m_ldlist_node; // 页节点
+    ldlist_frame_node_t m_ldlist_node; // 页节点
     int m_use_count; // 对象使用计数
     obj_shell_t *mp_free_list; // 空闲对象壳链
     obj_shell_t *mp_objs_start; // 对象组起始地址
@@ -56,8 +56,8 @@ struct s_page {
 // ******************** 页仓库 ********************
 typedef struct {
     int m_obj_size; // 该类型页对象大小
-    ldlist_head_t m_ldlist_partial; // 部分占用页
-    ldlist_head_t m_ldlist_full; // 满页
+    ldlist_frame_head_t m_ldlist_partial; // 部分占用页
+    ldlist_frame_head_t m_ldlist_full; // 满页
     page_t *mp_page_current; // 当前页
 } page_base_t;
 
@@ -68,30 +68,31 @@ typedef struct {
 } mempool_t;
 
 extern int mempool_build(mempool_t *const THIS);
-extern void *mempool_alloc(mempool_t *const THIS, int obj_size);
+extern void *mempool_alloc(mempool_t *const THIS,
+                           int obj_size,
+                           char const *pc_file,
+                           int line);
 extern void *mempool_array_alloc(mempool_t *const THIS,
                                  int obj_count,
-                                 int obj_size);
-extern void mempool_free(mempool_t *const THIS, void *p_obj);
+                                 int obj_size,
+                                 char const *pc_file,
+                                 int line);
+extern void mempool_free(mempool_t *const THIS,
+                         void *p_obj,
+                         char const *pc_file,
+                         int line);
 extern void mempool_destroy(mempool_t *const THIS);
 
-#if MEMPOOL_ISOLATION 
-    #define MEMPOOL_BUILD           mempool_build
-    #define MEMPOOL_ALLOC(pc_mempool, obj_size)      \
-                malloc(obj_size)
-    #define MEMPOOL_ARRAY_ALLOC(pc_mempool, obj_count, obj_size)     \
-                calloc(obj_count, obj_size)
-    #define MEMPOOL_FREE(pc_mempool, p_obj)          \
-                free(p_obj)
-    #define MEMPOOL_DESTROY         mempool_destroy
-#else
-    #define MEMPOOL_BUILD           mempool_build
-    #define MEMPOOL_ALLOC(pc_mempool, obj_size)      \
-                mempool_alloc(pc_mempool, obj_size)
-    #define MEMPOOL_ARRAY_ALLOC(pc_mempool, obj_count, obj_size)     \
-                mempool_array_alloc(pc_mempool, obj_count, obj_size)
-    #define MEMPOOL_FREE(pc_mempool, p_obj)          \
-                mempool_free(pc_mempool, p_obj)
-    #define MEMPOOL_DESTROY         mempool_destroy
-#endif // DEBUG_EDITION
+#define MEMPOOL_BUILD           mempool_build
+#define MEMPOOL_ALLOC(pc_mempool, obj_size)      \
+            mempool_alloc(pc_mempool, obj_size, __FILE__, __LINE__)
+#define MEMPOOL_ARRAY_ALLOC(pc_mempool, obj_count, obj_size)     \
+            mempool_array_alloc(pc_mempool,\
+                                obj_count,\
+                                obj_size,\
+                                __FILE__,\
+                                __LINE__)
+#define MEMPOOL_FREE(pc_mempool, p_obj)          \
+            mempool_free(pc_mempool, p_obj, __FILE__, __LINE__)
+#define MEMPOOL_DESTROY         mempool_destroy
 #endif // __MEM_H__
