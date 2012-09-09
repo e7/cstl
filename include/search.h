@@ -13,7 +13,7 @@
 #define INVALID_INDEX           (-1)
 
 typedef struct {
-    int (*mf_search)(int const [], int const, int const);
+    int (*mpf_search)(int const [], int const, int const);
 } search_t;
 
 

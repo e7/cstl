@@ -7,15 +7,38 @@
 #include "mem.h"
 
 
-// ******************** 循环双链表接口 ********************
+typedef struct ldlist_node ldlist_node_t;
+typedef struct ldlist_iterator ldlist_iterator_t;
+typedef struct ldlist ldlist_t;
+
+
+// 循环双链表结点
+struct ldlist_node {
+    void *mp_data;
+    ldlist_frame_node_t m_node;
+};
+
+// 循环双链表迭代器
+struct ldlist_iterator {
+    ldlist_frame_node_t *mp_node; // 结点
+    iterator_t m_iter; // 迭代器接口
+    int m_element_size; // 元素大小
+};
+
 // 循环双链表
-typedef struct ldlist {
+struct ldlist {
     mempool_t *mp_mempool;
     ldlist_frame_head_t m_head;
-    int m_size;
-} ldlist_t;
+    int m_element_size; // 元素大小
+    ldlist_iterator_t m_begin;
+    ldlist_iterator_t m_end;
+};
 
-extern int ldlist_build(ldlist_t *const THIS, mempool_t *p_mempool);
+
+// ******************** 循环双链表接口 ********************
+extern int ldlist_build(ldlist_t *const THIS,
+                        mempool_t *p_mempool,
+                        int element_size);
 
 extern int ldlist_push_front(ldlist_t *const THIS, void const *pc_data);
 

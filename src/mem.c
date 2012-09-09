@@ -113,8 +113,11 @@ static obj_shell_t *provide_obj_sh(page_base_t *const THIS)
     ASSERT(NULL != THIS);
 
     if (NULL == THIS->mp_page_current) {
-        THIS->mp_page_current
-            = (page_t *)ldlist_del_head(&THIS->m_ldlist_partial);
+        if (!ldlist_frame_node_alone(&THIS->m_ldlist_partial)) {
+            THIS->mp_page_current
+                = (page_t *)ldlist_frame_first(&THIS->m_ldlist_partial);
+            ldlist_frame_del(&THIS->m_ldlist_partial);
+        }
     }
     if (NULL == THIS->mp_page_current) {
         THIS->mp_page_current = new_page(THIS->m_obj_size);
@@ -243,10 +246,6 @@ void *mempool_array_alloc(mempool_t *const THIS,
         goto FINAL;
     }
 
-    if (OBJS_SIZE < MIN_OBJ_SIZE) {
-        goto FINAL;
-    }
-
     // ********** 分配内存 **********
     if (OBJS_SIZE > MAX_OBJ_SIZE) { // 大对象
         obj_shell_t *p_obj_sh
@@ -278,10 +277,10 @@ void *mempool_array_alloc(mempool_t *const THIS,
     ASSERT(NULL != pc_file);
     ASSERT(NULL != p_rslt);
     fprintf(stdout,
-            "[INFO] memory alloc in file %s at line %d: 0x%08x\n",
+            "[INFO] memory alloced in file %s at line %d: 0x%08x\n",
             pc_file,
             line,
-            p_rslt);
+            (uint_t)p_rslt);
     goto FINAL; // 为了内存池隔离版本消除警告
 
 FINAL:
@@ -332,7 +331,7 @@ void mempool_free(mempool_t *const THIS,
             "[INFO] memory freed in file %s at line %d: 0x%08x\n",
             pc_file,
             line,
-            p_obj);
+            (uint_t)p_obj);
     goto FINAL; // 为了内存池隔离版本消除警告
 
 FINAL:

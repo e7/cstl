@@ -7,7 +7,7 @@
 
 // 排序接口
 typedef struct {
-    int (*mf_sort)(int [], int const);
+    int (*mpf_sort)(int [], int const);
 } sort_t;
 
 

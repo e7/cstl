@@ -71,33 +71,35 @@ static inline void ldlist_frame_add_tail(ldlist_frame_head_t *p_head,
 
 // 访问链表结点数据
 static inline
-ldlist_frame_head_t *ldlist_frame_head(ldlist_frame_head_t const *pc_list)
+ldlist_frame_head_t *ldlist_frame_first(ldlist_frame_head_t const *pc_list)
 {
-    ldlist_frame_head_t *p_rslt = NULL;
-
     ASSERT(NULL != pc_list);
 
-    ASSERT(NULL == p_rslt);
-    if (!ldlist_frame_node_alone(pc_list)) {
-        p_rslt = pc_list->mp_next;
-    }
-
-    return p_rslt;
+    return pc_list->mp_next;
 }
 
 static inline
-ldlist_frame_head_t *ldlist_frame_tail(ldlist_frame_head_t const *pc_list)
+ldlist_frame_node_t *ldlist_frame_prev(ldlist_frame_node_t const *pc_node)
 {
-    ldlist_frame_head_t *p_rslt = NULL;
+    ASSERT(NULL != pc_node);
 
+    return pc_node->mp_prev;
+}
+
+static inline
+ldlist_frame_node_t *ldlist_frame_next(ldlist_frame_node_t const *pc_node)
+{
+    ASSERT(NULL != pc_node);
+
+    return pc_node->mp_next;
+}
+
+static inline
+ldlist_frame_head_t *ldlist_frame_last(ldlist_frame_head_t const *pc_list)
+{
     ASSERT(NULL != pc_list);
 
-    ASSERT(NULL == p_rslt);
-    if (!ldlist_frame_node_alone(pc_list)) {
-        p_rslt = pc_list->mp_prev;
-    }
-
-    return p_rslt;
+    return pc_list->mp_prev;
 }
 
 #define LDLIST_FRAME_ENTRY(ptr, type, member)         \
@@ -132,35 +134,5 @@ static inline void ldlist_frame_del(ldlist_frame_node_t *p_node)
     ASSERT(NULL != p_node);
 
     ldlist_frame_del_orig(p_node->mp_prev, p_node->mp_next);
-}
-
-static inline
-ldlist_frame_node_t *ldlist_del_head(ldlist_frame_node_t *p_list)
-{
-    ldlist_frame_node_t *p_rslt = NULL;
-
-    ASSERT(NULL != p_list);
-
-    p_rslt = ldlist_frame_head(p_list);
-    if (NULL != p_rslt) {
-        ldlist_frame_del(p_rslt);
-    }
-
-    return p_rslt;
-}
-
-static inline
-ldlist_frame_node_t *ldlist_del_tail(ldlist_frame_node_t *p_list)
-{
-    ldlist_frame_node_t *p_rslt = NULL;
-
-    ASSERT(NULL != p_list);
-
-    p_rslt = ldlist_frame_tail(p_list);
-    if (NULL != p_rslt) {
-        ldlist_frame_del(p_rslt);
-    }
-
-    return p_rslt;
 }
 #endif // __STD__LIST_H__

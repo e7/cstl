@@ -13,5 +13,5 @@
 
 #define DEBUG_EDITION           0x00000001
 
-#define MEMPOOL_ISOLATION       0x00000001
+#define MEMPOOL_ISOLATION       0x00000000
 #endif // __CONFIG_H__
