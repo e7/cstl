@@ -36,20 +36,25 @@ struct ldlist {
 
 
 // ******************** 循环双链表接口 ********************
-extern int ldlist_build(ldlist_t *const THIS,
-                        mempool_t *p_mempool,
-                        int element_size);
+extern void ldlist_build(ldlist_t *const THIS,
+                         mempool_t *p_mempool,
+                         int element_size);
 
 extern int ldlist_push_front(ldlist_t *const THIS, void const *pc_data);
 
 extern int ldlist_push_back(ldlist_t *const THIS, void const *pc_data);
 
-extern void *ldlist_pop_front(ldlist_t *const THIS);
+extern int ldlist_is_empty(ldlist_t *const THIS);
 
-extern void *ldlist_pop_back(ldlist_t *const THIS);
+extern int ldlist_pop_front(ldlist_t *const THIS);
 
-extern iterator_t *ldlist_begin(ldlist_t *const THIS);
+extern int ldlist_pop_back(ldlist_t *const THIS);
 
-extern iterator_t *ldlist_end(ldlist_t *const THIS);
+extern iterator_t *ldlist_begin(ldlist_t *const THIS,
+                                ldlist_iterator_t *p_iter);
+
+extern iterator_t const *ldlist_end(ldlist_t *const THIS);
+
+extern void ldlist_clean(ldlist_t *const THIS);
 
 extern void ldlist_destroy(ldlist_t *const THIS);

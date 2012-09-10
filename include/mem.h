@@ -67,7 +67,7 @@ typedef struct {
     page_base_t ma_obj_cache[OBJ_SIZE_NUM]; // 各类型页对象缓存
 } mempool_t;
 
-extern int mempool_build(mempool_t *const THIS);
+extern void mempool_build(mempool_t *const THIS);
 extern void *mempool_alloc(mempool_t *const THIS,
                            int obj_size,
                            char const *pc_file,

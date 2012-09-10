@@ -201,14 +201,11 @@ static void recycle_obj_sh(page_base_t *const THIS, obj_shell_t *p_obj_sh)
 
 
 // ******************** 内存池接口 ********************
-int mempool_build(mempool_t *const THIS)
+void mempool_build(mempool_t *const THIS)
 {
     int rslt = 0;
 
-    if (NULL == THIS) {
-        rslt = -1;
-        goto FINAL;
-    }
+    ASSERT(NULL != THIS);
 
     for (int i = 0; i < OBJ_SIZE_NUM; ++i) {
         THIS->ma_obj_cache[i].m_obj_size = A_OBJ_SIZE_SURPPORT[i];
@@ -217,7 +214,6 @@ int mempool_build(mempool_t *const THIS)
         THIS->ma_obj_cache[i].mp_page_current= NULL;
     }
 
-FINAL:
     return rslt;
 }
 
@@ -236,16 +232,14 @@ void *mempool_array_alloc(mempool_t *const THIS,
                           int line)
 {
     void *p_rslt = NULL;
+    int const OBJS_SIZE = obj_size * obj_count;
+
+    ASSERT(NULL != THIS);
+    ASSERT(NULL != pc_file);
 
 #if MEMPOOL_ISOLATION
     p_rslt = calloc(obj_count, obj_size);
 #else
-    int const OBJS_SIZE = obj_size * obj_count;
-
-    if (NULL == THIS){
-        goto FINAL;
-    }
-
     // ********** 分配内存 **********
     if (OBJS_SIZE > MAX_OBJ_SIZE) { // 大对象
         obj_shell_t *p_obj_sh
@@ -274,8 +268,6 @@ void *mempool_array_alloc(mempool_t *const THIS,
     }
 #endif // mempool_array_alloc's MEMPOOL_ISOLATION
 
-    ASSERT(NULL != pc_file);
-    ASSERT(NULL != p_rslt);
     fprintf(stdout,
             "[INFO] memory alloced in file %s at line %d: 0x%08x\n",
             pc_file,
@@ -292,19 +284,15 @@ void mempool_free(mempool_t *const THIS,
                   char const *pc_file,
                   int line)
 {
+    obj_shell_t *p_obj_sh = NULL;
+
+    ASSERT(NULL != THIS);
+    ASSERT(NULL != p_obj);
+    ASSERT(NULL != pc_file);
+
 #if MEMPOOL_ISOLATION
     free(p_obj);
 #else
-    obj_shell_t *p_obj_sh = NULL;
-
-    if (NULL == THIS) {
-        goto FINAL;
-    }
-
-    if (NULL == p_obj) {
-        goto FINAL;
-    }
-
     p_obj_sh = CONTAINER_OF(p_obj, obj_shell_t, m_obj);
     ASSERT(NULL != p_obj_sh);
     if (p_obj_sh->m_intptr.m_size > MAX_OBJ_SIZE) { // 大对象，直接释放
@@ -325,16 +313,12 @@ void mempool_free(mempool_t *const THIS,
 
 #endif // mempool_free's MEMPOOL_ISOLATION
 
-    ASSERT(NULL != pc_file);
-    ASSERT(NULL != p_obj);
     fprintf(stdout,
             "[INFO] memory freed in file %s at line %d: 0x%08x\n",
             pc_file,
             line,
             (uint_t)p_obj);
-    goto FINAL; // 为了内存池隔离版本消除警告
 
-FINAL:
     return;
 }
 

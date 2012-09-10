@@ -1,8 +1,6 @@
 #include "list.h"
 
 
-
-
 // ******************** 迭代器实现 ********************
 static void *ldlist_iterator_get_data(iterator_t const *pc_iter)
 {
@@ -10,17 +8,13 @@ static void *ldlist_iterator_get_data(iterator_t const *pc_iter)
     ldlist_iterator_t const *pc_ldlist_iter = NULL;
     ldlist_node_t const *pc_ldlist_node = NULL;
 
-    if (NULL == pc_iter) {
-        ASSERT(NULL == p_rslt);
-        goto FINAL;
-    }
+    ASSERT(NULL != pc_iter);
 
     pc_ldlist_iter = CONTAINER_OF(pc_iter, ldlist_iterator_t, m_iter);
     pc_ldlist_node
         = CONTAINER_OF(pc_ldlist_iter->mp_node, ldlist_node_t, m_node);
     p_rslt = pc_ldlist_node->mp_data;
 
-FINAL:
     return p_rslt;
 }
 
@@ -30,9 +24,8 @@ static void ldlist_iterator_set_data(iterator_t const *pc_iter,
     ldlist_iterator_t const *pc_ldlist_iter = NULL;
     ldlist_node_t const *pc_ldlist_node = NULL;
 
-    if (NULL == pc_iter) {
-        goto FINAL;
-    }
+    ASSERT(NULL != pc_iter);
+    ASSERT(NULL != pc_data);
 
     pc_ldlist_iter = CONTAINER_OF(pc_iter, ldlist_iterator_t, m_iter);
     pc_ldlist_node
@@ -41,26 +34,18 @@ static void ldlist_iterator_set_data(iterator_t const *pc_iter,
                  pc_data,
                  pc_ldlist_iter->m_element_size);
 
-FINAL:
     return;
 }
 
-int ldlist_iterator_equal(iterator_t const *pc_iter1,
-                          iterator_t const *pc_iter2)
+static int ldlist_iterator_equal(iterator_t const *pc_iter1,
+                                 iterator_t const *pc_iter2)
 {
     int rslt = FALSE;
     ldlist_iterator_t const *pc_ldlist_iter1 = NULL;
     ldlist_iterator_t const *pc_ldlist_iter2 = NULL;
 
-    if (NULL == pc_iter1) {
-        ASSERT(FALSE == rslt);
-        goto FINAL;
-    }
-
-    if (NULL == pc_iter2) {
-        ASSERT(FALSE == rslt);
-        goto FINAL;
-    }
+    ASSERT(NULL != pc_iter1);
+    ASSERT(NULL != pc_iter2);
 
     pc_ldlist_iter1 = CONTAINER_OF(pc_iter1, ldlist_iterator_t, m_iter);
     pc_ldlist_iter2 = CONTAINER_OF(pc_iter2, ldlist_iterator_t, m_iter);
@@ -68,44 +53,35 @@ int ldlist_iterator_equal(iterator_t const *pc_iter1,
     rslt = (pc_ldlist_iter1->mp_node == pc_ldlist_iter2->mp_node)
                ? TRUE : FALSE;
 
-FINAL:
     return rslt;
 }
 
-iterator_t *ldlist_iterator_get_next(iterator_t const *pc_iter)
+static iterator_t *ldlist_iterator_get_next(iterator_t const *pc_iter)
 {
     iterator_t *p_rslt = NULL;
     ldlist_iterator_t *p_ldlist_iter = NULL;
 
-    if (NULL == pc_iter) {
-        ASSERT(NULL == p_rslt);
-        goto FINAL;
-    }
+    ASSERT(NULL != pc_iter);
 
     p_ldlist_iter = CONTAINER_OF(pc_iter, ldlist_iterator_t, m_iter);
     p_ldlist_iter->mp_node = ldlist_frame_next(p_ldlist_iter->mp_node);
     p_rslt = (iterator_t *)pc_iter;
 
-FINAL:
     return p_rslt;
 }
 
-iterator_t *ldlist_iterator_get_prev(iterator_t const *pc_iter)
+static iterator_t *ldlist_iterator_get_prev(iterator_t const *pc_iter)
 {
     iterator_t *p_rslt = NULL;
 
-    if (NULL == pc_iter) {
-        ASSERT(NULL == p_rslt);
-        goto FINAL;
-    }
+    ASSERT(NULL != pc_iter);
 
-FINAL:
     return p_rslt;
 }
 
 
 // ******************** 循环双链表接口实现 ********************
-int ldlist_build(ldlist_t *const THIS,
+void ldlist_build(ldlist_t *const THIS,
                  mempool_t *p_mempool,
                  int element_size)
 {
@@ -120,19 +96,9 @@ int ldlist_build(ldlist_t *const THIS,
         },
         element_size,
     };
-    int rslt = 0;
 
-    if (NULL == THIS) {
-        rslt = -1;
-
-        goto FINAL;
-    }
-
-    if (NULL == p_mempool) {
-        rslt = -1;
-
-        goto FINAL;
-    }
+    ASSERT(NULL != THIS);
+    ASSERT(NULL != p_mempool);
 
     THIS->mp_mempool = p_mempool;
     init_ldlist_frame_node(&THIS->m_head);
@@ -141,30 +107,26 @@ int ldlist_build(ldlist_t *const THIS,
     memcpy(&THIS->m_begin, &LDLIST_ITER_TPLT, sizeof(LDLIST_ITER_TPLT));
     memcpy(&THIS->m_end, &LDLIST_ITER_TPLT, sizeof(LDLIST_ITER_TPLT));
 
-FINAL:
-    return rslt;
+    return;
 }
 
-int ldlist_push_front(ldlist_t *const THIS, void const *pc_data)
+enum {
+    PUSH_FRONT = 0x10,
+    POP_FRONT  = 0x20,
+    PUSH_BACK = 0x11,
+    POP_BACK  = 0x21,
+};
+
+static int ldlist_push(ldlist_t *const THIS,
+                       void const *pc_data,
+                       int push_type)
 {
     int rslt = 0;
     ldlist_node_t *p_node = NULL;
 
-    /* 条件检查 */
-    if (NULL == THIS) {
-        rslt = -1;
-        goto FINAL;
-    }
-
-    if (NULL == pc_data) {
-        rslt = -1;
-        goto FINAL;
-    }
-
-    if (NULL == THIS->mp_mempool) {
-        rslt = -1;
-        goto FINAL;
-    }
+    ASSERT(NULL != THIS);
+    ASSERT(NULL != pc_data);
+    ASSERT(NULL != THIS->mp_mempool);
 
     /* 构造结点 */
     p_node = MEMPOOL_ALLOC(THIS->mp_mempool, sizeof(ldlist_node_t));
@@ -172,55 +134,140 @@ int ldlist_push_front(ldlist_t *const THIS, void const *pc_data)
     (void)memcpy(p_node->mp_data, pc_data, THIS->m_element_size);
 
     /* 伤一敌可连其百 */
-    ldlist_frame_add_head(&THIS->m_head, &p_node->m_node);
+    if (PUSH_FRONT == push_type) {
+        ldlist_frame_add_head(&THIS->m_head, &p_node->m_node);
+    } else if (PUSH_BACK == push_type) {
+        ldlist_frame_add_tail(&THIS->m_head, &p_node->m_node);
+    } else {
+        ASSERT(0);
+    }
+}
+
+int ldlist_push_front(ldlist_t *const THIS, void const *pc_data)
+{
+    int rslt = 0;
+
+    /* 条件检查 */
+    ASSERT(NULL != THIS);
+    ASSERT(NULL != pc_data);
+    if (NULL == THIS->mp_mempool) {
+        rslt = -1;
+        goto FINAL;
+    }
+
+    rslt = ldlist_push(THIS, pc_data, PUSH_FRONT);
 
 FINAL:
     return rslt;
 }
 
-iterator_t *ldlist_begin(ldlist_t *const THIS)
+int ldlist_push_back(ldlist_t *const THIS, void const *pc_data)
 {
-    iterator_t *p_rslt = NULL;
+    int rslt = 0;
 
-    if (NULL == THIS) {
-        ASSERT(NULL == p_rslt);
+    /* 条件检查 */
+    ASSERT(NULL != THIS);
+    ASSERT(NULL != pc_data);
+    if (NULL == THIS->mp_mempool) {
+        rslt = -1;
         goto FINAL;
     }
+
+    rslt = ldlist_push(THIS, pc_data, PUSH_BACK);
+
+FINAL:
+    return rslt;
+}
+
+static void ldlist_pop(ldlist_t *const THIS, int pop_type)
+{
+    ldlist_node_t *p_node = NULL;
+    ldlist_frame_node_t *p_frame_node = NULL;
+
+    ASSERT(NULL != THIS);
+    ASSERT(NULL != THIS->mp_mempool);
+
+    if (POP_FRONT == pop_type) {
+        p_frame_node = ldlist_frame_first(&THIS->m_head);
+    } else if (POP_BACK == pop_type) {
+        p_frame_node = ldlist_frame_last(&THIS->m_head);
+    } else {
+        ASSERT(0);
+    }
+    ldlist_frame_del(p_frame_node);
+    p_node = CONTAINER_OF(p_frame_node, ldlist_node_t, m_node);
+    MEMPOOL_FREE(THIS->mp_mempool, p_node->mp_data);
+    MEMPOOL_FREE(THIS->mp_mempool, p_node);
+}
+
+int ldlist_pop_front(ldlist_t *const THIS)
+{
+    int rslt = 0;
+
+    ASSERT(NULL != THIS);
+    if (NULL == THIS->mp_mempool) {
+        rslt = -1;
+        goto FINAL;
+    }
+
+    ldlist_pop(THIS, POP_FRONT);
+
+FINAL:
+    return rslt;
+}
+
+int ldlist_pop_back(ldlist_t *const THIS)
+{
+    int rslt = 0;
+
+    ASSERT(NULL != THIS);
+    if (NULL == THIS->mp_mempool) {
+        rslt = -1;
+        goto FINAL;
+    }
+
+    ldlist_pop(THIS, POP_BACK);
+
+FINAL:
+    return rslt;
+}
+
+iterator_t *ldlist_begin(ldlist_t *const THIS,
+                         ldlist_iterator_t *p_iter)
+{
+    ASSERT(NULL != THIS);
+    ASSERT(NULL != p_iter);
 
     // 更新
     THIS->m_begin.mp_node = ldlist_frame_first(&THIS->m_head);
-    p_rslt = &THIS->m_begin.m_iter;
 
-FINAL:
-    return p_rslt;
+    (void)memcpy(p_iter, &THIS->m_begin, sizeof(THIS->m_begin));
+
+    return &p_iter->m_iter;
 }
 
-iterator_t *ldlist_end(ldlist_t *const THIS)
+iterator_t const *ldlist_end(ldlist_t *const THIS)
 {
     iterator_t *p_rslt = NULL;
 
-    if (NULL == THIS) {
-        ASSERT(NULL == p_rslt);
-        goto FINAL;
-    }
+    ASSERT(NULL != THIS);
 
-    // 更新
     ASSERT(THIS->m_end.mp_node == &THIS->m_head);
     p_rslt = &THIS->m_end.m_iter;
 
-FINAL:
     return p_rslt;
 }
 
-void ldlist_destroy(ldlist_t *const THIS)
+void ldlist_clean(ldlist_t *const THIS)
 {
     ldlist_frame_node_t *p_pos = NULL;
     ldlist_frame_node_t *p_cur_next = NULL;
 
-    if (NULL == THIS) {
+    ASSERT(NULL != THIS);
+
+    if (ldlist_frame_node_alone(&THIS->m_head)) {
         goto FINAL;
     }
-
     LDLIST_FRAME_FOR_EACH_SAFE(p_pos, p_cur_next, &THIS->m_head) {
         // 移除
         ldlist_node_t *p_node = LDLIST_FRAME_ENTRY(p_pos,
@@ -233,11 +280,18 @@ void ldlist_destroy(ldlist_t *const THIS)
         p_node->mp_data = NULL;
         MEMPOOL_FREE(THIS->mp_mempool, p_node);
     }
-
-    THIS->mp_mempool = NULL;
     ASSERT(ldlist_frame_node_alone(&THIS->m_head));
-    THIS->m_element_size = 0;
 
 FINAL:
     return;
+}
+
+void ldlist_destroy(ldlist_t *const THIS)
+{
+    ldlist_clean(THIS);
+
+    (void)memcpy(&THIS->m_begin, &THIS->m_end, sizeof(THIS->m_end));
+    THIS->m_element_size = 0;
+    ASSERT(ldlist_frame_node_alone(&THIS->m_head));
+    THIS->mp_mempool = NULL;
 }

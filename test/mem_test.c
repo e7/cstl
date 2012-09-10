@@ -100,18 +100,22 @@ int main(int argc, char *argv[])
     ldlist_t list = {
         NULL,
     };
+    ldlist_iterator_t list_iter = {
+        NULL,
+    };
 
-    if (0 != MEMPOOL_BUILD(&mempool_for_test)) {
-        rslt = -1;
-        goto FINAL;
-    }
-
+    MEMPOOL_BUILD(&mempool_for_test);
     ldlist_build(&list, &mempool_for_test, sizeof(int));
 
     for (int i = 0; i < ARRAY_COUNT(buf); ++i) {
-        ldlist_push_front(&list, &buf[i]);
+        ldlist_push_back(&list, &buf[i]);
     }
-    for (iterator_t *p_iter = ldlist_begin(&list);
+    /*printf("some delete =====\n");
+    printf("pop exit code: %d\n", ldlist_pop_back(&list));
+    printf("pop exit code: %d\n", ldlist_pop_back(&list));
+    printf("pop exit code: %d\n", ldlist_pop_back(&list));
+    printf("some delete =====\n");*/
+    for (iterator_t *p_iter = ldlist_begin(&list, &list_iter);
          !(*p_iter->mpf_equal)(ldlist_end(&list), p_iter);
          p_iter = (*p_iter->mpf_get_next)(p_iter))
     {
@@ -123,6 +127,5 @@ int main(int argc, char *argv[])
     ldlist_destroy(&list);
     MEMPOOL_DESTROY(&mempool_for_test);
 
-FINAL:
     return rslt;
 }
