@@ -2,8 +2,8 @@
 // author: e7, ryuuzaki.uchiha@gmail.com
 
 
-#ifndef __STD__LIST_H__
-#define __STD__LIST_H__
+#ifndef __LIST_FRAME_H__
+#define __LIST_FRAME_H__
 
 
 #include "common.h"
@@ -135,4 +135,4 @@ static inline void ldlist_frame_del(ldlist_frame_node_t *p_node)
 
     ldlist_frame_del_orig(p_node->mp_prev, p_node->mp_next);
 }
-#endif // __STD__LIST_H__
+#endif // __LIST_FRAME_H__
