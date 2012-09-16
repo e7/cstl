@@ -2,6 +2,7 @@
 #include "search.h"
 #include "list.h"
 #include "sort.h"
+#include "rbtree_frame.h"
 
 
 #if 0
@@ -85,6 +86,7 @@ FINAL:
 }
 #endif
 
+#if 0
 int main(int argc, char *argv[])
 {
     int rslt = 0;
@@ -128,4 +130,77 @@ int main(int argc, char *argv[])
     MEMPOOL_DESTROY(&mempool_for_test);
 
     return rslt;
+}
+#endif
+
+int main(int argc, char *argv[])
+{
+    rbtree_frame_t tree;
+    rbtree_frame_node_t nodes[] = {
+        {12, RB_BLACK, NULL, NULL, NULL},
+        {1, RB_BLACK, NULL, NULL, NULL},
+        {9, RB_BLACK, NULL, NULL, NULL},
+        {2, RB_BLACK, NULL, NULL, NULL},
+        {0, RB_BLACK, NULL, NULL, NULL},
+        {11, RB_BLACK, NULL, NULL, NULL},
+        {7, RB_BLACK, NULL, NULL, NULL},
+        {19, RB_BLACK, NULL, NULL, NULL},
+        {4, RB_BLACK, NULL, NULL, NULL},
+        {15, RB_BLACK, NULL, NULL, NULL},
+        {18, RB_BLACK, NULL, NULL, NULL},
+        {5, RB_BLACK, NULL, NULL, NULL},
+        {14, RB_BLACK, NULL, NULL, NULL},
+        {13, RB_BLACK, NULL, NULL, NULL},
+        {10, RB_BLACK, NULL, NULL, NULL},
+        {16, RB_BLACK, NULL, NULL, NULL},
+        {6, RB_BLACK, NULL, NULL, NULL},
+        {3, RB_BLACK, NULL, NULL, NULL},
+        {8, RB_BLACK, NULL, NULL, NULL},
+        {17, RB_BLACK, NULL, NULL, NULL},
+    };
+    rbtree_frame_node_t *p_pos = NULL;
+    ldlist_t list = {
+        NULL,
+    };
+    mempool_t mempool_for_test = {
+        {
+            {0},
+        }, // ma_obj_cache[0]
+    };
+
+    MEMPOOL_BUILD(&mempool_for_test);
+    ldlist_build(&list, &mempool_for_test, sizeof(rbtree_frame_node_t *));
+
+    init_rbtree_frame(&tree);
+    for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
+        insert_rbtree_frame(&tree, &nodes[i]);
+    }
+
+    // 中序遍历
+    p_pos = tree.mp_root;
+    while (NULL != p_pos) {
+        if (NULL != p_pos->mp_lchild) {
+            ldlist_push_front(&list, &p_pos);
+            p_pos = p_pos->mp_lchild;
+            continue;
+        }
+
+        fprintf(stderr, "%d\n", p_pos->m_key);
+
+        if (NULL == p_pos->mp_rchild) {
+            if (ldlist_is_empty(&list)) {
+                break;
+            }
+            p_pos = *(rbtree_frame_node_t **)ldlist_first(&list);
+            ldlist_pop_front(&list);
+        }
+        fprintf(stderr, "%d\n", p_pos->m_key);
+
+        p_pos = p_pos->mp_rchild;
+    }
+
+    ldlist_destroy(&list);
+    MEMPOOL_DESTROY(&mempool_for_test);
+
+    return 0;
 }

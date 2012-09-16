@@ -61,6 +61,7 @@ typedef unsigned int uint_t;
 typedef signed long long_t;
 typedef unsigned long ulong_t;
 
+typedef int_t bool;
 #define FALSE           (0)
 #define TRUE            (!FALSE)
 

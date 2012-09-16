@@ -31,9 +31,20 @@ static inline void init_ldlist_frame_node(ldlist_frame_node_t *p_node)
 // 结点是否落单
 static inline int ldlist_frame_node_alone(ldlist_frame_node_t const *p_node)
 {
+    int rslt = FALSE;
+
     ASSERT (NULL != p_node);
 
-    return (p_node->mp_prev == p_node->mp_next);
+    if (p_node == p_node->mp_prev) {
+        ASSERT(p_node == p_node->mp_next);
+        rslt = TRUE;
+    }
+    if (p_node == p_node->mp_next) {
+        ASSERT(p_node == p_node->mp_prev);
+        rslt = TRUE;
+    }
+
+    return rslt;
 }
 
 // 向链表添加结点

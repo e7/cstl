@@ -30,7 +30,7 @@ int binary_search(int const A_BUF[], int const SIZE, int const KEY)
 {
     int index = INVALID_INDEX;
     int tmp_size = 0;
-    int *p_tmp_buf = NULL;
+    int const *pc_tmp_buf = NULL;
 
     if (NULL == A_BUF) {
         goto FINAL;
@@ -39,22 +39,22 @@ int binary_search(int const A_BUF[], int const SIZE, int const KEY)
     if (SIZE < 1) {
         goto FINAL;
     }
-    
+
     tmp_size = SIZE;
-    p_tmp_buf = A_BUF;
+    pc_tmp_buf = A_BUF;
     while (tmp_size > 0) {
         int i = tmp_size / 2;
 
-        ASSERT(NULL != p_tmp_buf);
+        ASSERT(NULL != pc_tmp_buf);
 
-        if (KEY == p_tmp_buf[i]) {
-            index = &p_tmp_buf[i] - A_BUF;
+        if (KEY == pc_tmp_buf[i]) {
+            index = &pc_tmp_buf[i] - A_BUF;
             break;
-        } else if (KEY > p_tmp_buf[i]) {
-            tmp_size -= &p_tmp_buf[i] - p_tmp_buf + 1;
-            p_tmp_buf = &p_tmp_buf[i + 1];
+        } else if (KEY > pc_tmp_buf[i]) {
+            tmp_size -= &pc_tmp_buf[i] - pc_tmp_buf + 1;
+            pc_tmp_buf = &pc_tmp_buf[i + 1];
         } else {
-            tmp_size = &p_tmp_buf[i] - p_tmp_buf;
+            tmp_size = &pc_tmp_buf[i] - pc_tmp_buf;
         }
     }
 

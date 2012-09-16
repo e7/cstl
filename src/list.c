@@ -110,6 +110,35 @@ void ldlist_build(ldlist_t *const THIS,
     return;
 }
 
+int ldlist_is_empty(ldlist_t *const THIS)
+{
+    ASSERT(NULL != THIS);
+
+    return ldlist_frame_node_alone(&THIS->m_head);
+}
+
+void *ldlist_first(ldlist_t *const THIS)
+{
+    ldlist_node_t *p_node = NULL;
+
+    ASSERT(NULL != THIS);
+
+    p_node = CONTAINER_OF(THIS->m_head.mp_next, ldlist_node_t, m_node);
+
+    return p_node->mp_data;
+}
+
+void *ldlist_last(ldlist_t *const THIS)
+{
+    ldlist_node_t *p_node = NULL;
+
+    ASSERT(NULL != THIS);
+
+    p_node = CONTAINER_OF(THIS->m_head.mp_prev, ldlist_node_t, m_node);
+
+    return p_node->mp_data;
+}
+
 enum {
     PUSH_FRONT = 0x10,
     POP_FRONT  = 0x20,
@@ -117,11 +146,10 @@ enum {
     POP_BACK  = 0x21,
 };
 
-static int ldlist_push(ldlist_t *const THIS,
+static void ldlist_push(ldlist_t *const THIS,
                        void const *pc_data,
                        int push_type)
 {
-    int rslt = 0;
     ldlist_node_t *p_node = NULL;
 
     ASSERT(NULL != THIS);
@@ -141,42 +169,34 @@ static int ldlist_push(ldlist_t *const THIS,
     } else {
         ASSERT(0);
     }
+
+    ASSERT(!ldlist_is_empty(THIS));
+
+    return;
 }
 
-int ldlist_push_front(ldlist_t *const THIS, void const *pc_data)
+void ldlist_push_front(ldlist_t *const THIS, void const *pc_data)
 {
-    int rslt = 0;
-
     /* 条件检查 */
     ASSERT(NULL != THIS);
+    ASSERT(NULL != THIS->mp_mempool);
     ASSERT(NULL != pc_data);
-    if (NULL == THIS->mp_mempool) {
-        rslt = -1;
-        goto FINAL;
-    }
 
-    rslt = ldlist_push(THIS, pc_data, PUSH_FRONT);
+    ldlist_push(THIS, pc_data, PUSH_FRONT);
 
-FINAL:
-    return rslt;
+    return;
 }
 
-int ldlist_push_back(ldlist_t *const THIS, void const *pc_data)
+void ldlist_push_back(ldlist_t *const THIS, void const *pc_data)
 {
-    int rslt = 0;
-
     /* 条件检查 */
     ASSERT(NULL != THIS);
+    ASSERT(NULL != THIS->mp_mempool);
     ASSERT(NULL != pc_data);
-    if (NULL == THIS->mp_mempool) {
-        rslt = -1;
-        goto FINAL;
-    }
 
-    rslt = ldlist_push(THIS, pc_data, PUSH_BACK);
+    ldlist_push(THIS, pc_data, PUSH_BACK);
 
-FINAL:
-    return rslt;
+    return;
 }
 
 static void ldlist_pop(ldlist_t *const THIS, int pop_type)
@@ -200,36 +220,24 @@ static void ldlist_pop(ldlist_t *const THIS, int pop_type)
     MEMPOOL_FREE(THIS->mp_mempool, p_node);
 }
 
-int ldlist_pop_front(ldlist_t *const THIS)
+void ldlist_pop_front(ldlist_t *const THIS)
 {
-    int rslt = 0;
-
     ASSERT(NULL != THIS);
-    if (NULL == THIS->mp_mempool) {
-        rslt = -1;
-        goto FINAL;
-    }
+    ASSERT(NULL != THIS->mp_mempool);
 
     ldlist_pop(THIS, POP_FRONT);
 
-FINAL:
-    return rslt;
+    return;
 }
 
-int ldlist_pop_back(ldlist_t *const THIS)
+void ldlist_pop_back(ldlist_t *const THIS)
 {
-    int rslt = 0;
-
     ASSERT(NULL != THIS);
-    if (NULL == THIS->mp_mempool) {
-        rslt = -1;
-        goto FINAL;
-    }
+    ASSERT(NULL != THIS->mp_mempool);
 
     ldlist_pop(THIS, POP_BACK);
 
-FINAL:
-    return rslt;
+    return;
 }
 
 iterator_t *ldlist_begin(ldlist_t *const THIS,

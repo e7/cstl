@@ -203,8 +203,6 @@ static void recycle_obj_sh(page_base_t *const THIS, obj_shell_t *p_obj_sh)
 // ******************** 内存池接口 ********************
 void mempool_build(mempool_t *const THIS)
 {
-    int rslt = 0;
-
     ASSERT(NULL != THIS);
 
     for (int i = 0; i < OBJ_SIZE_NUM; ++i) {
@@ -214,7 +212,7 @@ void mempool_build(mempool_t *const THIS)
         THIS->ma_obj_cache[i].mp_page_current= NULL;
     }
 
-    return rslt;
+    return;
 }
 
 void *mempool_alloc(mempool_t *const THIS,
