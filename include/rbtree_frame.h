@@ -113,7 +113,7 @@ rbtree_frame_node_t **find_first_red_node(rbtree_frame_t *p_tree,
 }
 
 static inline rbtree_frame_node_t *find_rbtree_frame(rbtree_frame_t *p_tree,
-                                                int key)
+                                                     int key)
 {
     rbtree_frame_node_t *p_pos = NULL;
 
@@ -121,12 +121,14 @@ static inline rbtree_frame_node_t *find_rbtree_frame(rbtree_frame_t *p_tree,
 
     p_pos = p_tree->mp_root;
     while (NULL != p_pos) {
-        if (key < (p_pos->m_key)) {
-            p_pos = p_pos->mp_lchild;
-        } else if (key > (p_pos->m_key)) {
-            p_pos = p_pos->mp_rchild;
-        } else {
+        if (key == p_pos->m_key) {
             break;
+        }
+
+        if (key < p_pos->m_key) {
+            p_pos = p_pos->mp_lchild;
+        } else {
+            p_pos = p_pos->mp_rchild;
         }
     }
 

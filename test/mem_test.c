@@ -220,7 +220,7 @@ typedef int key_t;
 
 int main(int argc, char *argv[])
 {
-    int i, count = 3900000;
+    int i, count = 5000000;
     struct timeval tpstart, tpend;
     float timeuse;
     rbtree_frame_t tree;
@@ -233,13 +233,17 @@ int main(int argc, char *argv[])
     srand(time(NULL));
     init_rbtree_frame(&tree);
 
+    for (i = 0; i < count; ++i) {
+        p_nodes[i].m_key = rand() % count;
+    }
+
+    printf("start\n");
     gettimeofday(&tpstart, NULL);
     for (i = 0; i < count; ++i) {
-     //   printf("%d\n", i);
-        p_nodes[i].m_key = rand() % count;
         insert_rbtree_frame(&tree, &p_nodes[i]);
     }
     gettimeofday(&tpend, NULL);
+    printf("stop\n");
 
     timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec)
                   + (tpend.tv_usec - tpstart.tv_usec);
