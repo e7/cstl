@@ -14,8 +14,8 @@ typedef struct rbtree_frame rbtree_frame_t;
 
 
 enum {
+    RB_BLACK = 0,
     RB_RED = 1,
-    RB_BLACK = 2,
 };
 
 

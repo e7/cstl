@@ -133,6 +133,7 @@ int main(int argc, char *argv[])
 }
 #endif
 
+#if 0
 int main(int argc, char *argv[])
 {
     rbtree_frame_t tree;
@@ -201,6 +202,50 @@ int main(int argc, char *argv[])
 
     ldlist_destroy(&list);
     MEMPOOL_DESTROY(&mempool_for_test);
+
+    return 0;
+}
+#endif
+
+// 伪红黑树性能测试
+#include <sys/time.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+
+typedef int key_t;
+
+int main(int argc, char *argv[])
+{
+    int i, count = 3900000;
+    struct timeval tpstart, tpend;
+    float timeuse;
+    rbtree_frame_t tree;
+    rbtree_frame_node_t *p_nodes = malloc(sizeof(rbtree_frame_node_t) * count);
+
+    if (NULL == p_nodes) {
+        return -1;
+    }
+
+    srand(time(NULL));
+    init_rbtree_frame(&tree);
+
+    gettimeofday(&tpstart, NULL);
+    for (i = 0; i < count; ++i) {
+     //   printf("%d\n", i);
+        p_nodes[i].m_key = rand() % count;
+        insert_rbtree_frame(&tree, &p_nodes[i]);
+    }
+    gettimeofday(&tpend, NULL);
+
+    timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec)
+                  + (tpend.tv_usec - tpstart.tv_usec);
+    timeuse /= 1000000;
+
+    printf("Used Time: %f\n", timeuse);
 
     return 0;
 }
