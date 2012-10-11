@@ -46,7 +46,7 @@ rb_node_t* rb_erase(key_t key, rb_node_t* root);
 
 int main()
 {
-    int i, count = 5000000;
+    int i, count = 10000000;
     key_t *p_key = malloc(count * sizeof(key_t));
     rb_node_t* root = NULL;
     //rb_node_t* node = NULL;

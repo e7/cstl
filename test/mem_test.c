@@ -220,12 +220,17 @@ typedef int key_t;
 
 int main(int argc, char *argv[])
 {
-    int i, count = 5000000;
+    int i, count = 10000000;
     struct timeval tpstart, tpend;
     float timeuse;
     rbtree_frame_t tree;
     rbtree_frame_node_t *p_nodes = malloc(sizeof(rbtree_frame_node_t) * count);
+    //rbtree_frame_node_t *p_nodes = NULL;
+    mempool_t mempool_for_test;
 
+    MEMPOOL_BUILD(&mempool_for_test);
+
+    //p_nodes = MEMPOOL_ARRAY_ALLOC(&mempool_for_test, count, sizeof(rbtree_frame_node_t));
     if (NULL == p_nodes) {
         return -1;
     }
@@ -250,6 +255,8 @@ int main(int argc, char *argv[])
     timeuse /= 1000000;
 
     printf("Used Time: %f\n", timeuse);
+
+    MEMPOOL_DESTROY(&mempool_for_test);
 
     return 0;
 }
