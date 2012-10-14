@@ -246,12 +246,68 @@ static inline void insert_rbtree_frame(rbtree_frame_t *p_tree,
         }
     }
 
-    // 升级为4叉结点，更新结点颜色
+    // 更新结点颜色
     (*pp_father)->m_color = RB_BLACK;
     (*pp_father)->mp_lchild->m_color = RB_RED;
     (*pp_father)->mp_rchild->m_color = RB_RED;
 
 FINAL:
     return;
+}
+
+static inline int remove_from_rbtree_frame(rbtree_frame_t *p_tree, int key)
+{
+    int rslt = 0;
+    rbtree_frame_node_t *p_del = NULL;
+    rbtree_frame_node_t *p_father = NULL;
+
+    p_del = find_rbtree_frame(p_tree, key); // 寻找待删除的结点
+    if (NULL == p_del) {
+        rslt = -1;
+
+        goto FINAL;
+    }
+    p_father = p_del->mp_father;
+    p_del->mp_father = NULL;
+
+    if (RB_RED == p_father->m_color) { // 父结点为红色
+        ASSERT(RB_BLACK == p_del->m_color);
+        ASSERT((NULL == p_father->mp_lchild)
+                   || (NULL == p_father->mp_rchild)); // 3叉结点
+
+        p_father->mp_lchild = NULL;
+        p_father->mp_rchild = NULL;
+    } else if (RB_RED == p_del->m_color) { // 待删结点为红色
+        rbtree_frame_node_t *p_child
+            = (NULL == p_del->mp_lchild) ? p_del->mp_rchild : p_del->mp_lchild;
+
+        ASSERT(RB_BLACK == p_father->m_color);
+        ASSERT((NULL == p_del->mp_lchild)
+                   || (NULL == p_del->mp_rchild)); // 3叉结点
+
+        if (NULL == p_child) {
+            p_father->m_color = RB_RED;
+            if (p_del == p_father->mp_lchild) {
+                p_father->mp_lchild = NULL;
+            } else {
+                p_father->mp_rchild = NULL;
+            }
+        } else {
+            ASSERT(RB_BLACK == p_child->m_color);
+
+            p_child->m_color = RB_RED;
+            p_child->mp_father = p_father;
+            if (p_del == p_father->mp_lchild) {
+                p_father->mp_lchild = p_child;
+            } else {
+                p_father->mp_rchild = p_child;
+            }
+        }
+    } else { // 普通结点
+        ASSERT(RB_BLACK == p_del->m_color);
+    }
+
+FINAL:
+    return rslt;
 }
 #endif
