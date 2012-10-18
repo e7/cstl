@@ -72,23 +72,7 @@ struct rbtree_frame {
     int m_size;
 };
 
-static inline void init_rbtree_frame(rbtree_frame_t *p_tree)
-{
-    ASSERT(NULL != p_tree);
-
-    p_tree->mp_root = NULL;
-    p_tree->m_size = 0;
-
-    return;
-}
-
-static inline int is_rbtree_frame_empty(rbtree_frame_t *p_tree)
-{
-    ASSERT(NULL != p_tree);
-
-    return (NULL == p_tree->mp_root);
-}
-
+// ***** 内部函数 *****
 static inline
 rbtree_frame_node_t **find_first_red_node(rbtree_frame_t *p_tree,
                                           int key)
@@ -112,27 +96,96 @@ rbtree_frame_node_t **find_first_red_node(rbtree_frame_t *p_tree,
     return pp_rslt;
 }
 
-static inline rbtree_frame_node_t *find_rbtree_frame(rbtree_frame_t *p_tree,
-                                                     int key)
+// 功能：在子树中寻找键为key结点
+// 参数：p_sub_tree<i>，子树根结点
+//       key<i>，键
+// 返回值：key结点的父节点中的左儿子或右儿子的地址
+static inline
+rbtree_frame_node_t **find_sub_tree_node(rbtree_frame_node_t *p_sub_tree,
+                                         int key)
 {
-    rbtree_frame_node_t *p_pos = NULL;
+    rbtree_frame_node_t **pp_pos = NULL;
 
-    ASSERT(NULL != p_tree);
+    ASSERT(NULL != p_sub_tree);
 
-    p_pos = p_tree->mp_root;
-    while (NULL != p_pos) {
-        if (key == p_pos->m_key) {
+    pp_pos = &p_sub_tree;
+    while (NULL != (*pp_pos)) {
+        if (key == (*pp_pos)->m_key) {
             break;
-        }
-
-        if (key < p_pos->m_key) {
-            p_pos = p_pos->mp_lchild;
+        } else if (key < (*pp_pos)->m_key) {
+            pp_pos = &(*pp_pos)->mp_lchild;
+        } else if (key > (*pp_pos)->m_key) {
+            pp_pos = &(*pp_pos)->mp_rchild;
         } else {
-            p_pos = p_pos->mp_rchild;
+            ASSERT(0);
         }
     }
 
-    return p_pos;
+    return pp_pos;
+}
+
+// 功能：在子树中寻找最大值结点
+// 参数：p_sub_tree<i>，子树根结点
+// 返回值：子树的最大结点的父节点的右儿子的地址
+static inline
+rbtree_frame_node_t **find_sub_tree_node_max(rbtree_frame_node_t *p_sub_tree)
+{
+    rbtree_frame_node_t **pp_pos = NULL;
+
+    ASSERT(NULL != p_sub_tree);
+
+    pp_pos = &p_sub_tree;
+    while (NULL != (*pp_pos)->mp_rchild) {
+        pp_pos = &(*pp_pos)->mp_rchild;
+    }
+
+    return pp_pos;
+}
+
+// 功能：在子树中寻找最小值结点
+// 参数：p_sub_tree<i>，子树根结点
+// 返回值：子树的最小结点的父节点的左儿子的地址
+static inline
+rbtree_frame_node_t **find_sub_tree_node_min(rbtree_frame_node_t *p_sub_tree)
+{
+    rbtree_frame_node_t **pp_pos = NULL;
+
+    ASSERT(NULL != p_sub_tree);
+
+    pp_pos = &p_sub_tree;
+    while (NULL != (*pp_pos)->mp_lchild) {
+        pp_pos = &(*pp_pos)->mp_lchild;
+    }
+
+    return pp_pos;
+}
+
+
+// ***** 接口函数 *****
+static inline void init_rbtree_frame(rbtree_frame_t *p_tree)
+{
+    ASSERT(NULL != p_tree);
+
+    p_tree->mp_root = NULL;
+    p_tree->m_size = 0;
+
+    return;
+}
+
+static inline int is_rbtree_frame_empty(rbtree_frame_t *p_tree)
+{
+    ASSERT(NULL != p_tree);
+
+    return (NULL == p_tree->mp_root);
+}
+
+
+static inline rbtree_frame_node_t *find_rbtree_frame(rbtree_frame_t *p_tree,
+                                                     int key)
+{
+    ASSERT(NULL != p_tree);
+
+    return *find_sub_tree_node(p_tree->mp_root, key);
 }
 
 static inline void insert_rbtree_frame(rbtree_frame_t *p_tree,
