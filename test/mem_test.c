@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 }
 #endif
 
-#if 0
+#if 1
 int main(int argc, char *argv[])
 {
     rbtree_frame_t tree;
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
         {9, RB_BLACK, NULL, NULL, NULL},
         {2, RB_BLACK, NULL, NULL, NULL},
         {0, RB_BLACK, NULL, NULL, NULL},
-        {11, RB_BLACK, NULL, NULL, NULL},
+       /* {11, RB_BLACK, NULL, NULL, NULL},
         {7, RB_BLACK, NULL, NULL, NULL},
         {19, RB_BLACK, NULL, NULL, NULL},
         {4, RB_BLACK, NULL, NULL, NULL},
@@ -157,9 +157,9 @@ int main(int argc, char *argv[])
         {6, RB_BLACK, NULL, NULL, NULL},
         {3, RB_BLACK, NULL, NULL, NULL},
         {8, RB_BLACK, NULL, NULL, NULL},
-        {17, RB_BLACK, NULL, NULL, NULL},
+        {17, RB_BLACK, NULL, NULL, NULL},*/
     };
-    rbtree_frame_node_t *p_pos = NULL;
+    //rbtree_frame_node_t *p_pos = NULL;
     ldlist_t list = {
         NULL,
     };
@@ -173,11 +173,19 @@ int main(int argc, char *argv[])
     ldlist_build(&list, &mempool_for_test, sizeof(rbtree_frame_node_t *));
 
     init_rbtree_frame(&tree);
+    
+    fprintf(stderr, "before insert size: %d\n", tree.m_size);
     for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
         insert_rbtree_frame(&tree, &nodes[i]);
     }
+    fprintf(stderr, "after insert size: %d\n", tree.m_size);
+    for (int i = 0; i < ARRAY_COUNT(nodes) - 1; ++i) {
+        remove_from_rbtree_frame(&tree, nodes[i].m_key);
+    }
+    fprintf(stderr, "after remove size: %d\n", tree.m_size);
 
     // 中序遍历
+    /*
     p_pos = tree.mp_root;
     while (NULL != p_pos) {
         if (NULL != p_pos->mp_lchild) {
@@ -198,7 +206,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "%d\n", p_pos->m_key);
 
         p_pos = p_pos->mp_rchild;
-    }
+    }*/
 
     ldlist_destroy(&list);
     MEMPOOL_DESTROY(&mempool_for_test);
@@ -207,7 +215,8 @@ int main(int argc, char *argv[])
 }
 #endif
 
-// 伪红黑树性能测试
+#if 0
+// 2-3树性能测试
 #include <sys/time.h>
 
 #include <stdio.h>
@@ -260,3 +269,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+#endif

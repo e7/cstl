@@ -97,19 +97,25 @@ rbtree_frame_node_t **find_first_red_node(rbtree_frame_t *p_tree,
 }
 
 // 功能：在子树中寻找键为key结点
-// 参数：p_sub_tree<i>，子树根结点
+// 参数：pp_sub_tree<i>，子树根结点
 //       key<i>，键
 // 返回值：key结点的父节点中的左儿子或右儿子的地址
 static inline
-rbtree_frame_node_t **find_sub_tree_node(rbtree_frame_node_t *p_sub_tree,
+rbtree_frame_node_t **find_sub_tree_node(rbtree_frame_node_t **pp_sub_tree,
                                          int key)
 {
     rbtree_frame_node_t **pp_pos = NULL;
 
-    ASSERT(NULL != p_sub_tree);
+    ASSERT(NULL != pp_sub_tree);
 
-    pp_pos = &p_sub_tree;
-    while (NULL != (*pp_pos)) {
+    pp_pos = pp_sub_tree;
+    while (TRUE) {
+        if (NULL == (*pp_pos)) {
+            pp_pos = NULL;
+
+            break;
+        }
+
         if (key == (*pp_pos)->m_key) {
             break;
         } else if (key < (*pp_pos)->m_key) {
@@ -125,16 +131,16 @@ rbtree_frame_node_t **find_sub_tree_node(rbtree_frame_node_t *p_sub_tree,
 }
 
 // 功能：在子树中寻找最大值结点
-// 参数：p_sub_tree<i>，子树根结点
+// 参数：pp_sub_tree<i>，子树根结点
 // 返回值：子树的最大结点的父节点的右儿子的地址
 static inline
-rbtree_frame_node_t **find_sub_tree_node_max(rbtree_frame_node_t *p_sub_tree)
+rbtree_frame_node_t **find_sub_tree_node_max(rbtree_frame_node_t **pp_sub_tree)
 {
     rbtree_frame_node_t **pp_pos = NULL;
 
-    ASSERT(NULL != p_sub_tree);
+    ASSERT(NULL != pp_sub_tree);
 
-    pp_pos = &p_sub_tree;
+    pp_pos = pp_sub_tree;
     while (NULL != (*pp_pos)->mp_rchild) {
         pp_pos = &(*pp_pos)->mp_rchild;
     }
@@ -143,16 +149,16 @@ rbtree_frame_node_t **find_sub_tree_node_max(rbtree_frame_node_t *p_sub_tree)
 }
 
 // 功能：在子树中寻找最小值结点
-// 参数：p_sub_tree<i>，子树根结点
+// 参数：pp_sub_tree<i>，子树根结点
 // 返回值：子树的最小结点的父节点的左儿子的地址
 static inline
-rbtree_frame_node_t **find_sub_tree_node_min(rbtree_frame_node_t *p_sub_tree)
+rbtree_frame_node_t **find_sub_tree_node_min(rbtree_frame_node_t **pp_sub_tree)
 {
     rbtree_frame_node_t **pp_pos = NULL;
 
-    ASSERT(NULL != p_sub_tree);
+    ASSERT(NULL != pp_sub_tree);
 
-    pp_pos = &p_sub_tree;
+    pp_pos = pp_sub_tree;
     while (NULL != (*pp_pos)->mp_lchild) {
         pp_pos = &(*pp_pos)->mp_lchild;
     }
@@ -183,14 +189,19 @@ static inline int is_rbtree_frame_empty(rbtree_frame_t *p_tree)
 static inline rbtree_frame_node_t *find_rbtree_frame(rbtree_frame_t *p_tree,
                                                      int key)
 {
+    rbtree_frame_node_t **pp_rslt = NULL;
+
     ASSERT(NULL != p_tree);
 
-    return *find_sub_tree_node(p_tree->mp_root, key);
+    pp_rslt = find_sub_tree_node(&p_tree->mp_root, key);
+
+    return (NULL == pp_rslt) ? NULL : (*pp_rslt);
 }
 
-static inline void insert_rbtree_frame(rbtree_frame_t *p_tree,
-                                       rbtree_frame_node_t *p_node)
+static inline int insert_rbtree_frame(rbtree_frame_t *p_tree,
+                                      rbtree_frame_node_t *p_node)
 {
+    int rslt = 0;
     rbtree_frame_node_t **pp_father = NULL;
 
     ASSERT(NULL != p_tree);
@@ -207,6 +218,8 @@ static inline void insert_rbtree_frame(rbtree_frame_t *p_tree,
 
     // ********** 结点已存在 **********
     if (NULL != find_rbtree_frame(p_tree, p_node->m_key)) {
+        rslt = -1;
+
         goto FINAL;
     }
 
@@ -305,62 +318,119 @@ static inline void insert_rbtree_frame(rbtree_frame_t *p_tree,
     (*pp_father)->mp_rchild->m_color = RB_RED;
 
 FINAL:
-    return;
+    if (0 == rslt) {
+        ++(p_tree->m_size);
+    }
+
+    return rslt;
 }
 
 static inline int remove_from_rbtree_frame(rbtree_frame_t *p_tree, int key)
 {
     int rslt = 0;
-    rbtree_frame_node_t *p_del = NULL;
-    rbtree_frame_node_t *p_father = NULL;
+    rbtree_frame_node_t **pp_del = NULL;
 
-    p_del = find_rbtree_frame(p_tree, key); // 寻找待删除的结点
-    if (NULL == p_del) {
+    pp_del = find_sub_tree_node(&p_tree->mp_root, key); // 寻找待删除的结点
+    if (NULL == pp_del) {
         rslt = -1;
 
         goto FINAL;
     }
-    p_father = p_del->mp_father;
-    p_del->mp_father = NULL;
 
-    if (RB_RED == p_father->m_color) { // 父结点为红色
-        ASSERT(RB_BLACK == p_del->m_color);
-        ASSERT((NULL == p_father->mp_lchild)
-                   || (NULL == p_father->mp_rchild)); // 3叉结点
+    if (NULL == (*pp_del)->mp_father) { // 删除根结点
+        (*pp_del)->mp_father = NULL;
+        (*pp_del)->mp_lchild = NULL;
+        (*pp_del)->mp_rchild = NULL;
 
-        p_father->mp_lchild = NULL;
-        p_father->mp_rchild = NULL;
-    } else if (RB_RED == p_del->m_color) { // 待删结点为红色
+        (*pp_del) = NULL;
+
+        goto FINAL;
+    }
+
+    if (RB_RED == (*pp_del)->mp_father->m_color) { // 父结点为红色
+        ASSERT(RB_BLACK == (*pp_del)->m_color); // 待删结点必为黑色
+        ASSERT((NULL == (*pp_del)->mp_father->mp_lchild)
+                   || (NULL == (*pp_del)->mp_father->mp_rchild));
+
+        (*pp_del)->mp_father = NULL;
+        (*pp_del)->mp_lchild = NULL;
+        (*pp_del)->mp_rchild = NULL;
+
+        (*pp_del) = NULL;
+    } else if (RB_RED == (*pp_del)->m_color) { // 待删结点为红色
         rbtree_frame_node_t *p_child
-            = (NULL == p_del->mp_lchild) ? p_del->mp_rchild : p_del->mp_lchild;
+            = (NULL == (*pp_del)->mp_lchild)
+                  ? (*pp_del)->mp_rchild
+                  : (*pp_del)->mp_lchild;
 
-        ASSERT(RB_BLACK == p_father->m_color);
-        ASSERT((NULL == p_del->mp_lchild)
-                   || (NULL == p_del->mp_rchild)); // 3叉结点
+        ASSERT(RB_BLACK == (*pp_del)->mp_father->m_color);
+        ASSERT((NULL == (*pp_del)->mp_lchild)
+                   || (NULL == (*pp_del)->mp_rchild));
 
         if (NULL == p_child) {
-            p_father->m_color = RB_RED;
-            if (p_del == p_father->mp_lchild) {
-                p_father->mp_lchild = NULL;
-            } else {
-                p_father->mp_rchild = NULL;
-            }
-        } else {
+            ASSERT(RB_BLACK == (*pp_del)->mp_father->m_color);
+
+            (*pp_del)->mp_father->m_color = RB_RED;
+
+            (*pp_del)->mp_father = NULL;
+            (*pp_del)->mp_lchild = NULL;
+            (*pp_del)->mp_rchild = NULL;
+
+            (*pp_del) = NULL;
+        } else { // 有儿子，为3叉结点
             ASSERT(RB_BLACK == p_child->m_color);
 
             p_child->m_color = RB_RED;
-            p_child->mp_father = p_father;
-            if (p_del == p_father->mp_lchild) {
-                p_father->mp_lchild = p_child;
-            } else {
-                p_father->mp_rchild = p_child;
-            }
+            p_child->mp_father = (*pp_del)->mp_father;
+
+            (*pp_del)->mp_father = NULL;
+            (*pp_del)->mp_lchild = NULL;
+            (*pp_del)->mp_rchild = NULL;
+
+            (*pp_del) = NULL;
         }
     } else { // 普通结点
-        ASSERT(RB_BLACK == p_del->m_color);
+        rbtree_frame_node_t *p_max = NULL;
+        rbtree_frame_node_t **pp_max = NULL;
+
+        ASSERT(RB_BLACK == (*pp_del)->m_color);
+        
+        // 寻找待删结点左子树最大结点，用于替代被删结点
+        pp_max = find_sub_tree_node_max(&((*pp_del)->mp_lchild));
+        ASSERT(NULL != pp_max);
+        ASSERT(NULL == (*pp_max)->mp_rchild);
+        p_max = *pp_max;
+        
+        // 断开替补结点
+        if (RB_RED == (*pp_max)->mp_father->m_color) {
+            (*pp_max)->mp_father = NULL;
+            (*pp_max) = NULL;
+        } else if (RB_BLACK == (*pp_max)->mp_father->m_color) {
+            (*pp_max)->mp_father->m_color = RB_RED;
+            (*pp_max)->mp_father = NULL;
+            (*pp_max) = NULL;
+        } else {
+            ASSERT(0);
+        }
+
+        // 执行替补
+        p_max->m_color = RB_BLACK;
+        
+        p_max->mp_father = (*pp_del)->mp_father;
+        p_max->mp_lchild = (*pp_del)->mp_lchild;
+        p_max->mp_rchild = (*pp_del)->mp_rchild;
+        (*pp_del)->mp_father = NULL;
+        (*pp_del)->mp_lchild = NULL;
+        (*pp_del)->mp_rchild = NULL;
+
+        (*pp_del) = p_max;
     }
 
 FINAL:
+    if (0 == rslt) {
+        --(p_tree->m_size);
+    }
+
     return rslt;
 }
 #endif
