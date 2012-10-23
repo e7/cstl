@@ -3,6 +3,7 @@
 #include "list.h"
 #include "sort.h"
 #include "rbtree_frame.h"
+#include "avltree_frame.h"
 
 
 #if 0
