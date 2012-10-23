@@ -347,17 +347,7 @@ static inline int remove_from_rbtree_frame(rbtree_frame_t *p_tree, int key)
         goto FINAL;
     }
 
-    if (RB_RED == (*pp_del)->mp_father->m_color) { // 父结点为红色
-        ASSERT(RB_BLACK == (*pp_del)->m_color); // 待删结点必为黑色
-        ASSERT((NULL == (*pp_del)->mp_father->mp_lchild)
-                   || (NULL == (*pp_del)->mp_father->mp_rchild));
-
-        (*pp_del)->mp_father = NULL;
-        (*pp_del)->mp_lchild = NULL;
-        (*pp_del)->mp_rchild = NULL;
-
-        (*pp_del) = NULL;
-    } else if (RB_RED == (*pp_del)->m_color) { // 待删结点为红色
+    if (RB_RED == (*pp_del)->m_color) { // 待删结点为红色
         rbtree_frame_node_t *p_child
             = (NULL == (*pp_del)->mp_lchild)
                   ? (*pp_del)->mp_rchild
@@ -389,41 +379,64 @@ static inline int remove_from_rbtree_frame(rbtree_frame_t *p_tree, int key)
 
             (*pp_del) = NULL;
         }
-    } else { // 普通结点
+    } else { // 待删结点为黑色
         rbtree_frame_node_t *p_max = NULL;
         rbtree_frame_node_t **pp_max = NULL;
 
         ASSERT(RB_BLACK == (*pp_del)->m_color);
-        
-        // 寻找待删结点左子树最大结点，用于替代被删结点
-        pp_max = find_sub_tree_node_max(&((*pp_del)->mp_lchild));
-        ASSERT(NULL != pp_max);
-        ASSERT(NULL == (*pp_max)->mp_rchild);
-        p_max = *pp_max;
-        
-        // 断开替补结点
-        if (RB_RED == (*pp_max)->mp_father->m_color) {
-            (*pp_max)->mp_father = NULL;
-            (*pp_max) = NULL;
-        } else if (RB_BLACK == (*pp_max)->mp_father->m_color) {
-            (*pp_max)->mp_father->m_color = RB_RED;
-            (*pp_max)->mp_father = NULL;
-            (*pp_max) = NULL;
-        } else {
-            ASSERT(0);
+
+        if (is_rbtree_frame_node_full(*pp_del)) {
+            // 寻找待删结点左子树最大结点，用于替代被删结点
+            pp_max = find_sub_tree_node_max(&((*pp_del)->mp_lchild));
+            ASSERT(NULL != pp_max);
+            p_max = *pp_max;
+            
+            // 断开替补结点
+            ASSERT(NULL == p_max->mp_rchild);
+
+            if (NULL == p_max->mp_lchild) {
+                p_max->mp_father->m_color = RB_RED;
+                
+                p_max->mp_father = NULL;
+                p_max->mp_lchild = NULL;
+                p_max->mp_rchild = NULL;
+
+                (*pp_max) = NULL;
+            } else {
+                p_max->mp_lchild->mp_father = p_max->mp_father;
+                p_max->mp_father = NULL;
+                (*pp_max) = p_max->mp_lchild;
+                p_max->mp_lchild = NULL;
+            }
+
+            // 执行替补
+            p_max->m_color = RB_BLACK;
+            
+            p_max->mp_father = (*pp_del)->mp_father;
+            p_max->mp_lchild = (*pp_del)->mp_lchild;
+            if (NULL != p_max->mp_lchild) {
+                (*pp_del)->mp_lchild->mp_father = p_max;
+            }
+            p_max->mp_rchild = (*pp_del)->mp_rchild;
+            if (NULL != p_max->mp_rchild) {
+                (*pp_del)->mp_rchild->mp_father = p_max;
+            }
+
+            (*pp_del)->mp_father = NULL;
+            (*pp_del)->mp_lchild = NULL;
+            (*pp_del)->mp_rchild = NULL;
+
+            (*pp_del) = p_max;
+        } else { // 叶子结点
+            ASSERT((NULL == (*pp_del)->mp_lchild)
+                       && (NULL == (*pp_del)->mp_rchild));
+
+            (*pp_del)->mp_father = NULL;
+            (*pp_del)->mp_lchild = NULL;
+            (*pp_del)->mp_rchild = NULL;
+
+            (*pp_del) = NULL;
         }
-
-        // 执行替补
-        p_max->m_color = RB_BLACK;
-        
-        p_max->mp_father = (*pp_del)->mp_father;
-        p_max->mp_lchild = (*pp_del)->mp_lchild;
-        p_max->mp_rchild = (*pp_del)->mp_rchild;
-        (*pp_del)->mp_father = NULL;
-        (*pp_del)->mp_lchild = NULL;
-        (*pp_del)->mp_rchild = NULL;
-
-        (*pp_del) = p_max;
     }
 
 FINAL:
