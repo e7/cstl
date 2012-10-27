@@ -39,10 +39,31 @@ int insert_avltree_frame(avltree_frame_t *p_tree,
                          avltree_frame_t *p_subtree)
 {
     int rslt = 0;
+    avltree_frame_t **pp_father = NULL;
 
     ASSERT(NULL != p_tree);
     ASSERT(NULL != p_subtree);
 
+    // 执行bst插入
+    pp_father = &p_tree;
+    while (NULL != *pp_father) {
+        if ((*pp_father)->m_key < p_subtree->m_key) {
+            pp_father = &(*pp_father)->mp_ltree;
+        } else if ((*pp_father)->m_key > p_subtree->m_key) {
+            pp_father = &(*pp_father)->mp_rtree;
+        } else {
+            break;
+        }
+    }
+    if (NULL != *pp_father) {
+        rslt = -1;
+        goto FINAL;
+    }
+    (*pp_father) = p_subtree;
+
+    // 调整
+
+FINAL:
     return rslt;
 }
 
