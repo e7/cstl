@@ -22,8 +22,38 @@ struct avltree_frame {
             avltree_frame_node_t name = {0, 0, NULL, NULL, NULL}
 
 
-// ********** 二叉树的四种旋转 **********
+// ********** avl树的四种旋转 **********
+static inline
+void avl_r_rotate(avltree_frame_t *p_tree)
+{
+    //        1 o                    2 o           //
+    //         / \                    / \          //
+    //      2 o   o 3              4 o   o 1       //
+    //       / \         -->        /   / \        //
+    //    4 o   o 5              6 o   o   o 3     //
+    //     /                           5           //
+    //  6 o                                        //
 
+    ASSERT(NULL != p_tree);
+}
+
+static inline
+void avl_l_rotate(avltree_frame_t *p_tree)
+{
+    ASSERT(NULL != p_tree);
+}
+
+static inline
+void avl_rl_rotate(avltree_frame_t *p_tree)
+{
+    ASSERT(NULL != p_tree);
+}
+
+static inline
+void avl_lr_rotate(avltree_frame_t *p_tree)
+{
+    ASSERT(NULL != p_tree);
+}
 
 
 // ********** avl树接口 **********
