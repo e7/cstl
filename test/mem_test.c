@@ -4,6 +4,8 @@
 #include "sort.h"
 #include "rbtree_frame.h"
 #include "avltree_frame.h"
+#include "adv_string.h"
+#include "error_info.h"
 
 
 #if 0

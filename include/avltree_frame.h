@@ -11,7 +11,7 @@
 typedef struct avltree_frame avltree_frame_t;
 struct avltree_frame {
     int m_key; // 键
-    int m_height; // 树高度
+    int m_balance_factor; // 平衡因子
     avltree_frame_t *mp_ftree; // 父树
     avltree_frame_t *mp_ltree; // 左子树
     avltree_frame_t *mp_rtree; // 右子树
@@ -28,7 +28,7 @@ void init_avltree_frame(avltree_frame_t *p_tree, int key)
     ASSERT(NULL != p_tree);
 
     p_tree->m_key = key;
-    p_tree->m_height = 0;
+    p_tree->m_balance_factor = 0;
     p_tree->mp_ftree = NULL;
     p_tree->mp_ltree = NULL;
     p_tree->mp_rtree = NULL;

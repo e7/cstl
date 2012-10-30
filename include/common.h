@@ -2,8 +2,8 @@
 // author: e7, ryuuzaki.uchiha@gmail.com
 
 
-#ifndef __STD__COMMON_H__
-#define __STD__COMMON_H__
+#ifndef __COMMON_H__
+#define __COMMON_H__
 
 
 #include "config.h"
@@ -92,4 +92,4 @@ typedef int_t bool;
                 b ^= a;\
                 a ^= b;\
             } while (0)
-#endif // __STD__COMMON_H__
+#endif // __COMMON_H__
