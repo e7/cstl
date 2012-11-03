@@ -24,7 +24,7 @@ struct avltree_frame {
 
 // ********** avl树的四种旋转 **********
 static inline
-void avl_r_rotate(avltree_frame_t *p_tree)
+void avl_r_rotate(avltree_frame_t **pp_tree)
 {
     //        1 o                    2 o           //
     //         / \                    / \          //
@@ -34,13 +34,53 @@ void avl_r_rotate(avltree_frame_t *p_tree)
     //     /                           5           //
     //  6 o                                        //
 
-    ASSERT(NULL != p_tree);
+    ASSERT(NULL != pp_tree);
+    ASSERT(NULL != (*pp_tree));
+
+    do {
+        avltree_frame_t *p_father= (*pp_tree)->mp_ftree;
+        avltree_frame_t *p_old_root = (*pp_tree);
+        avltree_frame_t *p_new_root = (*pp_tree)->mp_ltree;
+        avltree_frame_t *p_child = (*pp_tree)->mp_ltree->mp_rtree;
+
+        // start ratate
+        p_old_root->mp_ftree = p_new_root;
+        (*pp_tree) = p_new_root;
+
+        p_new_root->mp_ftree = p_father;
+        p_old_root->mp_ltree = p_new_root->mp_rtree;
+
+        p_new_root->mp_rtree = p_old_root;
+        p_child->mp_ftree = p_old_root;
+    } while (0);
+
+    return;
 }
 
 static inline
-void avl_l_rotate(avltree_frame_t *p_tree)
+void avl_l_rotate(avltree_frame_t **pp_tree)
 {
-    ASSERT(NULL != p_tree);
+    ASSERT(NULL != pp_tree);
+    ASSERT(NULL != (*pp_tree));
+
+    do {
+        avltree_frame_t *p_father= (*pp_tree)->mp_ftree;
+        avltree_frame_t *p_old_root = (*pp_tree);
+        avltree_frame_t *p_new_root = (*pp_tree)->mp_rtree;
+        avltree_frame_t *p_child = (*pp_tree)->mp_rtree->mp_ltree;
+
+        // start ratate
+        p_old_root->mp_ftree = p_new_root;
+        (*pp_tree) = p_new_root;
+
+        p_new_root->mp_ftree = p_father;
+        p_old_root->mp_rtree = p_new_root->mp_ltree;
+
+        p_new_root->mp_ltree = p_old_root;
+        p_child->mp_ftree = p_old_root;
+    } while (0);
+
+    return;
 }
 
 static inline
