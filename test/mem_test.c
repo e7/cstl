@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
 }
 #endif
 
-#if 1
+#if 0
 int main(int argc, char *argv[])
 {
     rbtree_frame_t tree;
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
     ldlist_build(&list, &mempool_for_test, sizeof(rbtree_frame_node_t *));
 
     init_rbtree_frame(&tree);
-    
+
     fprintf(stderr, "before insert size: %d\n", tree.m_size);
     for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
         insert_rbtree_frame(&tree, &nodes[i]);
@@ -258,6 +258,75 @@ int main(int argc, char *argv[])
     gettimeofday(&tpstart, NULL);
     for (i = 0; i < count; ++i) {
         insert_rbtree_frame(&tree, &p_nodes[i]);
+    }
+    gettimeofday(&tpend, NULL);
+    printf("stop\n");
+
+    timeuse = 1000000 * (tpend.tv_sec - tpstart.tv_sec)
+                  + (tpend.tv_usec - tpstart.tv_usec);
+    timeuse /= 1000000;
+
+    printf("Used Time: %f\n", timeuse);
+
+    MEMPOOL_DESTROY(&mempool_for_test);
+
+    return 0;
+}
+#endif
+
+#if 1
+// avl树性能测试
+#include <sys/time.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+
+typedef int key_t;
+
+int main(int argc, char *argv[])
+{
+    int count = 10000000;
+    struct timeval tpstart, tpend;
+    float timeuse;
+    avltree_frame_t *p_tree = NULL;
+    avltree_frame_t *p_nodes = NULL;
+    /*avltree_frame_t nodes[] = {
+        {12, 0, NULL, NULL, NULL, 0},
+        {1, 0, NULL, NULL, NULL, 0},
+        {9, 0, NULL, NULL, NULL, 0},
+        {2, 0, NULL, NULL, NULL, 0},
+        {0, 0, NULL, NULL, NULL, 0},
+        {11, 0, NULL, NULL, NULL, 0},
+        {7, 0, NULL, NULL, NULL, 0},
+        {19, 0, NULL, NULL, NULL, 0},
+        {4, 0, NULL, NULL, NULL, 0},
+        {15, 0, NULL, NULL, NULL, 0},
+        {18, 0, NULL, NULL, NULL, 0},
+        {5, 0, NULL, NULL, NULL, 0},
+        {14, 0, NULL, NULL, NULL, 0},
+    };*/
+    mempool_t mempool_for_test;
+
+    MEMPOOL_BUILD(&mempool_for_test);
+    srand(time(NULL));
+
+    //p_nodes = MEMPOOL_ARRAY_ALLOC(&mempool_for_test, count, sizeof(rbtree_frame_node_t));
+    p_nodes = calloc(count, sizeof(avltree_frame_t));
+
+    for (int i = 0; i < count; ++i) {
+        p_nodes[i].m_key = rand() % count;
+        p_nodes[i].mp_ftree = NULL;
+        p_nodes[i].mp_ltree = NULL;
+        p_nodes[i].mp_rtree = NULL;
+    }
+
+    printf("start\n");
+    gettimeofday(&tpstart, NULL);
+    for (int i = 0; i < count; ++i) {
+        insert_avltree_frame(&p_tree, &p_nodes[i]);
     }
     gettimeofday(&tpend, NULL);
     printf("stop\n");

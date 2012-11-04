@@ -37,6 +37,7 @@ void avl_r_rotate(avltree_frame_t **pp_tree)
     ASSERT(NULL != pp_tree);
     ASSERT(NULL != (*pp_tree));
 
+    // 旋转
     do {
         avltree_frame_t *p_father= (*pp_tree)->mp_ftree;
         avltree_frame_t *p_old_root = (*pp_tree);
@@ -51,7 +52,15 @@ void avl_r_rotate(avltree_frame_t **pp_tree)
         p_old_root->mp_ltree = p_new_root->mp_rtree;
 
         p_new_root->mp_rtree = p_old_root;
-        p_child->mp_ftree = p_old_root;
+        if (NULL != p_child) {
+            p_child->mp_ftree = p_old_root;
+        }
+
+        // 修正平衡因子
+        p_old_root->m_balance_factor
+            += MAX(0 - p_new_root->m_balance_factor, 0) + 1;
+        p_new_root->m_balance_factor
+            += MAX(0, p_old_root->m_balance_factor) + 1;
     } while (0);
 
     return;
@@ -77,22 +86,44 @@ void avl_l_rotate(avltree_frame_t **pp_tree)
         p_old_root->mp_rtree = p_new_root->mp_ltree;
 
         p_new_root->mp_ltree = p_old_root;
-        p_child->mp_ftree = p_old_root;
+        if (NULL != p_child) {
+            p_child->mp_ftree = p_old_root;
+        }
+
+        // 修正平衡因子
+        p_old_root->m_balance_factor
+            -= MAX(0, p_new_root->m_balance_factor) + 1;
+        p_new_root->m_balance_factor
+            += MIN(p_old_root->m_balance_factor, 0) - 1;
     } while (0);
 
     return;
 }
 
 static inline
-void avl_rl_rotate(avltree_frame_t *p_tree)
+void avl_lr_rotate(avltree_frame_t **pp_tree)
 {
-    ASSERT(NULL != p_tree);
+    ASSERT(NULL != pp_tree);
+    ASSERT(NULL != (*pp_tree));
+
+    // 执行双旋转
+    avl_l_rotate(&((*pp_tree)->mp_ltree));
+    avl_r_rotate(pp_tree);
+
+    return;
 }
 
 static inline
-void avl_lr_rotate(avltree_frame_t *p_tree)
+void avl_rl_rotate(avltree_frame_t **pp_tree)
 {
-    ASSERT(NULL != p_tree);
+    ASSERT(NULL != pp_tree);
+    ASSERT(NULL != (*pp_tree));
+
+    // 执行双旋转
+    avl_r_rotate(&((*pp_tree)->mp_rtree));
+    avl_l_rotate(pp_tree);
+
+    return;
 }
 
 
@@ -110,31 +141,30 @@ void init_avltree_frame(avltree_frame_t *p_tree, int key)
 }
 
 static inline
-int insert_avltree_frame(avltree_frame_t *p_tree,
+int insert_avltree_frame(avltree_frame_t **pp_tree,
                          avltree_frame_t *p_subtree)
 {
     int rslt = 0;
     int const UPWARD_COUNT = 3; // 最多影响曾祖父结点
-    avltree_frame_t *p_ftree = NULL;
-    avltree_frame_t **pp_vacancy = NULL;
+    avltree_frame_t **pp_orig = NULL; // 树根指针真身
+    avltree_frame_t **pp_vacancy = NULL; //待插位置
     avltree_frame_t *p_child_tree = NULL;
 
     // 参数检查
-    ASSERT(NULL != p_tree);
+    ASSERT(NULL != pp_tree);
     ASSERT(NULL != p_subtree);
-
-    // 只允许插入单结点子树
     ASSERT(0 == p_subtree->m_balance_factor);
     ASSERT((NULL == p_subtree->mp_ltree) && (NULL == p_subtree->mp_rtree));
 
     // 寻找插入位置
-    pp_vacancy = &p_tree;
+    pp_vacancy = pp_tree;
+    pp_orig = pp_tree;
     while (NULL != *pp_vacancy) {
-        p_ftree = (*pp_vacancy); // 更新父树
+        pp_orig = pp_vacancy;
 
-        if ((*pp_vacancy)->m_key < p_subtree->m_key) {
+        if ((*pp_vacancy)->m_key > p_subtree->m_key) {
             pp_vacancy = &(*pp_vacancy)->mp_ltree;
-        } else if ((*pp_vacancy)->m_key > p_subtree->m_key) {
+        } else if ((*pp_vacancy)->m_key < p_subtree->m_key) {
             pp_vacancy = &(*pp_vacancy)->mp_rtree;
         } else {
             break;
@@ -146,25 +176,66 @@ int insert_avltree_frame(avltree_frame_t *p_tree,
     }
 
     // 执行插入
-    p_subtree->mp_ftree = p_ftree;
+    p_subtree->mp_ftree = (*pp_orig);
     (*pp_vacancy) = p_subtree;
 
     // 调整
     p_child_tree = p_subtree;
     for (int i = 0; i < UPWARD_COUNT; ++i) {
-        if (p_child_tree == p_ftree->mp_ltree) {
-            --(p_ftree->m_balance_factor);
-        } else if (p_child_tree == p_ftree->mp_rtree) {
-            ++(p_ftree->m_balance_factor);
-        } else {
-            ASSERT(0);
+        if (NULL == (*pp_orig)) {
+            break;
         }
 
-        if (p_ftree->m_balance_factor < -1) {
-        } else if (p_ftree->m_balance_factor > 1) {
+        if (p_child_tree == (*pp_orig)->mp_ltree) {
+            --((*pp_orig)->m_balance_factor);
+        } else if (p_child_tree == (*pp_orig)->mp_rtree) {
+            ++((*pp_orig)->m_balance_factor);
         } else {
-            p_child_tree = p_ftree;
-            p_ftree = p_ftree->mp_ftree;
+            ASSERT(p_child_tree == (*pp_orig));
+
+            break;
+        }
+
+        if ((*pp_orig)->m_balance_factor < -1) {
+            if ((*pp_orig)->mp_ltree->m_balance_factor < 0) {
+                avl_r_rotate(pp_orig);
+            } else if ((*pp_orig)->mp_ltree->m_balance_factor > 0) {
+                avl_lr_rotate(pp_orig);
+            } else {
+                ASSERT(0);
+            }
+
+            break;
+        } else if ((*pp_orig)->m_balance_factor > 1) {
+            if ((*pp_orig)->mp_rtree->m_balance_factor > 0) {
+                avl_l_rotate(pp_orig);
+            } else if ((*pp_orig)->mp_rtree->m_balance_factor < 0) {
+                avl_rl_rotate(pp_orig);
+            } else {
+                ASSERT(0);
+            }
+
+            break;
+        } else if (0 == (*pp_orig)->m_balance_factor) {
+            break;
+        } else {
+            p_child_tree = (*pp_orig);
+            if (NULL == (*pp_orig)->mp_ftree) {
+                break;
+            }
+            if (NULL == (*pp_orig)->mp_ftree->mp_ftree) {
+                pp_orig = pp_tree;
+            } else if ((*pp_orig)->mp_ftree
+                           == (*pp_orig)->mp_ftree->mp_ftree->mp_ltree)
+            {
+                pp_orig = &((*pp_orig)->mp_ftree->mp_ftree->mp_ltree);
+            } else if ((*pp_orig)->mp_ftree
+                           == (*pp_orig)->mp_ftree->mp_ftree->mp_rtree)
+            {
+                pp_orig = &((*pp_orig)->mp_ftree->mp_ftree->mp_rtree);
+            } else {
+                ASSERT(0);
+            }
         }
     }
 

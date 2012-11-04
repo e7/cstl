@@ -92,4 +92,6 @@ typedef int_t bool;
                 b ^= a;\
                 a ^= b;\
             } while (0)
+#define MAX(a, b)               (((a) > (b)) ? (a) : (b))
+#define MIN(a, b)               (((a) > (b)) ? (b) : (a))
 #endif // __COMMON_H__
