@@ -328,6 +328,9 @@ int main(int argc, char *argv[])
     for (int i = 0; i < count; ++i) {
         insert_avltree_frame(&p_tree, &p_nodes[i]);
     }
+    /*for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
+        insert_avltree_frame(&p_tree, &nodes[i]);
+    }*/
     gettimeofday(&tpend, NULL);
     printf("stop\n");
 

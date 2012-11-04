@@ -145,7 +145,6 @@ int insert_avltree_frame(avltree_frame_t **pp_tree,
                          avltree_frame_t *p_subtree)
 {
     int rslt = 0;
-    int const UPWARD_COUNT = 3; // 最多影响曾祖父结点
     avltree_frame_t **pp_orig = NULL; // 树根指针真身
     avltree_frame_t **pp_vacancy = NULL; //待插位置
     avltree_frame_t *p_child_tree = NULL;
@@ -181,11 +180,7 @@ int insert_avltree_frame(avltree_frame_t **pp_tree,
 
     // 调整
     p_child_tree = p_subtree;
-    for (int i = 0; i < UPWARD_COUNT; ++i) {
-        if (NULL == (*pp_orig)) {
-            break;
-        }
-
+    while(NULL != (*pp_orig)) {
         if (p_child_tree == (*pp_orig)->mp_ltree) {
             --((*pp_orig)->m_balance_factor);
         } else if (p_child_tree == (*pp_orig)->mp_rtree) {
