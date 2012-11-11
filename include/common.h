@@ -70,6 +70,8 @@ typedef int_t bool;
 
 
 // common macros
+#define NONE            ((void)0)
+
 #if DEBUG_EDITION
     #define ASSERT(cond)        assert(cond)
 #else
