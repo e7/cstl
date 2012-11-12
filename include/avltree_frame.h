@@ -133,13 +133,13 @@ avltree_frame_t **find_prev_avltree_frame(avltree_frame_t **pp_tree)
     avltree_frame_t **pp_rslt = NULL;
 
     ASSERT(NULL != pp_tree);
-
     ASSERT(NULL != *pp_tree);
 
     pp_rslt = &(*pp_tree)->mp_ltree;
     while (TRUE) {
         if (NULL == (*pp_rslt)) {
             pp_rslt = NULL;
+            
             break;
         }
 
@@ -151,6 +151,31 @@ avltree_frame_t **find_prev_avltree_frame(avltree_frame_t **pp_tree)
     }
 
     return pp_rslt;
+}
+
+// 寻找中序后继
+static inline
+avltree_frame_t **find_next_avltree_frame(avltree_frame_t **pp_tree)
+{
+    avltree_frame_t **pp_rslt = NULL;
+
+    ASSERT(NULL != pp_tree);
+    ASSERT(NULL != *pp_tree);
+
+    pp_rslt = &(*pp_tree)->mp_rtree;
+    while (TRUE) {
+        if (NULL == (*pp_rslt)) {
+            pp_rslt = NULL;
+
+            break;
+        }
+
+        if (NULL == (*pp_rslt)->mp_ltree) {
+            break;
+        } else {
+            pp_rslt = &(*pp_rslt)->mp_ltree;
+        }
+    }
 }
 
 // 上虑调整
@@ -303,7 +328,7 @@ int insert_avltree_frame(avltree_frame_t **pp_tree,
     p_child_tree = p_subtree;
 #if 1
     upward_avltree_frame(pp_tree, pp_orig, p_child_tree, AVL_INSERT);
-#else
+#else // same functional with upward_avltree_frame
     while(NULL != (*pp_orig)) {
         if (p_child_tree == (*pp_orig)->mp_ltree) {
             --((*pp_orig)->m_balance_factor);
