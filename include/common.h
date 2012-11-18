@@ -90,9 +90,9 @@ typedef int_t bool;
 
 #define SWAP(a, b)              \
             do {\
-                a ^= b;\
-                b ^= a;\
-                a ^= b;\
+                (a) ^= (b);\
+                (b) ^= (a);\
+                (a) ^= (b);\
             } while (0)
 #define MAX(a, b)               (((a) > (b)) ? (a) : (b))
 #define MIN(a, b)               (((a) > (b)) ? (b) : (a))

@@ -11,11 +11,11 @@
 typedef struct avltree_frame avltree_frame_t;
 struct avltree_frame {
     int m_key; // 键
+    void *mp_value; // 值
     int m_balance_factor; // 平衡因子
     avltree_frame_t *mp_ftree; // 父树
     avltree_frame_t *mp_ltree; // 左子树
     avltree_frame_t *mp_rtree; // 右子树
-    int m_size; // 树结点数目
 };
 
 #define AVLTREE_FRAME_NODE(name)         \
@@ -126,56 +126,73 @@ void avl_rl_rotate(avltree_frame_t **pp_tree)
     return;
 }
 
-// 寻找中序前驱
+// ********** avl树的结点交换 **********
 static inline
-avltree_frame_t **find_prev_avltree_frame(avltree_frame_t **pp_tree)
+void swap_avltree_frame_orig(avltree_frame_t *p_tree1,
+                             avltree_frame_t *p_tree2)
 {
-    avltree_frame_t **pp_rslt = NULL;
+    avltree_frame_t *p_tmp = NULL;
 
-    ASSERT(NULL != pp_tree);
-    ASSERT(NULL != *pp_tree);
+    p_tmp = p_tree1;
+    p_tree1 = p_tree2;
+    p_tree2 = p_tmp;
 
-    pp_rslt = &(*pp_tree)->mp_ltree;
-    while (TRUE) {
-        if (NULL == (*pp_rslt)) {
-            pp_rslt = NULL;
-            
-            break;
-        }
-
-        if (NULL == (*pp_rslt)->mp_rtree) {
-            break;
-        } else {
-            pp_rslt = &(*pp_rslt)->mp_rtree;
-        }
-    }
-
-    return pp_rslt;
+    return;
 }
 
-// 寻找中序后继
 static inline
-avltree_frame_t **find_next_avltree_frame(avltree_frame_t **pp_tree)
+void swap_avltree_frame(avltree_frame_t **pp_tree1,
+                        avltree_frame_t **pp_tree2)
 {
-    avltree_frame_t **pp_rslt = NULL;
+    // 先交换左右儿子的父节点指针
 
+
+    // 再交换本结点各指针
+    swap_avltree_frame_orig((*pp_tree1)->mp_ftree, (*pp_tree2)->mp_ftree);
+}
+
+// ********** avl树的内部查找 **********
+typedef struct {
+    avltree_frame_t **mpp_father;
+    avltree_frame_t **mpp_child;
+} avl_iter_t; // 上滤迭代器
+
+// 寻找树的最大值
+static inline
+avl_iter_t *find_max_avltree_frame(avltree_frame_t **pp_tree,
+                                   avl_iter_t *p_iter)
+{
     ASSERT(NULL != pp_tree);
+
+    // 开始寻找
     ASSERT(NULL != *pp_tree);
-
-    pp_rslt = &(*pp_tree)->mp_rtree;
-    while (TRUE) {
-        if (NULL == (*pp_rslt)) {
-            pp_rslt = NULL;
-
-            break;
-        }
-
-        if (NULL == (*pp_rslt)->mp_ltree) {
-            break;
-        } else {
-            pp_rslt = &(*pp_rslt)->mp_ltree;
-        }
+    p_iter->mpp_father = NULL;
+    p_iter->mpp_child = pp_tree;
+    while (NULL != (*p_iter->mpp_child)->mp_rtree) {
+        p_iter->mpp_father = p_iter->mpp_child;
+        p_iter->mpp_child = &(*p_iter->mpp_child)->mp_rtree;
     }
+
+    return p_iter;
+}
+
+// 寻找树的最小值
+static inline
+avl_iter_t *find_min_avltree_frame(avltree_frame_t **pp_tree,
+                                   avl_iter_t *p_iter)
+{
+    ASSERT(NULL != pp_tree);
+
+    // 开始寻找
+    ASSERT(NULL != *pp_tree);
+    p_iter->mpp_father = NULL;
+    p_iter->mpp_child = pp_tree;
+    while (NULL != (*p_iter->mpp_child)->mp_ltree) {
+        p_iter->mpp_father = p_iter->mpp_child;
+        p_iter->mpp_child = &(*p_iter->mpp_child)->mp_ltree;
+    }
+
+    return p_iter;
 }
 
 // 上虑调整
@@ -280,6 +297,7 @@ void init_avltree_frame(avltree_frame_t *p_tree, int key)
     ASSERT(NULL != p_tree);
 
     p_tree->m_key = key;
+    p_tree->mp_value = NULL;
     p_tree->m_balance_factor = 0;
     p_tree->mp_ftree = NULL;
     p_tree->mp_ltree = NULL;
@@ -389,48 +407,71 @@ FINAL:
 }
 
 static inline
-avltree_frame_t **find_avltree_frame(avltree_frame_t **pp_tree, int key)
+avl_iter_t *find_avltree_frame(avltree_frame_t **pp_tree,
+                               int key,
+                               avl_iter_t *p_iter)
 {
-    avltree_frame_t **pp_rslt = NULL;
-
     ASSERT(NULL != pp_tree);
+    ASSERT(NULL != p_iter);
 
-    if (NULL == *pp_tree) {
-        goto FINAL;
-    }
+    ASSERT(NULL != *pp_tree);
 
-    pp_rslt = pp_tree;
-    while (key != (*pp_rslt)->m_key) {
-        if ((*pp_rslt)->m_key < key) {
-            pp_rslt = &(*pp_rslt)->mp_ltree;
-        } else if ((*pp_rslt)->m_key > key) {
-            pp_rslt = &(*pp_rslt)->mp_rtree;
+    p_iter->mpp_father = NULL;
+    p_iter->mpp_child = pp_tree;
+    while (key != (*p_iter->mpp_child)->m_key) {
+        if ((*p_iter->mpp_child)->m_key < key) {
+            p_iter->mpp_father = p_iter->mpp_child;
+            p_iter->mpp_child = &(*p_iter->mpp_child)->mp_ltree;
+        } else if ((*p_iter->mpp_child)->m_key > key) {
+            p_iter->mpp_father = p_iter->mpp_child;
+            p_iter->mpp_child = &(*p_iter->mpp_child)->mp_rtree;
         } else {
             ASSERT(0);
         }
 
-        if (NULL == *pp_rslt) {
-            pp_rslt = NULL;
+        if (NULL == *p_iter->mpp_child) {
+            p_iter = NULL;
             break;
         }
     }
 
-FINAL:
-    return pp_rslt;
+    return p_iter;
 }
 
 static inline
-void remove_avltree_frame(avltree_frame_t **pp_tree,
-                          avltree_frame_t **pp_del)
+int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
 {
+    int rslt = 0;
+    avl_iter_t del = {
+        NULL, NULL,
+    };
+    avl_iter_t alternate = {
+        NULL, NULL,
+    };
+    avl_iter_t *p_iter = NULL;
+
     ASSERT(NULL != pp_tree);
     ASSERT(NULL != *pp_tree);
-    ASSERT(NULL != pp_del);
-    ASSERT(NULL != *pp_del);
 
-    goto FINAL;
+    // 查找待删除的结点
+    p_iter = find_avltree_frame(pp_tree, key, &del);
+    if (NULL == p_iter) {
+        rslt = -1;
+        goto FINAL;
+    }
+
+    // 寻找候补结点
+    if (NULL != (*p_iter->mpp_child)->mp_ltree) {
+        p_iter = find_max_avltree_frame(&(*p_iter->mpp_child)->mp_ltree,
+                                        &alternate);
+    } else if (NULL != (*p_iter->mpp_child)->mp_rtree) {
+        p_iter = find_min_avltree_frame(&(*p_iter->mpp_child)->mp_rtree,
+                                        &alternate);
+    } else {
+        ASSERT(1);
+    }
 
 FINAL:
-    return;
+    return rslt;
 }
 #endif // __AVLTREE_FRAME_H__
