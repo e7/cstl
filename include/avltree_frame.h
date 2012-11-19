@@ -126,31 +126,6 @@ void avl_rl_rotate(avltree_frame_t **pp_tree)
     return;
 }
 
-// ********** avl树的结点交换 **********
-static inline
-void swap_avltree_frame_orig(avltree_frame_t *p_tree1,
-                             avltree_frame_t *p_tree2)
-{
-    avltree_frame_t *p_tmp = NULL;
-
-    p_tmp = p_tree1;
-    p_tree1 = p_tree2;
-    p_tree2 = p_tmp;
-
-    return;
-}
-
-static inline
-void swap_avltree_frame(avltree_frame_t **pp_tree1,
-                        avltree_frame_t **pp_tree2)
-{
-    // 先交换左右儿子的父节点指针
-
-
-    // 再交换本结点各指针
-    swap_avltree_frame_orig((*pp_tree1)->mp_ftree, (*pp_tree2)->mp_ftree);
-}
-
 // ********** avl树的内部查找 **********
 typedef struct {
     avltree_frame_t **mpp_father;
@@ -448,28 +423,41 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
     avl_iter_t alternate = {
         NULL, NULL,
     };
-    avl_iter_t *p_iter = NULL;
+    avl_iter_t *p_alternate = NULL;
 
     ASSERT(NULL != pp_tree);
     ASSERT(NULL != *pp_tree);
 
     // 查找待删除的结点
-    p_iter = find_avltree_frame(pp_tree, key, &del);
-    if (NULL == p_iter) {
+    p_alternate = find_avltree_frame(pp_tree, key, &del);
+    if (NULL == p_alternate) {
         rslt = -1;
         goto FINAL;
     }
 
-    // 寻找候补结点
-    if (NULL != (*p_iter->mpp_child)->mp_ltree) {
-        p_iter = find_max_avltree_frame(&(*p_iter->mpp_child)->mp_ltree,
-                                        &alternate);
-    } else if (NULL != (*p_iter->mpp_child)->mp_rtree) {
-        p_iter = find_min_avltree_frame(&(*p_iter->mpp_child)->mp_rtree,
-                                        &alternate);
-    } else {
-        ASSERT(1);
+    // 迭代寻找候补结点
+    while (TRUE) {
+        if (NULL != (*del.mpp_child)->mp_ltree) {
+            p_alternate = find_max_avltree_frame(&(*del.mpp_child)->mp_ltree,
+                                                 &alternate);
+        } else if (NULL != (*del.mpp_child)->mp_rtree) {
+            p_alternate = find_min_avltree_frame(&(*del.mpp_child)->mp_rtree,
+                                                 &alternate);
+        } else {
+            break;
+        }
+
+        // 交换结点核心数据
+        SWAP((*del.mpp_child)->m_key, (*p_alternate->mpp_child)->m_key); // 键
+        SWAP((*del.mpp_child)->mp_value,
+             (*p_alternate->mpp_child)->mp_value); // 值
     }
+
+    // 上滤然后删除
+    upward_avltree_frame(pp_tree,
+                         p_alternate->mpp_father,
+                         *p_alternate->mpp_child, AVL_REMOVE);
+
 
 FINAL:
     return rslt;

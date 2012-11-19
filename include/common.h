@@ -90,9 +90,9 @@ typedef int_t bool;
 
 #define SWAP(a, b)              \
             do {\
-                (a) ^= (b);\
-                (b) ^= (a);\
-                (a) ^= (b);\
+                __typeof__(a) tmp = (b);\
+                (b) = (a);\
+                (a) = tmp;\
             } while (0)
 #define MAX(a, b)               (((a) > (b)) ? (a) : (b))
 #define MIN(a, b)               (((a) > (b)) ? (b) : (a))
