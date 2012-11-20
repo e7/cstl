@@ -202,7 +202,7 @@ void upward_avltree_frame(avltree_frame_t **pp_root,
                 ++((*pp_tree_iter)->m_balance_factor);
             } else {
                 ASSERT(p_tree_iter == (*pp_tree_iter));
-            } 
+            }
         } else if (AVL_REMOVE == cause) { // 删除导致调整
             if (p_tree_iter == (*pp_tree_iter)->mp_ltree) {
                 ++((*pp_tree_iter)->m_balance_factor);
@@ -423,41 +423,45 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
     avl_iter_t alternate = {
         NULL, NULL,
     };
-    avl_iter_t *p_alternate = NULL;
+    avl_iter_t *p_del = NULL;
 
     ASSERT(NULL != pp_tree);
     ASSERT(NULL != *pp_tree);
 
     // 查找待删除的结点
-    p_alternate = find_avltree_frame(pp_tree, key, &del);
-    if (NULL == p_alternate) {
+    p_del = find_avltree_frame(pp_tree, key, &del);
+    if (NULL == p_del) {
         rslt = -1;
         goto FINAL;
     }
 
     // 迭代寻找候补结点
     while (TRUE) {
-        if (NULL != (*del.mpp_child)->mp_ltree) {
-            p_alternate = find_max_avltree_frame(&(*del.mpp_child)->mp_ltree,
-                                                 &alternate);
-        } else if (NULL != (*del.mpp_child)->mp_rtree) {
-            p_alternate = find_min_avltree_frame(&(*del.mpp_child)->mp_rtree,
-                                                 &alternate);
+        if (NULL != (*p_del->mpp_child)->mp_ltree) {
+            p_del = find_max_avltree_frame(&(*p_del->mpp_child)->mp_ltree,
+                                           &alternate);
+        } else if (NULL != (*p_del->mpp_child)->mp_rtree) {
+            p_del = find_min_avltree_frame(&(*p_del->mpp_child)->mp_rtree,
+                                           &alternate);
         } else {
             break;
         }
 
         // 交换结点核心数据
-        SWAP((*del.mpp_child)->m_key, (*p_alternate->mpp_child)->m_key); // 键
+        SWAP((*del.mpp_child)->m_key, (*alternate.mpp_child)->m_key); // 键
         SWAP((*del.mpp_child)->mp_value,
-             (*p_alternate->mpp_child)->mp_value); // 值
+             (*alternate.mpp_child)->mp_value); // 值
     }
 
     // 上滤然后删除
+    ASSERT(NULL == (*p_del->mpp_child)->mp_ltree);
+    ASSERT(NULL == (*p_del->mpp_child)->mp_rtree);
     upward_avltree_frame(pp_tree,
-                         p_alternate->mpp_father,
-                         *p_alternate->mpp_child, AVL_REMOVE);
-
+                         p_del->mpp_father,
+                         *p_del->mpp_child,
+                         AVL_REMOVE);
+    (*p_del->mpp_child)->mp_ftree = NULL;
+    *p_del->mpp_father = NULL;
 
 FINAL:
     return rslt;

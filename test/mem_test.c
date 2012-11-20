@@ -293,21 +293,21 @@ int main(int argc, char *argv[])
     float timeuse;
     avltree_frame_t *p_tree = NULL;
     avltree_frame_t *p_nodes = NULL;
-    /*avltree_frame_t nodes[] = {
-        {12, 0, NULL, NULL, NULL, 0},
-        {1, 0, NULL, NULL, NULL, 0},
-        {9, 0, NULL, NULL, NULL, 0},
-        {2, 0, NULL, NULL, NULL, 0},
-        {0, 0, NULL, NULL, NULL, 0},
-        {11, 0, NULL, NULL, NULL, 0},
-        {7, 0, NULL, NULL, NULL, 0},
-        {19, 0, NULL, NULL, NULL, 0},
-        {4, 0, NULL, NULL, NULL, 0},
-        {15, 0, NULL, NULL, NULL, 0},
-        {18, 0, NULL, NULL, NULL, 0},
-        {5, 0, NULL, NULL, NULL, 0},
-        {14, 0, NULL, NULL, NULL, 0},
-    };*/
+    avltree_frame_t nodes[] = {
+        {12, NULL, 0, NULL, NULL, NULL},
+        {1, NULL, 0, NULL, NULL, NULL},
+        {9, NULL, 0, NULL, NULL, NULL},
+        {2, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {11, NULL, 0, NULL, NULL, NULL},
+        {7, NULL, 0, NULL, NULL, NULL},
+        {19, NULL, 0, NULL, NULL, NULL},
+        {4, NULL, 0, NULL, NULL, NULL},
+        {15, NULL, 0, NULL, NULL, NULL},
+        {18, NULL, 0, NULL, NULL, NULL},
+        {5, NULL, 0, NULL, NULL, NULL},
+        {14, NULL, 0, NULL, NULL, NULL},
+    };
     mempool_t mempool_for_test;
 
     MEMPOOL_BUILD(&mempool_for_test);
@@ -325,12 +325,13 @@ int main(int argc, char *argv[])
 
     printf("start\n");
     gettimeofday(&tpstart, NULL);
-    for (int i = 0; i < count; ++i) {
+    /*for (int i = 0; i < count; ++i) {
         insert_avltree_frame(&p_tree, &p_nodes[i]);
-    }
-    /*for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
-        insert_avltree_frame(&p_tree, &nodes[i]);
     }*/
+    for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
+        insert_avltree_frame(&p_tree, &nodes[i]);
+    }
+    remove_avltree_frame(&p_tree, 9);
     gettimeofday(&tpend, NULL);
     printf("stop\n");
 
