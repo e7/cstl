@@ -178,36 +178,42 @@ enum {
 
 static inline
 void upward_avltree_frame(avltree_frame_t **pp_root,
-                          avltree_frame_t **pp_tree,
-                          avltree_frame_t *p_single,
+                          avltree_frame_t **pp_father,
+                          avltree_frame_t *p_child,
                           int cause)
 {
-    avltree_frame_t **pp_tree_iter = NULL;
-    avltree_frame_t *p_tree_iter = NULL;
+    avltree_frame_t **pp_fiter = NULL;
+    avltree_frame_t *p_citer = NULL;
 
-    ASSERT(NULL != pp_tree);
-    ASSERT(NULL != *pp_tree);
+    ASSERT(NULL != pp_root);
+    ASSERT(NULL != p_child);
 
     // 初始化
-    pp_tree_iter = pp_tree;
-    p_tree_iter = p_single;
+    if (NULL != pp_father) {
+        pp_fiter = pp_father;
+    } else {
+        pp_fiter = pp_root;
+    }
+    ASSERT(NULL != pp_fiter);
+    ASSERT(NULL != *pp_fiter); // 插后调，删前调
+    p_citer = p_child;
 
     // 调整
     while (TRUE) {
         // 更新平衡因子
         if (AVL_INSERT == cause) { // 插入导致调整
-            if (p_tree_iter == (*pp_tree_iter)->mp_ltree) {
-                --((*pp_tree_iter)->m_balance_factor);
-            } else if (p_tree_iter == (*pp_tree_iter)->mp_rtree) {
-                ++((*pp_tree_iter)->m_balance_factor);
+            if (p_citer == (*pp_fiter)->mp_ltree) {
+                --((*pp_fiter)->m_balance_factor);
+            } else if (p_citer == (*pp_fiter)->mp_rtree) {
+                ++((*pp_fiter)->m_balance_factor);
             } else {
-                ASSERT(p_tree_iter == (*pp_tree_iter));
+                ASSERT(p_citer == (*pp_fiter));
             }
         } else if (AVL_REMOVE == cause) { // 删除导致调整
-            if (p_tree_iter == (*pp_tree_iter)->mp_ltree) {
-                ++((*pp_tree_iter)->m_balance_factor);
-            } else if (p_tree_iter == (*pp_tree_iter)->mp_rtree) {
-                --((*pp_tree_iter)->m_balance_factor);
+            if (p_citer == (*pp_fiter)->mp_ltree) {
+                ++((*pp_fiter)->m_balance_factor);
+            } else if (p_citer == (*pp_fiter)->mp_rtree) {
+                --((*pp_fiter)->m_balance_factor);
             } else {
                 ASSERT(0);
             }
@@ -215,46 +221,46 @@ void upward_avltree_frame(avltree_frame_t **pp_root,
             ASSERT(0);
         }
 
-        if ((*pp_tree_iter)->m_balance_factor < -1) {
-            if ((*pp_tree_iter)->mp_ltree->m_balance_factor < 0) {
-                avl_r_rotate(pp_tree_iter);
-            } else if ((*pp_tree_iter)->mp_ltree->m_balance_factor > 0) {
-                avl_lr_rotate(pp_tree_iter);
+        if ((*pp_fiter)->m_balance_factor < -1) {
+            if ((*pp_fiter)->mp_ltree->m_balance_factor < 0) {
+                avl_r_rotate(pp_fiter);
+            } else if ((*pp_fiter)->mp_ltree->m_balance_factor > 0) {
+                avl_lr_rotate(pp_fiter);
             } else {
                 ASSERT(0);
             }
 
             break;
-        } else if ((*pp_tree_iter)->m_balance_factor > 1) {
-            if ((*pp_tree_iter)->mp_rtree->m_balance_factor > 0) {
-                avl_l_rotate(pp_tree_iter);
-            } else if ((*pp_tree_iter)->mp_rtree->m_balance_factor < 0) {
-                avl_rl_rotate(pp_tree_iter);
+        } else if ((*pp_fiter)->m_balance_factor > 1) {
+            if ((*pp_fiter)->mp_rtree->m_balance_factor > 0) {
+                avl_l_rotate(pp_fiter);
+            } else if ((*pp_fiter)->mp_rtree->m_balance_factor < 0) {
+                avl_rl_rotate(pp_fiter);
             } else {
                 ASSERT(0);
             }
 
             break;
-        } else if (0 == (*pp_tree_iter)->m_balance_factor) {
+        } else if (0 == (*pp_fiter)->m_balance_factor) {
             break;
         } else { // 向上移动
-            p_tree_iter = (*pp_tree_iter);
+            p_citer = (*pp_fiter);
 
-            if (NULL == (*pp_tree_iter)->mp_ftree) {
+            if (NULL == (*pp_fiter)->mp_ftree) {
                 break;
             }
-            if (NULL == (*pp_tree_iter)->mp_ftree->mp_ftree) {
-                pp_tree_iter = pp_root;
-            } else if ((*pp_tree_iter)->mp_ftree
-                           == (*pp_tree_iter)->mp_ftree->mp_ftree->mp_ltree)
+            if (NULL == (*pp_fiter)->mp_ftree->mp_ftree) {
+                pp_fiter = pp_root;
+            } else if ((*pp_fiter)->mp_ftree
+                           == (*pp_fiter)->mp_ftree->mp_ftree->mp_ltree)
             {
-                pp_tree_iter
-                    = &((*pp_tree_iter)->mp_ftree->mp_ftree->mp_ltree);
-            } else if ((*pp_tree_iter)->mp_ftree
-                           == (*pp_tree_iter)->mp_ftree->mp_ftree->mp_rtree)
+                pp_fiter
+                    = &((*pp_fiter)->mp_ftree->mp_ftree->mp_ltree);
+            } else if ((*pp_fiter)->mp_ftree
+                           == (*pp_fiter)->mp_ftree->mp_ftree->mp_rtree)
             {
-                pp_tree_iter
-                    = &((*pp_tree_iter)->mp_ftree->mp_ftree->mp_rtree);
+                pp_fiter
+                    = &((*pp_fiter)->mp_ftree->mp_ftree->mp_rtree);
             } else {
                 ASSERT(0);
             }
