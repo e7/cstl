@@ -364,9 +364,12 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
     ASSERT(NULL == (*p_del->mpp_child)->mp_ltree);
     ASSERT(NULL == (*p_del->mpp_child)->mp_rtree);
 
+    if (NULL == p_del->mpp_father) { // 该树只有一个结点
+        goto DELETE;
+    }
+
     alternate.mpp_father = p_del->mpp_father;
     alternate.mpp_child = p_del->mpp_child;
-
     while (NULL != (*alternate.mpp_father)) {
         // 调整父树平衡因子
         if (*alternate.mpp_child == (*alternate.mpp_father)->mp_ltree) {
@@ -431,8 +434,9 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
            ASSERT(0);
        }
     }
-
     ASSERT(p_static_del == *p_del->mpp_child); // 一系列调整后仍持有
+
+DELETE:
     (*p_del->mpp_child)->mp_ftree = NULL;
     *p_del->mpp_child = NULL;
 

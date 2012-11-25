@@ -293,30 +293,35 @@ int main(int argc, char *argv[])
     float timeuse;
     avltree_frame_t *p_tree = NULL;
     avltree_frame_t *p_nodes = NULL;
+    int keys[] = {
+        12, 1, 9, 2, 0, 11, 7, 19, 4, 15, 18, 5, 14,
+    };
     avltree_frame_t nodes[] = {
-        {12, NULL, 0, NULL, NULL, NULL},
-        {1, NULL, 0, NULL, NULL, NULL},
-        {9, NULL, 0, NULL, NULL, NULL},
-        {2, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
-        {11, NULL, 0, NULL, NULL, NULL},
-        {7, NULL, 0, NULL, NULL, NULL},
-        {19, NULL, 0, NULL, NULL, NULL},
-        {4, NULL, 0, NULL, NULL, NULL},
-        {15, NULL, 0, NULL, NULL, NULL},
-        {18, NULL, 0, NULL, NULL, NULL},
-        {5, NULL, 0, NULL, NULL, NULL},
-        {14, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
     };
     mempool_t mempool_for_test;
 
-    printf("%d\n", ABS(0));
     MEMPOOL_BUILD(&mempool_for_test);
     srand(time(NULL));
 
     //p_nodes = MEMPOOL_ARRAY_ALLOC(&mempool_for_test, count, sizeof(rbtree_frame_node_t));
     p_nodes = calloc(count, sizeof(avltree_frame_t));
 
+    for (int i = 0; i < ARRAY_COUNT(keys); ++i) {
+        nodes[i].m_key = keys[i];
+    }
     for (int i = 0; i < count; ++i) {
         p_nodes[i].m_key = rand() % count;
         p_nodes[i].mp_ftree = NULL;
@@ -333,7 +338,7 @@ int main(int argc, char *argv[])
         insert_avltree_frame(&p_tree, &nodes[i]);
     }
     for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
-        remove_avltree_frame(&p_tree, nodes[i].m_key);
+        remove_avltree_frame(&p_tree, keys[i]);
     }
     gettimeofday(&tpend, NULL);
     printf("stop\n");
