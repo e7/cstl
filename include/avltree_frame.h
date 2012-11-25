@@ -36,6 +36,7 @@ void avl_r_rotate(avltree_frame_t **pp_tree)
 
     ASSERT(NULL != pp_tree);
     ASSERT(NULL != (*pp_tree));
+    ASSERT(NULL != (*pp_tree)->mp_ltree);
 
     // 旋转
     do {
@@ -71,6 +72,7 @@ void avl_l_rotate(avltree_frame_t **pp_tree)
 {
     ASSERT(NULL != pp_tree);
     ASSERT(NULL != (*pp_tree));
+    ASSERT(NULL != (*pp_tree)->mp_rtree);
 
     do {
         avltree_frame_t *p_father= (*pp_tree)->mp_ftree;
@@ -215,7 +217,7 @@ int insert_avltree_frame(avltree_frame_t **pp_tree,
             break;
         }
     }
-    if (NULL != *pp_vacancy) {
+    if (NULL != *pp_vacancy) { // 已存在
         rslt = -1;
         goto FINAL;
     }
@@ -411,6 +413,8 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
                ASSERT(0);
            }
        } else if ((*alternate.mpp_father)->m_balance_factor < -1) {
+           ASSERT(NULL != (*alternate.mpp_father)->mp_ltree);
+
            if ((*alternate.mpp_father)->mp_ltree->m_balance_factor <= 0) {
                 avl_r_rotate(alternate.mpp_father);
            } else if ((*alternate.mpp_father)->mp_ltree->m_balance_factor > 0)
@@ -421,6 +425,8 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
            }
            break;
        } else if ((*alternate.mpp_father)->m_balance_factor > 1) {
+           ASSERT(NULL != (*alternate.mpp_father)->mp_rtree);
+
            if ((*alternate.mpp_father)->mp_rtree->m_balance_factor >= 0) {
                 avl_l_rotate(alternate.mpp_father);
            } else if ((*alternate.mpp_father)->mp_rtree->m_balance_factor < 0)

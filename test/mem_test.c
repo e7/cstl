@@ -288,15 +288,26 @@ typedef int key_t;
 
 int main(int argc, char *argv[])
 {
-    int count = 10000000;
+    //int count = 10000000;
+    int count = 10000;
     struct timeval tpstart, tpend;
     float timeuse;
     avltree_frame_t *p_tree = NULL;
     avltree_frame_t *p_nodes = NULL;
     int keys[] = {
-        12, 1, 9, 2, 0, 11, 7, 19, 4, 15, 18, 5, 14,
+        12, 1, 9, 2, 0,
+        11, 7, 19, 4, 15,
+        18, 5, 14, 13, 10,
+        16, 6, 3, 8, 17,
     };
     avltree_frame_t nodes[] = {
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
@@ -331,15 +342,18 @@ int main(int argc, char *argv[])
 
     printf("start\n");
     gettimeofday(&tpstart, NULL);
-    /*for (int i = 0; i < count; ++i) {
+    for (int i = 0; i < count; ++i) {
         insert_avltree_frame(&p_tree, &p_nodes[i]);
-    }*/
-    for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
+    }
+    for (int i = 0; i < count; ++i) {
+        remove_avltree_frame(&p_tree, p_nodes[i].m_key);
+    }
+    /*for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
         insert_avltree_frame(&p_tree, &nodes[i]);
     }
     for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
         remove_avltree_frame(&p_tree, keys[i]);
-    }
+    }*/
     gettimeofday(&tpend, NULL);
     printf("stop\n");
 
