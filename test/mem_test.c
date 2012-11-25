@@ -310,6 +310,7 @@ int main(int argc, char *argv[])
     };
     mempool_t mempool_for_test;
 
+    printf("%d\n", ABS(0));
     MEMPOOL_BUILD(&mempool_for_test);
     srand(time(NULL));
 
@@ -331,7 +332,9 @@ int main(int argc, char *argv[])
     for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
         insert_avltree_frame(&p_tree, &nodes[i]);
     }
-    remove_avltree_frame(&p_tree, 9);
+    for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
+        remove_avltree_frame(&p_tree, nodes[i].m_key);
+    }
     gettimeofday(&tpend, NULL);
     printf("stop\n");
 

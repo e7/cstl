@@ -87,6 +87,11 @@ typedef int_t bool;
 #define ARRAY_COUNT(a)          (sizeof(a) / sizeof((a)[0]))
 
 #define HOWMANY(x, y)           (((x) + ((y) - 1)) / (y))
+#define ABS(x)                  \
+            (\
+                ((x) ^ ((x) >> (sizeof(x) * 8 - 1))) \
+                    - ((x) >> (sizeof(x) * 8 - 1))\
+            )
 
 #define SWAP(a, b)              \
             do {\

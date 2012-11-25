@@ -172,107 +172,6 @@ avl_iter_t *find_rmin_avltree_frame(avltree_frame_t **pp_tree,
     return p_iter;
 }
 
-// 上虑调整
-enum {
-    AVL_INSERT = 0x00001001,
-    AVL_REMOVE = 0x00001002,
-};
-
-static inline
-void upward_avltree_frame(avltree_frame_t **pp_root,
-                          avltree_frame_t **pp_father,
-                          avltree_frame_t *p_child,
-                          int cause)
-{
-    avltree_frame_t **pp_fiter = NULL;
-    avltree_frame_t *p_citer = NULL;
-
-    ASSERT(NULL != pp_root);
-    ASSERT(NULL != p_child);
-
-    // 初始化
-    if (NULL != pp_father) {
-        pp_fiter = pp_father;
-    } else {
-        pp_fiter = pp_root;
-    }
-    ASSERT(NULL != pp_fiter);
-    ASSERT(NULL != *pp_fiter); // 插后调，删前调
-    p_citer = p_child;
-
-    // 调整
-    while (TRUE) {
-        // 更新平衡因子
-        if (AVL_INSERT == cause) { // 插入导致调整
-            if (p_citer == (*pp_fiter)->mp_ltree) {
-                --((*pp_fiter)->m_balance_factor);
-            } else if (p_citer == (*pp_fiter)->mp_rtree) {
-                ++((*pp_fiter)->m_balance_factor);
-            } else {
-                ASSERT(p_citer == (*pp_fiter));
-            }
-        } else if (AVL_REMOVE == cause) { // 删除导致调整
-            if (p_citer == (*pp_fiter)->mp_ltree) {
-                ++((*pp_fiter)->m_balance_factor);
-            } else if (p_citer == (*pp_fiter)->mp_rtree) {
-                --((*pp_fiter)->m_balance_factor);
-            } else {
-                ASSERT(p_citer == (*pp_fiter));
-            }
-        } else {
-            ASSERT(0);
-        }
-
-        if ((*pp_fiter)->m_balance_factor < -1) {
-            if ((*pp_fiter)->mp_ltree->m_balance_factor < 0) {
-                avl_r_rotate(pp_fiter);
-            } else if ((*pp_fiter)->mp_ltree->m_balance_factor > 0) {
-                avl_lr_rotate(pp_fiter);
-            } else {
-                ASSERT(0);
-            }
-
-            break;
-        } else if ((*pp_fiter)->m_balance_factor > 1) {
-            if ((*pp_fiter)->mp_rtree->m_balance_factor > 0) {
-                avl_l_rotate(pp_fiter);
-            } else if ((*pp_fiter)->mp_rtree->m_balance_factor < 0) {
-                avl_rl_rotate(pp_fiter);
-            } else {
-                ASSERT(0);
-            }
-
-            break;
-        } else if (0 == (*pp_fiter)->m_balance_factor) {
-            break;
-        } else { // 向上移动
-            p_citer = (*pp_fiter);
-
-            if (NULL == (*pp_fiter)->mp_ftree) {
-                break;
-            }
-            if (NULL == (*pp_fiter)->mp_ftree->mp_ftree) {
-                pp_fiter = pp_root;
-            } else if ((*pp_fiter)->mp_ftree
-                           == (*pp_fiter)->mp_ftree->mp_ftree->mp_ltree)
-            {
-                pp_fiter
-                    = &((*pp_fiter)->mp_ftree->mp_ftree->mp_ltree);
-            } else if ((*pp_fiter)->mp_ftree
-                           == (*pp_fiter)->mp_ftree->mp_ftree->mp_rtree)
-            {
-                pp_fiter
-                    = &((*pp_fiter)->mp_ftree->mp_ftree->mp_rtree);
-            } else {
-                ASSERT(0);
-            }
-        }
-    }
-
-    return;
-}
-
-
 // ********** avl树接口 **********
 static inline
 void init_avltree_frame(avltree_frame_t *p_tree, int key)
@@ -327,9 +226,6 @@ int insert_avltree_frame(avltree_frame_t **pp_tree,
 
     // 调整
     p_child_tree = p_subtree;
-#if 1
-    upward_avltree_frame(pp_tree, pp_orig, p_child_tree, AVL_INSERT);
-#else // same functional with upward_avltree_frame
     while(NULL != (*pp_orig)) {
         if (p_child_tree == (*pp_orig)->mp_ltree) {
             --((*pp_orig)->m_balance_factor);
@@ -383,7 +279,6 @@ int insert_avltree_frame(avltree_frame_t **pp_tree,
             }
         }
     }
-#endif
 
 FINAL:
     return rslt;
@@ -404,10 +299,10 @@ avl_iter_t *find_avltree_frame(avltree_frame_t **pp_tree,
     while (key != (*p_iter->mpp_child)->m_key) {
         if ((*p_iter->mpp_child)->m_key < key) {
             p_iter->mpp_father = p_iter->mpp_child;
-            p_iter->mpp_child = &(*p_iter->mpp_child)->mp_ltree;
+            p_iter->mpp_child = &(*p_iter->mpp_child)->mp_rtree;
         } else if ((*p_iter->mpp_child)->m_key > key) {
             p_iter->mpp_father = p_iter->mpp_child;
-            p_iter->mpp_child = &(*p_iter->mpp_child)->mp_rtree;
+            p_iter->mpp_child = &(*p_iter->mpp_child)->mp_ltree;
         } else {
             ASSERT(0);
         }
@@ -432,6 +327,7 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
         NULL, NULL,
     };
     avl_iter_t *p_del = NULL;
+    avltree_frame_t *p_static_del = NULL;
 
     ASSERT(NULL != pp_tree);
     ASSERT(NULL != *pp_tree);
@@ -464,12 +360,79 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
     }
 
     // 上滤然后删除
+    p_static_del = *p_del->mpp_child;
     ASSERT(NULL == (*p_del->mpp_child)->mp_ltree);
     ASSERT(NULL == (*p_del->mpp_child)->mp_rtree);
-    upward_avltree_frame(pp_tree,
-                         p_del->mpp_father,
-                         *p_del->mpp_child,
-                         AVL_REMOVE);
+
+    alternate.mpp_father = p_del->mpp_father;
+    alternate.mpp_child = p_del->mpp_child;
+
+    while (NULL != (*alternate.mpp_father)) {
+        // 调整父树平衡因子
+        if (*alternate.mpp_child == (*alternate.mpp_father)->mp_ltree) {
+            ++(*alternate.mpp_father)->m_balance_factor;
+        } else if (*alternate.mpp_child == (*alternate.mpp_father)->mp_rtree) {
+            --(*alternate.mpp_father)->m_balance_factor;
+        } else {
+            ASSERT(0);
+        }
+
+        // 根据平衡因子执行旋转
+       if (1 == ABS((*alternate.mpp_father)->m_balance_factor)) {
+            // 说明原来的平衡因子是0，平衡因子为0的结点容错性更强，
+            // 不必再上滤
+            break;
+       } else if (0 == (*alternate.mpp_father)->m_balance_factor) {
+           alternate.mpp_child = alternate.mpp_father;
+
+           if (NULL == (*alternate.mpp_father)->mp_ftree) {
+               break;
+           }
+
+           if (NULL == (*alternate.mpp_father)->mp_ftree->mp_ftree) {
+               alternate.mpp_father = pp_tree;
+           } else if (
+               (*alternate.mpp_father)->mp_ftree
+                   == (*alternate.mpp_father)->mp_ftree->mp_ftree->mp_ltree)
+           {
+               alternate.mpp_father
+                   = &((*alternate.mpp_father)->mp_ftree->mp_ftree->mp_ltree);
+           }
+           else if (
+               (*alternate.mpp_father)->mp_ftree
+                   == (*alternate.mpp_father)->mp_ftree->mp_ftree->mp_rtree)
+           {
+               alternate.mpp_father
+                   = &((*alternate.mpp_father)->mp_ftree->mp_ftree->mp_rtree);
+           } else {
+               ASSERT(0);
+           }
+       } else if ((*alternate.mpp_father)->m_balance_factor < -1) {
+           if ((*alternate.mpp_father)->mp_ltree->m_balance_factor <= 0) {
+                avl_r_rotate(alternate.mpp_father);
+           } else if ((*alternate.mpp_father)->mp_ltree->m_balance_factor > 0)
+           {
+                avl_lr_rotate(alternate.mpp_father);
+           } else {
+               ASSERT(0);
+           }
+           break;
+       } else if ((*alternate.mpp_father)->m_balance_factor > 1) {
+           if ((*alternate.mpp_father)->mp_rtree->m_balance_factor >= 0) {
+                avl_l_rotate(alternate.mpp_father);
+           } else if ((*alternate.mpp_father)->mp_rtree->m_balance_factor < 0)
+           {
+                avl_rl_rotate(alternate.mpp_father);
+           } else {
+               ASSERT(0);
+           }
+           break;
+       } else {
+           ASSERT(0);
+       }
+    }
+
+    ASSERT(p_static_del == *p_del->mpp_child); // 一系列调整后仍持有
     (*p_del->mpp_child)->mp_ftree = NULL;
     *p_del->mpp_child = NULL;
 
