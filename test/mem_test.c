@@ -289,7 +289,7 @@ typedef int key_t;
 int main(int argc, char *argv[])
 {
     //int count = 10000000;
-    int count = 50;
+    int count = 15;
     struct timeval tpstart, tpend;
     float timeuse;
     avltree_frame_t *p_tree = NULL;
@@ -301,7 +301,8 @@ int main(int argc, char *argv[])
         16, 6, 3, 8, 17,
     };*/
     int keys[] = {
-        20, 37, 13, 32, 9, 28, 47, 46, 2, 42, 8, 35, 30, 8, 13,
+        2, 10, 13,  8, 1, 7, 17, 8, 0, 11,
+        9, 17,  0, 16, 4, 5,  2, 7, 6,  8,
     };
     int *p_keys = (int *)calloc(count, sizeof(int));
     avltree_frame_t nodes[] = {
@@ -320,11 +321,11 @@ int main(int argc, char *argv[])
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL}, // 15
-        /*{0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
-        {0, NULL, 0, NULL, NULL, NULL},*/
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL}, // 20
     };
     mempool_t mempool_for_test;
 
@@ -349,8 +350,8 @@ int main(int argc, char *argv[])
     /*fprintf(stderr, "keys: ");
     for (int i = 0; i < count; ++i) {
         fprintf(stderr, "%d, ", p_keys[i]);
-    }
-    fprintf(stderr, "\b\n");*/
+    }*/
+    fprintf(stderr, "\b\n");
 
     printf("start\n");
     gettimeofday(&tpstart, NULL);

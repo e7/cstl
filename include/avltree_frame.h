@@ -62,9 +62,6 @@ void avl_r_rotate(avltree_frame_t **pp_tree)
             += MAX(0 - p_new_root->m_balance_factor, 0) + 1;
         p_new_root->m_balance_factor
             += MAX(0, p_old_root->m_balance_factor) + 1;
-
-        ASSERT(ABS(p_old_root->m_balance_factor) <= 1);
-        ASSERT(ABS(p_new_root->m_balance_factor) <= 1);
     } while (0);
 
     return;
@@ -101,8 +98,6 @@ void avl_l_rotate(avltree_frame_t **pp_tree)
         p_new_root->m_balance_factor
             += MIN(p_old_root->m_balance_factor, 0) - 1;
 
-        ASSERT(ABS(p_old_root->m_balance_factor) <= 1);
-        ASSERT(ABS(p_new_root->m_balance_factor) <= 1);
     } while (0);
 
     return;
@@ -248,8 +243,17 @@ int insert_avltree_frame(avltree_frame_t **pp_tree,
         if ((*pp_orig)->m_balance_factor < -1) {
             if ((*pp_orig)->mp_ltree->m_balance_factor < 0) {
                 avl_r_rotate(pp_orig);
+
+                // 断言平衡因子
+                ASSERT(ABS((*pp_orig)->m_balance_factor) <= 1);
+                ASSERT(ABS((*pp_orig)->mp_rtree->m_balance_factor) <= 1);
             } else if ((*pp_orig)->mp_ltree->m_balance_factor > 0) {
                 avl_lr_rotate(pp_orig);
+
+                // 断言平衡因子
+                ASSERT(ABS((*pp_orig)->m_balance_factor) <= 1);
+                ASSERT(ABS((*pp_orig)->mp_ltree->m_balance_factor) <= 1);
+                ASSERT(ABS((*pp_orig)->mp_rtree->m_balance_factor) <= 1);
             } else {
                 ASSERT(0);
             }
@@ -258,8 +262,17 @@ int insert_avltree_frame(avltree_frame_t **pp_tree,
         } else if ((*pp_orig)->m_balance_factor > 1) {
             if ((*pp_orig)->mp_rtree->m_balance_factor > 0) {
                 avl_l_rotate(pp_orig);
+
+                // 断言平衡因子
+                ASSERT(ABS((*pp_orig)->m_balance_factor) <= 1);
+                ASSERT(ABS((*pp_orig)->mp_ltree->m_balance_factor) <= 1);
             } else if ((*pp_orig)->mp_rtree->m_balance_factor < 0) {
                 avl_rl_rotate(pp_orig);
+
+                // 断言平衡因子
+                ASSERT(ABS((*pp_orig)->m_balance_factor) <= 1);
+                ASSERT(ABS((*pp_orig)->mp_ltree->m_balance_factor) <= 1);
+                ASSERT(ABS((*pp_orig)->mp_rtree->m_balance_factor) <= 1);
             } else {
                 ASSERT(0);
             }
@@ -422,9 +435,21 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
 
            if ((*alternate.mpp_father)->mp_ltree->m_balance_factor <= 0) {
                 avl_r_rotate(alternate.mpp_father);
+
+                // 断言平衡因子
+                ASSERT(ABS((*alternate.mpp_father)->m_balance_factor) <= 1);
+                ASSERT(ABS((*alternate.mpp_father)->mp_rtree->m_balance_factor)
+                           <= 1);
            } else if ((*alternate.mpp_father)->mp_ltree->m_balance_factor > 0)
            {
                 avl_lr_rotate(alternate.mpp_father);
+
+                // 断言平衡因子
+                ASSERT(ABS((*alternate.mpp_father)->m_balance_factor) <= 1);
+                ASSERT(ABS((*alternate.mpp_father)->mp_ltree->m_balance_factor)
+                           <= 1);
+                ASSERT(ABS((*alternate.mpp_father)->mp_rtree->m_balance_factor)
+                           <= 1);
            } else {
                ASSERT(0);
            }
@@ -434,9 +459,21 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
 
            if ((*alternate.mpp_father)->mp_rtree->m_balance_factor >= 0) {
                 avl_l_rotate(alternate.mpp_father);
+
+                // 断言平衡因子
+                ASSERT(ABS((*alternate.mpp_father)->m_balance_factor) <= 1);
+                ASSERT(ABS((*alternate.mpp_father)->mp_ltree->m_balance_factor)
+                           <= 1);
            } else if ((*alternate.mpp_father)->mp_rtree->m_balance_factor < 0)
            {
                 avl_rl_rotate(alternate.mpp_father);
+
+                // 断言平衡因子
+                ASSERT(ABS((*alternate.mpp_father)->m_balance_factor) <= 1);
+                ASSERT(ABS((*alternate.mpp_father)->mp_ltree->m_balance_factor)
+                           <= 1);
+                ASSERT(ABS((*alternate.mpp_father)->mp_rtree->m_balance_factor)
+                           <= 1);
            } else {
                ASSERT(0);
            }
