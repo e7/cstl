@@ -62,6 +62,9 @@ void avl_r_rotate(avltree_frame_t **pp_tree)
             += MAX(0 - p_new_root->m_balance_factor, 0) + 1;
         p_new_root->m_balance_factor
             += MAX(0, p_old_root->m_balance_factor) + 1;
+
+        ASSERT(ABS(p_old_root->m_balance_factor) <= 1);
+        ASSERT(ABS(p_new_root->m_balance_factor) <= 1);
     } while (0);
 
     return;
@@ -97,6 +100,9 @@ void avl_l_rotate(avltree_frame_t **pp_tree)
             -= MAX(0, p_new_root->m_balance_factor) + 1;
         p_new_root->m_balance_factor
             += MIN(p_old_root->m_balance_factor, 0) - 1;
+
+        ASSERT(ABS(p_old_root->m_balance_factor) <= 1);
+        ASSERT(ABS(p_new_root->m_balance_factor) <= 1);
     } while (0);
 
     return;

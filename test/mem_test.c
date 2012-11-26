@@ -289,16 +289,19 @@ typedef int key_t;
 int main(int argc, char *argv[])
 {
     //int count = 10000000;
-    int count = 100000;
+    int count = 50;
     struct timeval tpstart, tpend;
     float timeuse;
     avltree_frame_t *p_tree = NULL;
     avltree_frame_t *p_nodes = NULL;
-    int keys[] = {
+    /*int keys[] = {
         12, 1, 9, 2, 0,
         11, 7, 19, 4, 15,
         18, 5, 14, 13, 10,
         16, 6, 3, 8, 17,
+    };*/
+    int keys[] = {
+        20, 37, 13, 32, 9, 28, 47, 46, 2, 42, 8, 35, 30, 8, 13,
     };
     int *p_keys = (int *)calloc(count, sizeof(int));
     avltree_frame_t nodes[] = {
@@ -311,17 +314,17 @@ int main(int argc, char *argv[])
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL}, // 10
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL}, // 15
+        /*{0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
-        {0, NULL, 0, NULL, NULL, NULL},
-        {0, NULL, 0, NULL, NULL, NULL},
-        {0, NULL, 0, NULL, NULL, NULL},
-        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},*/
     };
     mempool_t mempool_for_test;
 
@@ -336,35 +339,52 @@ int main(int argc, char *argv[])
     }
     for (int i = 0; i < count; ++i) {
         p_keys[i] =  rand() % count;
+
         p_nodes[i].m_key = p_keys[i];
         p_nodes[i].mp_ftree = NULL;
         p_nodes[i].mp_ltree = NULL;
         p_nodes[i].mp_rtree = NULL;
     }
 
+    /*fprintf(stderr, "keys: ");
+    for (int i = 0; i < count; ++i) {
+        fprintf(stderr, "%d, ", p_keys[i]);
+    }
+    fprintf(stderr, "\b\n");*/
+
     printf("start\n");
     gettimeofday(&tpstart, NULL);
-    for (int i = 0; i < count; ++i) {
+    /*for (int i = 0; i < count; ++i) {
+        fprintf(stderr, "insert[%d]: %d\n", i, p_nodes[i].m_key);
         insert_avltree_frame(&p_tree, &p_nodes[i]);
     }
     for (int i = 0; i < count; ++i) {
         avl_iter_t iter = {NULL, NULL};
 
+        fprintf(stderr, "%d: %d", i, p_keys[i]);
         find_avltree_frame(&p_tree, p_keys[i], &iter);
-        if (ABS((*iter.mpp_child)->m_balance_factor) > 1) {
-            ASSERT(0);
+        if (NULL != (*iter.mpp_child)) {
+            fprintf(stderr, " [YES]\n");
+            if (ABS((*iter.mpp_child)->m_balance_factor) > 1) {
+                ASSERT(0);
+            }
+            remove_avltree_frame(&p_tree, p_keys[i]);
+            if (NULL == p_tree) {
+                break;
+            }
+        } else {
+            fprintf(stderr, " [NO]\n");
         }
-    }
-    for (int i = 0; i < count; ++i) {
-        printf("%d: %d\n", i, p_nodes[i].m_key);
-        remove_avltree_frame(&p_tree, p_keys[i]);
-    }
-    /*for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
+    }*/
+    for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
         insert_avltree_frame(&p_tree, &nodes[i]);
     }
     for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
         remove_avltree_frame(&p_tree, keys[i]);
-    }*/
+        if (NULL == p_tree) {
+            break;
+        }
+    }
     gettimeofday(&tpend, NULL);
     printf("stop\n");
 
