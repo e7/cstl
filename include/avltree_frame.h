@@ -341,7 +341,7 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
         goto FINAL;
     }
 
-    // 迭代寻找候补结点
+    // 迭代替换候补结点
     while (TRUE) {
         if (NULL != (*p_del->mpp_child)->mp_ltree) {
             alternate.mpp_father = p_del->mpp_father;
@@ -384,8 +384,7 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
 
         // 根据平衡因子执行旋转
        if (1 == ABS((*alternate.mpp_father)->m_balance_factor)) {
-            // 说明原来的平衡因子是0，平衡因子为0的结点容错性更强，
-            // 不必再上滤
+            // 说明原来的平衡因子是0，增删结点不影响高度，不必上滤
             break;
        } else if (0 == (*alternate.mpp_father)->m_balance_factor) {
            alternate.mpp_child = alternate.mpp_father;

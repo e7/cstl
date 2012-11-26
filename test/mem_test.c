@@ -289,7 +289,7 @@ typedef int key_t;
 int main(int argc, char *argv[])
 {
     //int count = 10000000;
-    int count = 10000;
+    int count = 100000;
     struct timeval tpstart, tpend;
     float timeuse;
     avltree_frame_t *p_tree = NULL;
@@ -300,6 +300,7 @@ int main(int argc, char *argv[])
         18, 5, 14, 13, 10,
         16, 6, 3, 8, 17,
     };
+    int *p_keys = (int *)calloc(count, sizeof(int));
     avltree_frame_t nodes[] = {
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
@@ -334,7 +335,8 @@ int main(int argc, char *argv[])
         nodes[i].m_key = keys[i];
     }
     for (int i = 0; i < count; ++i) {
-        p_nodes[i].m_key = rand() % count;
+        p_keys[i] =  rand() % count;
+        p_nodes[i].m_key = p_keys[i];
         p_nodes[i].mp_ftree = NULL;
         p_nodes[i].mp_ltree = NULL;
         p_nodes[i].mp_rtree = NULL;
@@ -346,7 +348,16 @@ int main(int argc, char *argv[])
         insert_avltree_frame(&p_tree, &p_nodes[i]);
     }
     for (int i = 0; i < count; ++i) {
-        remove_avltree_frame(&p_tree, p_nodes[i].m_key);
+        avl_iter_t iter = {NULL, NULL};
+
+        find_avltree_frame(&p_tree, p_keys[i], &iter);
+        if (ABS((*iter.mpp_child)->m_balance_factor) > 1) {
+            ASSERT(0);
+        }
+    }
+    for (int i = 0; i < count; ++i) {
+        printf("%d: %d\n", i, p_nodes[i].m_key);
+        remove_avltree_frame(&p_tree, p_keys[i]);
     }
     /*for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
         insert_avltree_frame(&p_tree, &nodes[i]);
