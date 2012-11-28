@@ -348,7 +348,6 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
         NULL, NULL,
     };
     avl_iter_t *p_del = NULL;
-    avltree_frame_t *p_static_del = NULL;
 
     ASSERT(NULL != pp_tree);
     ASSERT(NULL != *pp_tree);
@@ -380,15 +379,67 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
              (*alternate.mpp_child)->mp_value); // 值
     }
 
-    // 上滤然后删除
-    p_static_del = *p_del->mpp_child;
+    // ***** 删除然后上滤 *****
     ASSERT(NULL == (*p_del->mpp_child)->mp_ltree);
     ASSERT(NULL == (*p_del->mpp_child)->mp_rtree);
 
     if (NULL == p_del->mpp_father) { // 该树只有一个结点
-        goto DELETE;
+        goto FINAL;
     }
 
+    // 调整父树平衡因子
+    if (*p_del->mpp_child == (*p_del->mpp_father)->mp_ltree) {
+        ++(*p_del->mpp_father)->m_balance_factor;
+    } else if (*p_del->mpp_child == (*p_del->mpp_father)->mp_rtree) {
+        --(*p_del->mpp_father)->m_balance_factor;
+    } else {
+        ASSERT(0);
+    }
+
+    // 执行删除
+    (*p_del->mpp_child)->mp_ftree = NULL;
+    *p_del->mpp_child = NULL;
+
+    // 执行上滤
+    if (1 == ABS((*p_del->mpp_father)->m_balance_factor)) {
+        // 可读性冗余分支，说明删除之前平衡因子是0
+    } else {
+        if ((*p_del->mpp_father)->m_balance_factor > 1) {
+            if ((*p_del->mpp_father)->mp_rtree->m_balance_factor < 0) {
+                avl_rl_rotate(p_del->mpp_father);
+            } else if ((*p_del->mpp_father)->mp_rtree->m_balance_factor >= 0) {
+                avl_l_rotate(p_del->mpp_father);
+            } else {
+                ASSERT(0);
+            }
+        } else if ((*p_del->mpp_father)->m_balance_factor < -1) {
+            if ((*p_del->mpp_father)->mp_ltree->m_balance_factor > 0) {
+                avl_lr_rotate(p_del->mpp_father);
+            } else if ((*p_del->mpp_father)->mp_ltree->m_balance_factor <= 0) {
+                avl_r_rotate(p_del->mpp_father);
+            } else {
+                ASSERT(0);
+            }
+        } else {
+            assert(0 == ABS((*p_del->mpp_father)->m_balance_factor));
+        }
+
+        if (NULL != (*p_del->mpp_father)->mp_ftree) {
+            if ((*p_del->mpp_father)
+                    == (*p_del->mpp_father)->mp_ftree->mp_ltree)
+            {
+                ++(*p_del->mpp_father)->m_balance_factor;
+            } else if ((*p_del->mpp_father)
+                           == (*p_del->mpp_father)->mp_ftree->mp_rtree)
+            {
+                --(*p_del->mpp_father)->m_balance_factor;
+            } else {
+                ASSERT(0);
+            }
+        }
+    }
+
+/*
     alternate.mpp_father = p_del->mpp_father;
     alternate.mpp_child = p_del->mpp_child;
     while (NULL != (*alternate.mpp_father)) {
@@ -482,11 +533,10 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
            ASSERT(0);
        }
     }
-    ASSERT(p_static_del == *p_del->mpp_child); // 一系列调整后仍持有
 
 DELETE:
     (*p_del->mpp_child)->mp_ftree = NULL;
-    *p_del->mpp_child = NULL;
+    *p_del->mpp_child = NULL;*/
 
 FINAL:
     return rslt;
