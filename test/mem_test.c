@@ -289,7 +289,7 @@ typedef int key_t;
 int main(int argc, char *argv[])
 {
     //int count = 10000000;
-    int count = 15;
+    int count = 20;
     struct timeval tpstart, tpend;
     float timeuse;
     avltree_frame_t *p_tree = NULL;
@@ -300,12 +300,12 @@ int main(int argc, char *argv[])
         18, 5, 14, 13, 10,
         16, 6, 3, 8, 17,
     };*/
-    int keys[] = {
+    /*int keys[] = {
         2, 10, 13,  8, 1, 7, 17, 8, 0, 11,
         9, 17,  0, 16, 4, 5,  2, 7, 6,  8,
-    };
+    };*/
     int *p_keys = (int *)calloc(count, sizeof(int));
-    avltree_frame_t nodes[] = {
+    /*avltree_frame_t nodes[] = {
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
@@ -326,7 +326,7 @@ int main(int argc, char *argv[])
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL}, // 20
-    };
+    };*/
     mempool_t mempool_for_test;
 
     MEMPOOL_BUILD(&mempool_for_test);
@@ -335,9 +335,9 @@ int main(int argc, char *argv[])
     //p_nodes = MEMPOOL_ARRAY_ALLOC(&mempool_for_test, count, sizeof(rbtree_frame_node_t));
     p_nodes = calloc(count, sizeof(avltree_frame_t));
 
-    for (int i = 0; i < ARRAY_COUNT(keys); ++i) {
+    /*for (int i = 0; i < ARRAY_COUNT(keys); ++i) {
         nodes[i].m_key = keys[i];
-    }
+    }*/
     for (int i = 0; i < count; ++i) {
         p_keys[i] =  rand() % count;
 
@@ -355,10 +355,22 @@ int main(int argc, char *argv[])
 
     printf("start\n");
     gettimeofday(&tpstart, NULL);
-    /*for (int i = 0; i < count; ++i) {
+    for (int i = 0; i < count; ++i) {
         fprintf(stderr, "insert[%d]: %d\n", i, p_nodes[i].m_key);
         insert_avltree_frame(&p_tree, &p_nodes[i]);
     }
+
+    for (int i = 0; i < count; ++i) {
+        avl_iter_t iter = {NULL, NULL};
+        fprintf(stderr, "find[%d]: %d\n", i, p_nodes[i].m_key);
+        find_avltree_frame(&p_tree, p_keys[i], &iter);
+        if (NULL != (*iter.mpp_child)) {
+            if (ABS((*iter.mpp_child)->m_balance_factor) > 1) {
+                ASSERT(0);
+            }
+        }
+    }
+
     for (int i = 0; i < count; ++i) {
         avl_iter_t iter = {NULL, NULL};
 
@@ -376,8 +388,8 @@ int main(int argc, char *argv[])
         } else {
             fprintf(stderr, " [NO]\n");
         }
-    }*/
-    for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
+    }
+    /*for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
         insert_avltree_frame(&p_tree, &nodes[i]);
     }
     for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
@@ -385,7 +397,7 @@ int main(int argc, char *argv[])
         if (NULL == p_tree) {
             break;
         }
-    }
+    }*/
     gettimeofday(&tpend, NULL);
     printf("stop\n");
 

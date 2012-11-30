@@ -348,6 +348,7 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
         NULL, NULL,
     };
     avl_iter_t *p_del = NULL;
+    avltree_frame_t *p_assert = NULL;
 
     ASSERT(NULL != pp_tree);
     ASSERT(NULL != *pp_tree);
@@ -378,8 +379,9 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
         SWAP((*del.mpp_child)->mp_value,
              (*alternate.mpp_child)->mp_value); // 值
     }
+    p_assert = *p_del->mpp_child;
 
-    // ***** 删除然后上滤 *****
+    // ***** 上滤然后删除 *****
     ASSERT(NULL == (*p_del->mpp_child)->mp_ltree);
     ASSERT(NULL == (*p_del->mpp_child)->mp_rtree);
 
@@ -387,156 +389,86 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
         goto FINAL;
     }
 
-    // 调整父树平衡因子
-    if (*p_del->mpp_child == (*p_del->mpp_father)->mp_ltree) {
-        ++(*p_del->mpp_father)->m_balance_factor;
-    } else if (*p_del->mpp_child == (*p_del->mpp_father)->mp_rtree) {
-        --(*p_del->mpp_father)->m_balance_factor;
-    } else {
-        ASSERT(0);
-    }
-
-    // 执行删除
-    (*p_del->mpp_child)->mp_ftree = NULL;
-    *p_del->mpp_child = NULL;
-
     // 执行上滤
-    if (1 == ABS((*p_del->mpp_father)->m_balance_factor)) {
-        // 可读性冗余分支，说明删除之前平衡因子是0
-    } else {
-        if ((*p_del->mpp_father)->m_balance_factor > 1) {
-            if ((*p_del->mpp_father)->mp_rtree->m_balance_factor < 0) {
-                avl_rl_rotate(p_del->mpp_father);
-            } else if ((*p_del->mpp_father)->mp_rtree->m_balance_factor >= 0) {
-                avl_l_rotate(p_del->mpp_father);
-            } else {
-                ASSERT(0);
-            }
-        } else if ((*p_del->mpp_father)->m_balance_factor < -1) {
-            if ((*p_del->mpp_father)->mp_ltree->m_balance_factor > 0) {
-                avl_lr_rotate(p_del->mpp_father);
-            } else if ((*p_del->mpp_father)->mp_ltree->m_balance_factor <= 0) {
-                avl_r_rotate(p_del->mpp_father);
-            } else {
-                ASSERT(0);
-            }
-        } else {
-            assert(0 == ABS((*p_del->mpp_father)->m_balance_factor));
-        }
-
-        if (NULL != (*p_del->mpp_father)->mp_ftree) {
-            if ((*p_del->mpp_father)
-                    == (*p_del->mpp_father)->mp_ftree->mp_ltree)
-            {
-                ++(*p_del->mpp_father)->m_balance_factor;
-            } else if ((*p_del->mpp_father)
-                           == (*p_del->mpp_father)->mp_ftree->mp_rtree)
-            {
-                --(*p_del->mpp_father)->m_balance_factor;
-            } else {
-                ASSERT(0);
-            }
-        }
-    }
-
-/*
-    alternate.mpp_father = p_del->mpp_father;
+    alternate.mpp_father = p_del->mpp_child;
     alternate.mpp_child = p_del->mpp_child;
-    while (NULL != (*alternate.mpp_father)) {
-        // 调整父树平衡因子
-        if (*alternate.mpp_child == (*alternate.mpp_father)->mp_ltree) {
-            ++(*alternate.mpp_father)->m_balance_factor;
-        } else if (*alternate.mpp_child == (*alternate.mpp_father)->mp_rtree) {
-            --(*alternate.mpp_father)->m_balance_factor;
+    while (TRUE) {
+        if (0 == (*alternate.mpp_father)->m_balance_factor) {
+            if ((*alternate.mpp_child) == (*alternate.mpp_father)->mp_ltree) {
+                ++(*alternate.mpp_father)->m_balance_factor;
+            } else if ((*alternate.mpp_child)
+                           == (*alternate.mpp_father)->mp_rtree)
+            {
+                --(*alternate.mpp_father)->m_balance_factor;
+            } else {
+                ASSERT(1);
+            }
+
+            break;
+        } else if (1 == (*alternate.mpp_father)->m_balance_factor) {
+            if ((*alternate.mpp_child) == (*alternate.mpp_father)->mp_ltree) {
+                ++(*alternate.mpp_father)->m_balance_factor;
+                if ((*alternate.mpp_father)->mp_rtree->m_balance_factor < 0) {
+                    avl_rl_rotate(alternate.mpp_father);
+                } else if ((*alternate.mpp_father)->mp_rtree->m_balance_factor
+                               >= 0)
+                {
+                    avl_l_rotate(alternate.mpp_father);
+                } else {
+                    ASSERT(0);
+                }
+            } else {
+                --(*alternate.mpp_father)->m_balance_factor;
+            }
+
+            ASSERT(2 > ABS((*alternate.mpp_father)->m_balance_factor));
+        } else if (-1 == (*alternate.mpp_father)->m_balance_factor) {
+            if ((*alternate.mpp_child) == (*alternate.mpp_father)->mp_rtree) {
+                --(*alternate.mpp_father)->m_balance_factor;
+                if ((*alternate.mpp_father)->mp_ltree->m_balance_factor > 0) {
+                    avl_lr_rotate(alternate.mpp_father);
+                } else if ((*alternate.mpp_father)->mp_ltree->m_balance_factor
+                               <= 0)
+                {
+                    avl_r_rotate(p_del->mpp_father);
+                } else {
+                    ASSERT(0);
+                }
+            } else {
+                ++(*alternate.mpp_father)->m_balance_factor;
+            }
+
+            ASSERT(2 > ABS((*alternate.mpp_father)->m_balance_factor));
+        } else {
+            assert(0);
+        }
+
+        alternate.mpp_child = alternate.mpp_father;
+        if (NULL == (*alternate.mpp_father)->mp_ftree) {
+            break;
+        }
+        if (NULL == (*alternate.mpp_father)->mp_ftree->mp_ftree) {
+            alternate.mpp_father = pp_tree;
+        } else if (
+            (*alternate.mpp_father)->mp_ftree
+                == (*alternate.mpp_father)->mp_ftree->mp_ftree->mp_ltree)
+        {
+            alternate.mpp_father
+                = &(*alternate.mpp_father)->mp_ftree->mp_ftree->mp_ltree;
+        } else if (
+            (*alternate.mpp_father)->mp_ftree
+                == (*alternate.mpp_father)->mp_ftree->mp_ftree->mp_rtree)
+        {
+            alternate.mpp_father
+                = &(*alternate.mpp_father)->mp_ftree->mp_ftree->mp_rtree;
         } else {
             ASSERT(0);
         }
-
-        // 根据平衡因子执行旋转
-       if (1 == ABS((*alternate.mpp_father)->m_balance_factor)) {
-            // 说明原来的平衡因子是0，增删结点不影响高度，不必上滤
-            break;
-       } else if (0 == (*alternate.mpp_father)->m_balance_factor) {
-           alternate.mpp_child = alternate.mpp_father;
-
-           if (NULL == (*alternate.mpp_father)->mp_ftree) {
-               break;
-           }
-
-           if (NULL == (*alternate.mpp_father)->mp_ftree->mp_ftree) {
-               alternate.mpp_father = pp_tree;
-           } else if (
-               (*alternate.mpp_father)->mp_ftree
-                   == (*alternate.mpp_father)->mp_ftree->mp_ftree->mp_ltree)
-           {
-               alternate.mpp_father
-                   = &((*alternate.mpp_father)->mp_ftree->mp_ftree->mp_ltree);
-           }
-           else if (
-               (*alternate.mpp_father)->mp_ftree
-                   == (*alternate.mpp_father)->mp_ftree->mp_ftree->mp_rtree)
-           {
-               alternate.mpp_father
-                   = &((*alternate.mpp_father)->mp_ftree->mp_ftree->mp_rtree);
-           } else {
-               ASSERT(0);
-           }
-       } else if ((*alternate.mpp_father)->m_balance_factor < -1) {
-           ASSERT(NULL != (*alternate.mpp_father)->mp_ltree);
-
-           if ((*alternate.mpp_father)->mp_ltree->m_balance_factor <= 0) {
-                avl_r_rotate(alternate.mpp_father);
-
-                // 断言平衡因子
-                ASSERT(ABS((*alternate.mpp_father)->m_balance_factor) <= 1);
-                ASSERT(ABS((*alternate.mpp_father)->mp_rtree->m_balance_factor)
-                           <= 1);
-           } else if ((*alternate.mpp_father)->mp_ltree->m_balance_factor > 0)
-           {
-                avl_lr_rotate(alternate.mpp_father);
-
-                // 断言平衡因子
-                ASSERT(ABS((*alternate.mpp_father)->m_balance_factor) <= 1);
-                ASSERT(ABS((*alternate.mpp_father)->mp_ltree->m_balance_factor)
-                           <= 1);
-                ASSERT(ABS((*alternate.mpp_father)->mp_rtree->m_balance_factor)
-                           <= 1);
-           } else {
-               ASSERT(0);
-           }
-           break;
-       } else if ((*alternate.mpp_father)->m_balance_factor > 1) {
-           ASSERT(NULL != (*alternate.mpp_father)->mp_rtree);
-
-           if ((*alternate.mpp_father)->mp_rtree->m_balance_factor >= 0) {
-                avl_l_rotate(alternate.mpp_father);
-
-                // 断言平衡因子
-                ASSERT(ABS((*alternate.mpp_father)->m_balance_factor) <= 1);
-                ASSERT(ABS((*alternate.mpp_father)->mp_ltree->m_balance_factor)
-                           <= 1);
-           } else if ((*alternate.mpp_father)->mp_rtree->m_balance_factor < 0)
-           {
-                avl_rl_rotate(alternate.mpp_father);
-
-                // 断言平衡因子
-                ASSERT(ABS((*alternate.mpp_father)->m_balance_factor) <= 1);
-                ASSERT(ABS((*alternate.mpp_father)->mp_ltree->m_balance_factor)
-                           <= 1);
-                ASSERT(ABS((*alternate.mpp_father)->mp_rtree->m_balance_factor)
-                           <= 1);
-           } else {
-               ASSERT(0);
-           }
-           break;
-       } else {
-           ASSERT(0);
-       }
     }
 
-DELETE:
+    ASSERT(p_assert == *p_del->mpp_child);
     (*p_del->mpp_child)->mp_ftree = NULL;
-    *p_del->mpp_child = NULL;*/
+    *p_del->mpp_child = NULL;
 
 FINAL:
     return rslt;
