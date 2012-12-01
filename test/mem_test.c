@@ -289,23 +289,17 @@ typedef int key_t;
 int main(int argc, char *argv[])
 {
     //int count = 10000000;
-    int count = 20;
+    int count = 50;
     struct timeval tpstart, tpend;
     float timeuse;
     avltree_frame_t *p_tree = NULL;
     avltree_frame_t *p_nodes = NULL;
-    /*int keys[] = {
-        12, 1, 9, 2, 0,
-        11, 7, 19, 4, 15,
-        18, 5, 14, 13, 10,
-        16, 6, 3, 8, 17,
-    };*/
-    /*int keys[] = {
-        2, 10, 13,  8, 1, 7, 17, 8, 0, 11,
-        9, 17,  0, 16, 4, 5,  2, 7, 6,  8,
-    };*/
     int *p_keys = (int *)calloc(count, sizeof(int));
-    /*avltree_frame_t nodes[] = {
+    /*int keys[] = {
+        16, 19, 15, 8, 14, 19, 17, 2, 6, 12,
+        8, 9, 19, 1, 15, 11, 16, 12, 0, 12,
+    };
+    avltree_frame_t nodes[] = {
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
@@ -335,9 +329,6 @@ int main(int argc, char *argv[])
     //p_nodes = MEMPOOL_ARRAY_ALLOC(&mempool_for_test, count, sizeof(rbtree_frame_node_t));
     p_nodes = calloc(count, sizeof(avltree_frame_t));
 
-    /*for (int i = 0; i < ARRAY_COUNT(keys); ++i) {
-        nodes[i].m_key = keys[i];
-    }*/
     for (int i = 0; i < count; ++i) {
         p_keys[i] =  rand() % count;
 
@@ -389,7 +380,10 @@ int main(int argc, char *argv[])
             fprintf(stderr, " [NO]\n");
         }
     }
-    /*for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
+    /*for (int i = 0; i < ARRAY_COUNT(keys); ++i) {
+        nodes[i].m_key = keys[i];
+    }
+    for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
         insert_avltree_frame(&p_tree, &nodes[i]);
     }
     for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {

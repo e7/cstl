@@ -386,11 +386,11 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
     ASSERT(NULL == (*p_del->mpp_child)->mp_rtree);
 
     if (NULL == p_del->mpp_father) { // 该树只有一个结点
-        goto FINAL;
+        goto DELETE;
     }
 
     // 执行上滤
-    alternate.mpp_father = p_del->mpp_child;
+    alternate.mpp_father = p_del->mpp_father;
     alternate.mpp_child = p_del->mpp_child;
     while (TRUE) {
         if (0 == (*alternate.mpp_father)->m_balance_factor) {
@@ -430,7 +430,7 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
                 } else if ((*alternate.mpp_father)->mp_ltree->m_balance_factor
                                <= 0)
                 {
-                    avl_r_rotate(p_del->mpp_father);
+                    avl_r_rotate(alternate.mpp_father);
                 } else {
                     ASSERT(0);
                 }
@@ -466,6 +466,7 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
         }
     }
 
+DELETE:
     ASSERT(p_assert == *p_del->mpp_child);
     (*p_del->mpp_child)->mp_ftree = NULL;
     *p_del->mpp_child = NULL;
