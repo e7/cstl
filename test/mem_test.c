@@ -295,9 +295,12 @@ int main(int argc, char *argv[])
     avltree_frame_t *p_tree = NULL;
     avltree_frame_t *p_nodes = NULL;
     int *p_keys = (int *)calloc(count, sizeof(int));
-    /*int keys[] = {
-        16, 19, 15, 8, 14, 19, 17, 2, 6, 12,
-        8, 9, 19, 1, 15, 11, 16, 12, 0, 12,
+    int keys[] = {
+        2, 2, 41, 8, 15, 3, 33, 47, 8, 28, 42,
+        17, 47, 30, 26, 7, 24, 48, 22, 6, 6,
+        42, 19, 42, 23, 25, 5, 28, 25, 12, 34,
+        27, 16, 27, 35, 31, 32, 19, 28, 40, 49,
+        20, 9, 46, 2, 36, 5, 28, 36, 28,
     };
     avltree_frame_t nodes[] = {
         {0, NULL, 0, NULL, NULL, NULL},
@@ -320,7 +323,37 @@ int main(int argc, char *argv[])
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL}, // 20
-    };*/
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL}, // 30
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL}, // 35
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL}, // 40
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL}, // 45
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL},
+        {0, NULL, 0, NULL, NULL, NULL}, // 50
+    };
     mempool_t mempool_for_test;
 
     MEMPOOL_BUILD(&mempool_for_test);
@@ -346,7 +379,7 @@ int main(int argc, char *argv[])
 
     printf("start\n");
     gettimeofday(&tpstart, NULL);
-    for (int i = 0; i < count; ++i) {
+    /*for (int i = 0; i < count; ++i) {
         fprintf(stderr, "insert[%d]: %d\n", i, p_nodes[i].m_key);
         insert_avltree_frame(&p_tree, &p_nodes[i]);
     }
@@ -379,19 +412,21 @@ int main(int argc, char *argv[])
         } else {
             fprintf(stderr, " [NO]\n");
         }
-    }
-    /*for (int i = 0; i < ARRAY_COUNT(keys); ++i) {
+    }*/
+
+    for (int i = 0; i < ARRAY_COUNT(keys); ++i) {
         nodes[i].m_key = keys[i];
     }
     for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
         insert_avltree_frame(&p_tree, &nodes[i]);
     }
     for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
+        fprintf(stderr, "remove[%d]: %d\n", i, keys[i]);
         remove_avltree_frame(&p_tree, keys[i]);
         if (NULL == p_tree) {
             break;
         }
-    }*/
+    }
     gettimeofday(&tpend, NULL);
     printf("stop\n");
 

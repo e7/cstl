@@ -108,6 +108,7 @@ void avl_lr_rotate(avltree_frame_t **pp_tree)
 {
     ASSERT(NULL != pp_tree);
     ASSERT(NULL != (*pp_tree));
+    ASSERT(ABS((*pp_tree)->m_balance_factor) > 1);
 
     // 执行双旋转
     avl_l_rotate(&((*pp_tree)->mp_ltree));
@@ -121,6 +122,7 @@ void avl_rl_rotate(avltree_frame_t **pp_tree)
 {
     ASSERT(NULL != pp_tree);
     ASSERT(NULL != (*pp_tree));
+    ASSERT(ABS((*pp_tree)->m_balance_factor) > 1);
 
     // 执行双旋转
     avl_r_rotate(&((*pp_tree)->mp_rtree));
@@ -394,6 +396,7 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
     alternate.mpp_child = p_del->mpp_child;
     while (TRUE) {
         if (0 == (*alternate.mpp_father)->m_balance_factor) {
+            // 不会引起父树高度变化，不必上滤
             if ((*alternate.mpp_child) == (*alternate.mpp_father)->mp_ltree) {
                 ++(*alternate.mpp_father)->m_balance_factor;
             } else if ((*alternate.mpp_child)
@@ -401,13 +404,17 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
             {
                 --(*alternate.mpp_father)->m_balance_factor;
             } else {
-                ASSERT(1);
+                ASSERT(0);
             }
 
             break;
         } else if (1 == (*alternate.mpp_father)->m_balance_factor) {
+            ASSERT(NULL != (*alternate.mpp_father)->mp_rtree);
+
             if ((*alternate.mpp_child) == (*alternate.mpp_father)->mp_ltree) {
+                // 说明左子树高度有降
                 ++(*alternate.mpp_father)->m_balance_factor;
+
                 if ((*alternate.mpp_father)->mp_rtree->m_balance_factor < 0) {
                     avl_rl_rotate(alternate.mpp_father);
                 } else if ((*alternate.mpp_father)->mp_rtree->m_balance_factor
@@ -423,8 +430,12 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
 
             ASSERT(2 > ABS((*alternate.mpp_father)->m_balance_factor));
         } else if (-1 == (*alternate.mpp_father)->m_balance_factor) {
+            ASSERT(NULL != (*alternate.mpp_father)->mp_ltree);
+
             if ((*alternate.mpp_child) == (*alternate.mpp_father)->mp_rtree) {
+                // 说明右子树高度有降
                 --(*alternate.mpp_father)->m_balance_factor;
+
                 if ((*alternate.mpp_father)->mp_ltree->m_balance_factor > 0) {
                     avl_lr_rotate(alternate.mpp_father);
                 } else if ((*alternate.mpp_father)->mp_ltree->m_balance_factor
@@ -445,6 +456,9 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
 
         alternate.mpp_child = alternate.mpp_father;
         if (NULL == (*alternate.mpp_father)->mp_ftree) {
+            // 已上滤到根结点
+            ASSERT(alternate.mpp_father == pp_tree);
+
             break;
         }
         if (NULL == (*alternate.mpp_father)->mp_ftree->mp_ftree) {
@@ -474,4 +488,4 @@ DELETE:
 FINAL:
     return rslt;
 }
-#endif // __AVLTREE_FRAME_H__
+#endif // __AVLTREE_FRAME_H_结点_
