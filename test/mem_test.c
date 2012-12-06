@@ -289,7 +289,7 @@ typedef int key_t;
 int main(int argc, char *argv[])
 {
     //int count = 10000000;
-    int count = 111550;
+    int count = 10000000;
     struct timeval tpstart, tpend;
     float timeuse;
     avltree_frame_t *p_tree = NULL;
@@ -380,37 +380,12 @@ int main(int argc, char *argv[])
     printf("start\n");
     gettimeofday(&tpstart, NULL);
     for (int i = 0; i < count; ++i) {
-        fprintf(stderr, "insert[%d]: %d\n", i, p_nodes[i].m_key);
         insert_avltree_frame(&p_tree, &p_nodes[i]);
     }
 
     for (int i = 0; i < count; ++i) {
-        avl_iter_t iter = {NULL, NULL};
-        fprintf(stderr, "find[%d]: %d\n", i, p_nodes[i].m_key);
-        find_avltree_frame(&p_tree, p_keys[i], &iter);
-        if (NULL != (*iter.mpp_child)) {
-            if (ABS((*iter.mpp_child)->m_balance_factor) > 1) {
-                ASSERT(0);
-            }
-        }
-    }
-
-    for (int i = 0; i < count; ++i) {
-        avl_iter_t iter = {NULL, NULL};
-
-        fprintf(stderr, "%d: %d", i, p_keys[i]);
-        find_avltree_frame(&p_tree, p_keys[i], &iter);
-        if (NULL != (*iter.mpp_child)) {
-            fprintf(stderr, " [YES]\n");
-            if (ABS((*iter.mpp_child)->m_balance_factor) > 1) {
-                ASSERT(0);
-            }
+        if (NULL != p_tree) {
             remove_avltree_frame(&p_tree, p_keys[i]);
-            if (NULL == p_tree) {
-                break;
-            }
-        } else {
-            fprintf(stderr, " [NO]\n");
         }
     }
 

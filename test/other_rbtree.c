@@ -98,6 +98,12 @@ int main()
             }
         }*/
     }
+    for (i = 0; i < count; ++i)
+    {
+        if (NULL != root) {
+            root = rb_erase(p_key[i], root);
+        }
+    }
     gettimeofday(&tpend, NULL);
     printf("stop\n");
 
@@ -436,7 +442,7 @@ rb_node_t* rb_erase(key_t key, rb_node_t *root)
 
     if (!(node = rb_search_auxiliary(key, root, NULL)))
     {
-        printf("key %d is not exist!\n", key);
+        // key is not exist!
         return root;
     }
 
