@@ -418,9 +418,15 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
                 if ((*alternate.mpp_father)->mp_rtree->m_balance_factor < 0) {
                     avl_rl_rotate(alternate.mpp_father);
                 } else if ((*alternate.mpp_father)->mp_rtree->m_balance_factor
-                               >= 0)
+                               > 0)
                 {
                     avl_l_rotate(alternate.mpp_father);
+                } else if (
+                    0 == (*alternate.mpp_father)->mp_rtree->m_balance_factor)
+                {
+                    avl_l_rotate(alternate.mpp_father);
+
+                    break;
                 } else {
                     ASSERT(0);
                 }
@@ -439,9 +445,15 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
                 if ((*alternate.mpp_father)->mp_ltree->m_balance_factor > 0) {
                     avl_lr_rotate(alternate.mpp_father);
                 } else if ((*alternate.mpp_father)->mp_ltree->m_balance_factor
-                               <= 0)
+                               < 0)
                 {
                     avl_r_rotate(alternate.mpp_father);
+                } else if (
+                    0 == (*alternate.mpp_father)->mp_ltree->m_balance_factor)
+                {
+                    avl_r_rotate(alternate.mpp_father);
+
+                    break;
                 } else {
                     ASSERT(0);
                 }
