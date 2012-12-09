@@ -10,6 +10,9 @@
 
 typedef enum {
     E_OK = 0,
+    E_UNKNOWN = 1,
+    E_NULL_POINTER = 4096,
+    E_OUT_OF_RANGE,
     E_EXISTED,
 } errno_t;
 #endif // __ERROR_INFO_H__

@@ -7,9 +7,18 @@
 
 // 排序接口
 typedef struct {
-    int (*mpf_sort)(int [], int const);
+    int (*mpf_sort)(void const *, int, int);
 } sort_t;
 
 
 // 常用排序实现
-int bubble_sort(int a_buf[], int const SIZE); // 冒泡排序
+extern compare_swap_t const CMP_SWAP_OF_INT;
+
+extern int insert_sort(void *pa_data,
+                       int ele_size,
+                       int count,
+                       compare_swap_t const *pc_compare); // 插入排序
+extern int quick_sort(void *pa_data,
+                      int ele_size,
+                      int count,
+                      compare_swap_t const *pc_compare); // 快速排序

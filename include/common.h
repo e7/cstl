@@ -61,9 +61,8 @@ typedef unsigned int uint_t;
 typedef signed long long_t;
 typedef unsigned long ulong_t;
 
-typedef int_t bool;
 #define FALSE           (0)
-#define TRUE            (!FALSE)
+#define TRUE            (1)
 
 #define EXEC_SUCCEED    (0)
 #define EXEC_FAILURE    (-1)
@@ -101,4 +100,15 @@ typedef int_t bool;
             } while (0)
 #define MAX(a, b)               (((a) > (b)) ? (a) : (b))
 #define MIN(a, b)               (((a) > (b)) ? (b) : (a))
+
+// 比较接口
+enum {
+    CMP_GREATER_THAN = 2,
+    CMP_EQUAL = 3,
+    CMP_LESS_THAN = 5,
+};
+typedef struct {
+    int (*mpf_compare)(void const *, void const *, int *);
+    int (*mpf_swap)(void *, void *);
+} compare_swap_t;
 #endif // __COMMON_H__
