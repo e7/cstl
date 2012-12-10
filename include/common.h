@@ -86,6 +86,7 @@ typedef unsigned long ulong_t;
 #define ARRAY_COUNT(a)          (sizeof(a) / sizeof((a)[0]))
 
 #define HOWMANY(x, y)           (((x) + ((y) - 1)) / (y))
+
 #define ABS(x)                  \
             (\
                 ((x) ^ ((x) >> (sizeof(x) * 8 - 1))) \
@@ -98,10 +99,17 @@ typedef unsigned long ulong_t;
                 (b) = (a);\
                 (a) = tmp;\
             } while (0)
+
 #define MAX(a, b)               (((a) > (b)) ? (a) : (b))
+#define MID(a, b, c)            \
+            (\
+                ((((a) - (b)) * ((b) - (c))) > 0) \
+                    ? (b) \
+                    : (((((b) - (a)) * ((a) - (c))) > 0) ? a : c)\
+            )
 #define MIN(a, b)               (((a) > (b)) ? (b) : (a))
 
-// 比较接口
+// 比较交换接口
 enum {
     CMP_GREATER_THAN = 2,
     CMP_EQUAL = 3,

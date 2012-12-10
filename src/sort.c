@@ -113,3 +113,42 @@ int insert_sort(void *pa_data,
 FINAL:
     return rslt;
 }
+
+// 快速排序
+// error_info: E_NULL_POINTER, E_OUT_OF_RANGE
+int quick_sort(void *pa_data,
+               int ele_size,
+               int total_size,
+               compare_swap_t const *pc_compare)
+{
+    int rslt = 0;
+
+    if (NULL == pa_data) {
+        rslt = -E_NULL_POINTER;
+
+        goto FINAL;
+    }
+
+    if ((ele_size < 0) || (total_size < ele_size)) {
+        rslt = -E_OUT_OF_RANGE;
+
+        goto FINAL;
+    }
+
+    if (NULL == pc_compare) {
+        rslt = -E_NULL_POINTER;
+
+        goto FINAL;
+    }
+
+    if ( (NULL == pc_compare->mpf_compare) ||
+            (NULL == pc_compare->mpf_swap))
+    {
+        rslt = -E_NULL_POINTER;
+
+        goto FINAL;
+    }
+
+FINAL:
+    return rslt;
+}

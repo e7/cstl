@@ -433,6 +433,8 @@ int main(int argc, char *argv[])
         &insert_sort,
     };
 
+    fprintf(stderr, "[%d]\n", MID(5, 4, 2));
+
     if (E_OK == (*sort.mpf_sort)(x,
                                  sizeof(x[0]),
                                  sizeof(x),
