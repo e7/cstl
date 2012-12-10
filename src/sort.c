@@ -57,13 +57,11 @@ compare_swap_t const CMP_SWAP_OF_INT = {
 // error_info: E_NULL_POINTER, E_OUT_OF_RANGE
 int insert_sort(void *pa_data,
                 int ele_size,
-                int count,
+                int total_size,
                 compare_swap_t const *pc_compare)
 {
     int rslt = E_OK;
-    int i =0;
     byte_t *p_i = NULL;
-    int j = ele_size - 1;
     byte_t *p_j = NULL;
 
     if (NULL == pa_data) {
@@ -72,7 +70,7 @@ int insert_sort(void *pa_data,
         goto FINAL;
     }
 
-    if ((ele_size < 0) || (count < 0)) {
+    if ((ele_size < 0) || (total_size < ele_size)) {
         rslt = -E_OUT_OF_RANGE;
 
         goto FINAL;
@@ -92,25 +90,24 @@ int insert_sort(void *pa_data,
         goto FINAL;
     }
 
-    ASSERT(0 == i);
     ASSERT(NULL == p_i);
-    ASSERT(ele_size - 1 == j);
     ASSERT(NULL == p_j);
-    while (i < (count - 1)) {
-        int cmp_rslt = 0;
+    for (int i = 0; i < (total_size - ele_size); i += ele_size) {
 
         p_i = &((byte_t *)pa_data)[i];
-        while (j < count) {
+        for (int j = i + ele_size; j < total_size; j += ele_size) {
+            int cmp_rslt = 0;
+
             p_j = &((byte_t *)pa_data)[j];
             rslt = (*pc_compare->mpf_compare)(p_i, p_j, &cmp_rslt);
             if (0 == (*pc_compare->mpf_compare)(p_i, p_j, &cmp_rslt)) {
-                (*pc_compare->mpf_swap)(p_i, p_j);
+                if (CMP_GREATER_THAN == cmp_rslt) {
+                    (*pc_compare->mpf_swap)(p_i, p_j);
+                }
             } else {
                 goto FINAL; // like exit(-1);
             }
-            j += ele_size;
         }
-        i += ele_size;
     }
 
 FINAL:

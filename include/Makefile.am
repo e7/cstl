@@ -1,0 +1,12 @@
+include_HEADERS  = adv_string.h
+include_HEADERS += avltree_frame.h
+include_HEADERS += common.h
+include_HEADERS += config.h
+include_HEADERS += error_info.h
+include_HEADERS += iterator.h
+include_HEADERS += list.h
+include_HEADERS += list_frame.h
+include_HEADERS += mem.h
+include_HEADERS += rbtree_frame.h
+include_HEADERS += search.h
+include_HEADERS += sort.h

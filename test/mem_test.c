@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
 }
 #endif
 
-#if 1
+#if 0
 // avl树性能测试
 #include <sys/time.h>
 
@@ -412,6 +412,36 @@ int main(int argc, char *argv[])
     printf("Used Time: %f\n", timeuse);
 
     MEMPOOL_DESTROY(&mempool_for_test);
+
+    return 0;
+}
+#endif
+
+
+#if 1
+// 插入排序测试
+#include <stdio.h>
+#include "sort.h"
+
+
+int main(int argc, char *argv[])
+{
+    int x[] = {
+        9, 4, 12, 8, 1, 99, 47, 8,
+    };
+    sort_t sort = {
+        &insert_sort,
+    };
+
+    if (E_OK == (*sort.mpf_sort)(x,
+                                 sizeof(x[0]),
+                                 sizeof(x),
+                                 &CMP_SWAP_OF_INT))
+    {
+        for (int i = 0; i < ARRAY_COUNT(x); ++i) {
+            fprintf(stderr, "%d\n", x[i]);
+        }
+    }
 
     return 0;
 }
