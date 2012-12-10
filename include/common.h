@@ -115,6 +115,7 @@ enum {
     CMP_EQUAL = 3,
     CMP_LESS_THAN = 5,
 };
+
 typedef struct {
     int (*mpf_compare)(void const *, void const *, int *);
     int (*mpf_swap)(void *, void *);
