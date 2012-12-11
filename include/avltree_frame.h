@@ -5,12 +5,12 @@
 #ifndef __AVLTREE_FRAME_H__
 #define __AVLTREE_FRAME_H__
 
-#include "common.h"
+#include "error_info.h"
 
 
 typedef struct avltree_frame avltree_frame_t;
 struct avltree_frame {
-    int m_key; // 键
+    intptr_t m_key; // 键
     void *mp_value; // 值
     int m_balance_factor; // 平衡因子
     avltree_frame_t *mp_ftree; // 父树
@@ -179,7 +179,7 @@ avl_iter_t *find_rmin_avltree_frame(avltree_frame_t **pp_tree,
 
 // ********** avl树接口 **********
 static inline
-void init_avltree_frame(avltree_frame_t *p_tree, int key)
+void init_avltree_frame(avltree_frame_t *p_tree, intptr_t key)
 {
     ASSERT(NULL != p_tree);
 
@@ -221,7 +221,7 @@ int insert_avltree_frame(avltree_frame_t **pp_tree,
         }
     }
     if (NULL != *pp_vacancy) { // 已存在
-        rslt = -1;
+        rslt = -E_EXISTED;
         goto FINAL;
     }
 
@@ -309,7 +309,7 @@ FINAL:
 
 static inline
 avl_iter_t *find_avltree_frame(avltree_frame_t **pp_tree,
-                               int key,
+                               intptr_t key,
                                avl_iter_t *p_iter)
 {
     ASSERT(NULL != pp_tree);
@@ -340,7 +340,7 @@ avl_iter_t *find_avltree_frame(avltree_frame_t **pp_tree,
 }
 
 static inline
-int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
+int remove_avltree_frame(avltree_frame_t **pp_tree, intptr_t key)
 {
     int rslt = 0;
     avl_iter_t del = {
@@ -358,7 +358,7 @@ int remove_avltree_frame(avltree_frame_t **pp_tree, int key)
     // 查找待删除的结点
     p_del = find_avltree_frame(pp_tree, key, &del);
     if (NULL == p_del) {
-        rslt = -1;
+        rslt = -E_NOT_EXISTED;
         goto FINAL;
     }
 

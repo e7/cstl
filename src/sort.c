@@ -53,7 +53,7 @@ compare_swap_t const CMP_SWAP_OF_INT = {
 };
 
 
-// 插入排序
+// ****** 插入排序 *****
 // error_info: E_NULL_POINTER, E_OUT_OF_RANGE
 int insert_sort(void *pa_data,
                 int ele_size,
@@ -110,7 +110,7 @@ FINAL:
     return rslt;
 }
 
-// 快速排序
+// ***** 快速排序 *****
 static inline
 void *prepare_pivot(void *pa_data,
                     int ele_size,

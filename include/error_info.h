@@ -14,5 +14,6 @@ typedef enum {
     E_NULL_POINTER = 4096,
     E_OUT_OF_RANGE,
     E_EXISTED,
+    E_NOT_EXISTED,
 } errno_t;
 #endif // __ERROR_INFO_H__

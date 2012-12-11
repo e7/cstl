@@ -2,14 +2,15 @@
 // author: e7, ryuuzaki.uchiha@gmail.com
 
 
+#include "error_info.h"
 #include "mem.h"
 
 
 // ******************** 对象页 ********************
 static page_t *new_page(int const OBJ_SIZE)
 {
-    int const OBJ_SHELL_SIZE = sizeof(obj_shell_t) + OBJ_SIZE;
-    int const PAGE_SIZE = sizeof(page_t) + OBJ_SHELL_SIZE * OBJS_PER_PAGE;
+    int_t const OBJ_SHELL_SIZE = sizeof(obj_shell_t) + OBJ_SIZE;
+    int_t const PAGE_SIZE = sizeof(page_t) + OBJ_SHELL_SIZE * OBJS_PER_PAGE;
     page_t *p_page = NULL;
     obj_shell_t *p_next_obj_sh = NULL;
 
@@ -31,7 +32,7 @@ static page_t *new_page(int const OBJ_SIZE)
 
     p_page->mp_free_list = (obj_shell_t *)p_page->ma_obj_shs; // 空闲链
     p_next_obj_sh = p_page->mp_free_list;
-    for (int i = 0; i < (OBJS_PER_PAGE - 1); ++i) {
+    for (int_t i = 0; i < (OBJS_PER_PAGE - 1); ++i) {
         p_next_obj_sh->m_intptr.mp_next
             = (obj_shell_t *)((byte_t *)p_next_obj_sh + OBJ_SHELL_SIZE);
         p_next_obj_sh = p_next_obj_sh->m_intptr.mp_next;
@@ -51,7 +52,7 @@ FINAL:
 
 static int is_page_full(page_t *p_page)
 {
-    int rslt = FALSE;
+    int_t rslt = FALSE;
 
     ASSERT(NULL != p_page);
     if (NULL == p_page->mp_free_list) {
@@ -134,7 +135,8 @@ static obj_shell_t *provide_obj_sh(page_base_t *const THIS)
 
     if (is_page_full(p_page_home)) {
         // 加入到满页链表
-        ldlist_frame_add_head(&THIS->m_ldlist_full, &p_page_home->m_ldlist_node);
+        ldlist_frame_add_head(&THIS->m_ldlist_full,
+                              &p_page_home->m_ldlist_node);
         THIS->mp_page_current = NULL;
     }
 
@@ -156,7 +158,7 @@ static void recycle_obj_sh(page_base_t *const THIS, obj_shell_t *p_obj_sh)
         p_page_home = THIS->mp_page_current;
     } else {
         do {
-            int found = FALSE;
+            int_t found = FALSE;
             ldlist_frame_node_t *p_node = NULL;
 
             LDLIST_FRAME_FOR_EACH(p_node, &THIS->m_ldlist_partial) {
@@ -173,7 +175,9 @@ static void recycle_obj_sh(page_base_t *const THIS, obj_shell_t *p_obj_sh)
                 break;
             }
             LDLIST_FRAME_FOR_EACH(p_node, &THIS->m_ldlist_partial) {
-                p_page_home = LDLIST_FRAME_ENTRY(p_node, page_t, m_ldlist_node);
+                p_page_home = LDLIST_FRAME_ENTRY(p_node,
+                                                 page_t,
+                                                 m_ldlist_node);
                 if ((p_obj_sh >= p_page_home->mp_objs_start)
                         && (p_obj_sh < p_page_home->mp_objs_end))
                 {
@@ -205,12 +209,13 @@ void mempool_build(mempool_t *const THIS)
 {
     ASSERT(NULL != THIS);
 
-    for (int i = 0; i < OBJ_SIZE_NUM; ++i) {
+    for (int_t i = 0; i < OBJ_SIZE_COUNT; ++i) {
         THIS->ma_obj_cache[i].m_obj_size = A_OBJ_SIZE_SURPPORT[i];
         init_ldlist_frame_node(&THIS->ma_obj_cache[i].m_ldlist_partial);
         init_ldlist_frame_node(&THIS->ma_obj_cache[i].m_ldlist_full);
         THIS->ma_obj_cache[i].mp_page_current= NULL;
     }
+    THIS->mp_bigobj_heap = NULL;
 
     return;
 }
@@ -230,7 +235,7 @@ void *mempool_array_alloc(mempool_t *const THIS,
                           int line)
 {
     void *p_rslt = NULL;
-    int const OBJS_SIZE = obj_size * obj_count;
+    int_t const OBJS_SIZE = obj_size * obj_count;
 
     ASSERT(NULL != THIS);
     ASSERT(NULL != pc_file);
@@ -240,24 +245,30 @@ void *mempool_array_alloc(mempool_t *const THIS,
 #else
     // ********** 分配内存 **********
     if (OBJS_SIZE > MAX_OBJ_SIZE) { // 大对象
-        obj_shell_t *p_obj_sh
-            = (obj_shell_t *)malloc(sizeof(obj_shell_t) + OBJS_SIZE);
-        if (NULL == p_obj_sh) {
-            ASSERT(NULL == p_rslt);
-            goto FINAL;
-        }
-        p_obj_sh->m_intptr.m_size = OBJS_SIZE;
-        p_rslt = (void *)(p_obj_sh->m_obj);
+        bigobj_shell_t *p_bigobj_sh = NULL;
+
+        p_bigobj_sh = (bigobj_shell_t *)malloc(sizeof(bigobj_shell_t)
+                                                   + OBJS_SIZE);
+
+        // 对象地址作为key
+        init_avltree_frame(&p_bigobj_sh->m_heap_node,
+                           (intptr_t)p_bigobj_sh->m_obj_sh.m_obj);
+        p_bigobj_sh->m_obj_sh.m_intptr.m_size = OBJS_SIZE;
+
+        ASSERT(0 == insert_avltree_frame(&THIS->mp_bigobj_heap,
+                                         &p_bigobj_sh->m_heap_node));
+
+        p_rslt = (void *)(p_bigobj_sh->m_obj_sh.m_obj);
     } else {
         int index = 0;
 
         // 寻找合适大小的页仓库
-        for (index = 0; index < OBJ_SIZE_NUM; ++index) {
+        for (index = 0; index < OBJ_SIZE_COUNT; ++index) {
             if (OBJS_SIZE <= A_OBJ_SIZE_SURPPORT[index]) {
                 break;
             }
         }
-        ASSERT(index <= OBJ_SIZE_NUM);
+        ASSERT(index <= OBJ_SIZE_COUNT);
 
         // ***** 从页仓库中分配对象 *****
         p_rslt = (void *)(
@@ -267,7 +278,8 @@ void *mempool_array_alloc(mempool_t *const THIS,
 #endif // mempool_array_alloc's MEMPOOL_ISOLATION
 
     fprintf(stdout,
-            "[INFO] memory alloced in file %s at line %d: 0x%08x\n",
+            "[INFO]0x%08x: memory alloced in file %s at line %d: 0x%08x\n",
+            (uint_t)THIS,
             pc_file,
             line,
             (uint_t)p_rslt);
@@ -277,11 +289,12 @@ FINAL:
     return p_rslt;
 }
 
-void mempool_free(mempool_t *const THIS,
-                  void *p_obj,
-                  char const *pc_file,
-                  int line)
+int mempool_free(mempool_t *const THIS,
+                 void *p_obj,
+                 char const *pc_file,
+                 int line)
 {
+    int rslt = 0;
     obj_shell_t *p_obj_sh = NULL;
 
     ASSERT(NULL != THIS);
@@ -293,38 +306,49 @@ void mempool_free(mempool_t *const THIS,
 #else
     p_obj_sh = CONTAINER_OF(p_obj, obj_shell_t, m_obj);
     ASSERT(NULL != p_obj_sh);
-    if (p_obj_sh->m_intptr.m_size > MAX_OBJ_SIZE) { // 大对象，直接释放
-        free(p_obj_sh);
+    if (p_obj_sh->m_intptr.m_size > MAX_OBJ_SIZE) { // 大对象
+        bigobj_shell_t *p_bigobj_sh = CONTAINER_OF(p_obj_sh,
+                                                   bigobj_shell_t,
+                                                   m_obj_sh);
+        rslt = remove_avltree_frame(&THIS->mp_bigobj_heap,
+                                    (intptr_t)p_obj);
+        if (E_OK == rslt) {
+            free(p_bigobj_sh);
+        }
     } else {
-        int const OBJ_SIZE = p_obj_sh->m_intptr.m_size;
+        int_t const OBJ_SIZE = p_obj_sh->m_intptr.m_size;
         page_base_t *p_base = NULL;
 
-        for (int i = 0; i < OBJ_SIZE_NUM; ++i) {
+        for (int_t i = 0; i < OBJ_SIZE_COUNT; ++i) {
             if (OBJ_SIZE == THIS->ma_obj_cache[i].m_obj_size) {
                 p_base = &THIS->ma_obj_cache[i];
             }
         }
 
-        ASSERT(NULL != p_base);
-        recycle_obj_sh(p_base, p_obj_sh);
+        if (NULL != p_base) {
+            recycle_obj_sh(p_base, p_obj_sh);
+        } else {
+            rslt = -E_NOT_EXISTED;
+        }
     }
 
 #endif // mempool_free's MEMPOOL_ISOLATION
 
     fprintf(stdout,
-            "[INFO] memory freed in file %s at line %d: 0x%08x\n",
+            "[INFO]0x%08x: memory freed in file %s at line %d: 0x%08x\n",
+            (uint_t)THIS,
             pc_file,
             line,
             (uint_t)p_obj);
 
-    return;
+    return rslt;
 }
 
 void mempool_destroy(mempool_t *const THIS)
 {
     ASSERT(NULL != THIS);
 
-    for (int i =0; i < OBJ_SIZE_NUM; ++i) {
+    for (int_t i = 0; i < OBJ_SIZE_COUNT; ++i) {
         ldlist_frame_head_t *p_list = NULL;
         ldlist_frame_node_t *p_pos = NULL;
         ldlist_frame_node_t *p_cur_next = NULL;

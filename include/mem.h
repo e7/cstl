@@ -7,6 +7,7 @@
 
 
 #include "list_frame.h"
+#include "avltree_frame.h"
 
 
 // 支持的对象大小
@@ -26,13 +27,14 @@ static int const A_OBJ_SIZE_SURPPORT[] = {
 #define MAX_OBJ_SIZE    \
             (A_OBJ_SIZE_SURPPORT[ARRAY_COUNT(A_OBJ_SIZE_SURPPORT) - 1])
 #define MIN_OBJ_SIZE    (A_OBJ_SIZE_SURPPORT[0])
-#define OBJ_SIZE_NUM    (ARRAY_COUNT(A_OBJ_SIZE_SURPPORT))
+#define OBJ_SIZE_COUNT  (ARRAY_COUNT(A_OBJ_SIZE_SURPPORT))
 
 
 // ******************** 对象页 ********************
 #define OBJS_PER_PAGE               64
 
 typedef struct s_obj_shell obj_shell_t;
+typedef struct s_bigobj_shell bigobj_shell_t;
 typedef struct s_page page_t;
 
 struct s_obj_shell {
@@ -42,6 +44,11 @@ struct s_obj_shell {
     } m_intptr; // 对象大小或指向下一对象壳
     char m_obj[0];
 }; // 对象壳类型
+
+struct s_bigobj_shell {
+    avltree_frame_t m_heap_node;
+    obj_shell_t m_obj_sh;
+}; // 大对象壳类型
 
 struct s_page {
     ldlist_frame_node_t m_ldlist_node; // 页节点
@@ -64,7 +71,8 @@ typedef struct {
 
 // ******************** 内存池接口 ********************
 typedef struct {
-    page_base_t ma_obj_cache[OBJ_SIZE_NUM]; // 各类型页对象缓存
+    page_base_t ma_obj_cache[OBJ_SIZE_COUNT]; // 各类型页对象缓存
+    avltree_frame_t *mp_bigobj_heap; // 大对象堆
 } mempool_t;
 
 extern void mempool_build(mempool_t *const THIS);
@@ -77,10 +85,10 @@ extern void *mempool_array_alloc(mempool_t *const THIS,
                                  int obj_size,
                                  char const *pc_file,
                                  int line);
-extern void mempool_free(mempool_t *const THIS,
-                         void *p_obj,
-                         char const *pc_file,
-                         int line);
+extern int mempool_free(mempool_t *const THIS,
+                        void *p_obj,
+                        char const *pc_file,
+                        int line);
 extern void mempool_destroy(mempool_t *const THIS);
 
 #define MEMPOOL_BUILD           mempool_build

@@ -9,7 +9,7 @@
 
 
 #if 0
-int main(int argc, char *argv[])
+int cstl_main(int argc, char *argv[])
 {
     int rslt = 0;
     int buf[] = {
@@ -90,7 +90,7 @@ FINAL:
 #endif
 
 #if 0
-int main(int argc, char *argv[])
+int cstl_main(int argc, char *argv[])
 {
     int rslt = 0;
     int buf[] = {
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 #endif
 
 #if 0
-int main(int argc, char *argv[])
+int cstl_main(int argc, char *argv[])
 {
     rbtree_frame_t tree;
     rbtree_frame_node_t nodes[] = {
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
 
 typedef int key_t;
 
-int main(int argc, char *argv[])
+int cstl_main(int argc, char *argv[])
 {
     int i, count = 10000000;
     struct timeval tpstart, tpend;
@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
 }
 #endif
 
-#if 0
+#if 1
 // avl树性能测试
 #include <sys/time.h>
 
@@ -286,7 +286,7 @@ int main(int argc, char *argv[])
 
 typedef int key_t;
 
-int main(int argc, char *argv[])
+int cstl_main(int argc, char *argv[])
 {
     //int count = 10000000;
     int count = 10000000;
@@ -418,13 +418,13 @@ int main(int argc, char *argv[])
 #endif
 
 
-#if 1
+#if 0
 // 插入排序测试
 #include <stdio.h>
 #include "sort.h"
 
 
-int main(int argc, char *argv[])
+int cstl_main(int argc, char *argv[])
 {
     int x[] = {
         9, 4, 12, 8, 1, 99, 47, 8,

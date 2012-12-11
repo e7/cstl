@@ -120,4 +120,8 @@ typedef struct {
     int (*mpf_compare)(void const *, void const *, int *);
     int (*mpf_swap)(void *, void *);
 } compare_swap_t;
+
+
+// 应用入口
+extern int cstl_main(int argc, char *argv[]);
 #endif // __COMMON_H__
