@@ -356,7 +356,7 @@ int cstl_main(int argc, char *argv[])
     };*/
     mempool_t mempool_for_test;
 
-    MEMPOOL_BUILD(&mempool_for_test);
+    MEMPOOL_BUILD(&mempool_for_test, "test");
     srand(time(NULL));
 
     //p_nodes = MEMPOOL_ARRAY_ALLOC(&mempool_for_test, count, sizeof(rbtree_frame_node_t));

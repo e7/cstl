@@ -71,11 +71,12 @@ typedef struct {
 
 // ******************** 内存池接口 ********************
 typedef struct {
+    char const *mpc_name; // 内存池名称
     page_base_t ma_obj_cache[OBJ_SIZE_COUNT]; // 各类型页对象缓存
     avltree_frame_t *mp_bigobj_heap; // 大对象堆
 } mempool_t;
 
-extern void mempool_build(mempool_t *const THIS);
+extern void mempool_build(mempool_t *const THIS, char const *pc_name);
 extern void *mempool_alloc(mempool_t *const THIS,
                            int obj_size,
                            char const *pc_file,

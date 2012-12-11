@@ -205,10 +205,11 @@ static void recycle_obj_sh(page_base_t *const THIS, obj_shell_t *p_obj_sh)
 
 
 // ******************** 内存池接口 ********************
-void mempool_build(mempool_t *const THIS)
+void mempool_build(mempool_t *const THIS, char const *pc_name)
 {
     ASSERT(NULL != THIS);
 
+    THIS->mpc_name = pc_name;
     for (int_t i = 0; i < OBJ_SIZE_COUNT; ++i) {
         THIS->ma_obj_cache[i].m_obj_size = A_OBJ_SIZE_SURPPORT[i];
         init_ldlist_frame_node(&THIS->ma_obj_cache[i].m_ldlist_partial);
@@ -278,7 +279,9 @@ void *mempool_array_alloc(mempool_t *const THIS,
 #endif // mempool_array_alloc's MEMPOOL_ISOLATION
 
     fprintf(stdout,
-            "[INFO]0x%08x: memory alloced in file %s at line %d: 0x%08x\n",
+            "[INFO][%s 0x%08x]: "
+                "memory alloced in file %s at line %d: 0x%08x\n",
+            THIS->mpc_name,
             (uint_t)THIS,
             pc_file,
             line,
@@ -335,7 +338,9 @@ int mempool_free(mempool_t *const THIS,
 #endif // mempool_free's MEMPOOL_ISOLATION
 
     fprintf(stdout,
-            "[INFO]0x%08x: memory freed in file %s at line %d: 0x%08x\n",
+            "[INFO][%s 0x%08x]: "
+                "memory freed in file %s at line %d: 0x%08x\n",
+            THIS->mpc_name,
             (uint_t)THIS,
             pc_file,
             line,
@@ -370,4 +375,5 @@ void mempool_destroy(mempool_t *const THIS)
             del_page(p_page);
         }
     }
+    ASSERT(NULL == THIS->mp_bigobj_heap); // 暗示内存泄露
 }
