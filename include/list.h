@@ -2,9 +2,18 @@
 // author: e7, ryuuzaki.uchiha@gmail.com
 
 
+#ifndef __LIST_H__
+#define __LIST_H__
+
+
 #include "list_frame.h"
 #include "iterator.h"
 #include "mem.h"
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 typedef struct ldlist_node ldlist_node_t;
@@ -62,3 +71,9 @@ extern iterator_t const *ldlist_end(ldlist_t *const THIS);
 extern void ldlist_clean(ldlist_t *const THIS);
 
 extern void ldlist_destroy(ldlist_t *const THIS);
+
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+#endif // __LIST_H__

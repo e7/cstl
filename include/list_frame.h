@@ -9,6 +9,11 @@
 #include "common.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 // ******************** 循环双链表框架 ********************
 typedef struct ldlist_frame_node ldlist_frame_node_t, ldlist_frame_head_t;
 struct ldlist_frame_node {
@@ -146,4 +151,9 @@ static inline void ldlist_frame_del(ldlist_frame_node_t *p_node)
 
     ldlist_frame_del_orig(p_node->mp_prev, p_node->mp_next);
 }
+
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 #endif // __LIST_FRAME_H__

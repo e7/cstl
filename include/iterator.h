@@ -9,6 +9,11 @@
 #include "common.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 // 迭代器接口
 typedef struct iterator iterator_t;
 struct iterator {
@@ -18,4 +23,9 @@ struct iterator {
     iterator_t *(*mpf_get_next)(iterator_t const *);
     iterator_t *(*mpf_get_prev)(iterator_t const *);
 };
+
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 #endif // __STD_ITERATOR_H__

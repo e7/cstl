@@ -10,6 +10,11 @@
 #include "avltree_frame.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 // 支持的对象大小
 static int const A_OBJ_SIZE_SURPPORT[] = {
     1 << 3, // 8
@@ -107,4 +112,9 @@ extern void mempool_destroy(mempool_t *const THIS);
 #define MEMPOOL_FREE(pc_mempool, p_obj)          \
             mempool_free(pc_mempool, p_obj, __FILE__, __LINE__)
 #define MEMPOOL_DESTROY         mempool_destroy
+
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 #endif // __MEM_H__

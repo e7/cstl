@@ -5,7 +5,13 @@
 #ifndef __ERROR_INFO_H__
 #define __ERROR_INFO_H__
 
+
 #include "common.h"
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 typedef enum {
@@ -16,4 +22,9 @@ typedef enum {
     E_EXISTED,
     E_NOT_EXISTED,
 } errno_t;
+
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 #endif // __ERROR_INFO_H__

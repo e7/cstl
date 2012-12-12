@@ -9,6 +9,11 @@
 #include "common.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 typedef struct rbtree_frame_node rbtree_frame_node_t;
 typedef struct rbtree_frame rbtree_frame_t;
 
@@ -446,4 +451,9 @@ FINAL:
 
     return rslt;
 }
+
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 #endif

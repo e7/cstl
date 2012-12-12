@@ -9,6 +9,11 @@
 #include "common.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 // 查找接口
 #define INVALID_INDEX           (-1)
 
@@ -24,4 +29,9 @@ extern int sequential_search(int const A_BUF[],
 extern int binary_search(int const A_BUF[],
                          int const size,
                          int const KEY); // 二分查找
+
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 #endif // __SEARCH_H__

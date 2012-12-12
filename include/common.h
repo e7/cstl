@@ -51,6 +51,12 @@
     #define __typeof__  typeof
 #endif
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 // common types
 typedef signed char byte_t;
 typedef unsigned char ubyte_t;
@@ -124,4 +130,9 @@ typedef struct {
 
 // 应用入口
 extern int cstl_main(int argc, char *argv[]);
+
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 #endif // __COMMON_H__

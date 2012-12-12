@@ -9,6 +9,11 @@
 #include "common.h"
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 // 排序接口
 typedef struct {
     int (*mpf_sort)(void *, int, int, compare_swap_t const *);
@@ -26,4 +31,9 @@ extern int quick_sort(void *pa_data,
                       int ele_size,
                       int total_size,
                       compare_swap_t const *pc_compare); // 快速排序
+
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 #endif

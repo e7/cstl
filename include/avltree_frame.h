@@ -5,7 +5,13 @@
 #ifndef __AVLTREE_FRAME_H__
 #define __AVLTREE_FRAME_H__
 
+
 #include "error_info.h"
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 typedef struct avltree_frame avltree_frame_t;
@@ -500,4 +506,9 @@ DELETE:
 FINAL:
     return rslt;
 }
+
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 #endif // __AVLTREE_FRAME_H_结点_
