@@ -352,18 +352,16 @@ int cstl_main(int argc, char *argv[])
         {0, NULL, 0, NULL, NULL, NULL},
         {0, NULL, 0, NULL, NULL, NULL}, // 50
     };*/
-    mempool_t mempool_for_test;
-    mempool_t *p_pool;
+    mempool_t *p_pool = NULL;
 
-    MEMPOOL_BUILD(&mempool_for_test, "test");
-    ASSERT(0 == find_mempool("test", &p_pool));
-    ASSERT(&mempool_for_test == p_pool);
+    ASSERT(0 == find_mempool(PUBLIC_MEMPOOL, &p_pool));
+    ASSERT(NULL != p_pool);
 
     srand(time(NULL));
 
-    p_nodes = MEMPOOL_ARRAY_ALLOC(&mempool_for_test,
-                                   count,
-                                   sizeof(avltree_frame_t));
+    p_nodes = MEMPOOL_ARRAY_ALLOC(p_pool,
+                                  count,
+                                  sizeof(avltree_frame_t));
     //p_nodes = calloc(count, sizeof(avltree_frame_t));
 
     for (int i = 0; i < count; ++i) {
@@ -392,7 +390,7 @@ int cstl_main(int argc, char *argv[])
             remove_avltree_frame(&p_tree, p_keys[i]);
         }
     }
-    MEMPOOL_FREE(&mempool_for_test, p_nodes);
+    MEMPOOL_FREE(p_pool, p_nodes);
 
     /*for (int i = 0; i < ARRAY_COUNT(keys); ++i) {
         nodes[i].m_key = keys[i];
@@ -415,8 +413,6 @@ int cstl_main(int argc, char *argv[])
     timeuse /= 1000000;
 
     printf("Used Time: %f\n", timeuse);
-
-    MEMPOOL_DESTROY(&mempool_for_test);
 
     return 0;
 }

@@ -401,9 +401,15 @@ int mempool_free(mempool_t *const THIS,
     return rslt;
 }
 
-void mempool_destroy(mempool_t *const THIS)
+int mempool_destroy(mempool_t *const THIS)
 {
-    ASSERT(NULL != THIS);
+    int rslt = 0;
+
+    if (NULL == THIS) {
+        rslt = -E_NULL_POINTER;
+
+        goto FINAL;
+    }
 
     for (int_t i = 0; i < OBJ_SIZE_COUNT; ++i) {
         ldlist_frame_head_t *p_list = NULL;
@@ -428,4 +434,7 @@ void mempool_destroy(mempool_t *const THIS)
         }
     }
     ASSERT(NULL == THIS->mp_bigobj_heap); // 暗示内存泄露
+
+FINAL:
+    return rslt;
 }

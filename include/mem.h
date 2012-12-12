@@ -75,6 +75,8 @@ typedef struct {
 
 
 // ******************** 内存池接口 ********************
+#define PUBLIC_MEMPOOL          ("public")
+
 typedef struct {
     char const *mpc_name; // 内存池名称
     avltree_frame_t m_map_node; // 池堆结点
@@ -98,7 +100,7 @@ extern int mempool_free(mempool_t *const THIS,
                         void *p_obj,
                         char const *pc_file,
                         int line);
-extern void mempool_destroy(mempool_t *const THIS);
+extern int mempool_destroy(mempool_t *const THIS);
 
 #define MEMPOOL_BUILD           mempool_build
 #define MEMPOOL_ALLOC(pc_mempool, obj_size)      \
@@ -112,6 +114,11 @@ extern void mempool_destroy(mempool_t *const THIS);
 #define MEMPOOL_FREE(pc_mempool, p_obj)          \
             mempool_free(pc_mempool, p_obj, __FILE__, __LINE__)
 #define MEMPOOL_DESTROY         mempool_destroy
+
+
+// ******************** 持久内存接口 ********************
+#define PERMANENT_MEM_SIZE          (1024 * 4)
+extern int alloc_permanent_mem(ssize_t size, void **pp_mem);
 
 
 #ifdef __cplusplus
