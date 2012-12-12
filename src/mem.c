@@ -6,6 +6,20 @@
 #include "mem.h"
 
 
+// 内存池堆
+static avltree_frame_t *sp_mempool_heap = NULL;
+
+static intptr_t name_hash(char const *pc_name)
+{
+    intptr_t key = 0;
+
+    for (int i = 0; '\0' != pc_name[i]; ++i) {
+        key = (key << 5) + pc_name[i];
+    }
+
+    return key;
+}
+
 // ******************** 对象页 ********************
 static page_t *new_page(int const OBJ_SIZE)
 {
@@ -205,11 +219,45 @@ static void recycle_obj_sh(page_base_t *const THIS, obj_shell_t *p_obj_sh)
 
 
 // ******************** 内存池接口 ********************
-void mempool_build(mempool_t *const THIS, char const *pc_name)
+int find_mempool(char const *pc_name, mempool_t **pp_pool)
 {
-    ASSERT(NULL != THIS);
+    int rslt = 0;
+    avl_iter_t *p_iter = NULL;
+    avl_iter_t iter = {
+        NULL, NULL,
+    };
 
+    if ((NULL == pc_name) || (NULL == pp_pool)) {
+        rslt = -E_NULL_POINTER;
+
+        goto FINAL;
+    }
+
+    p_iter = find_avltree_frame(&sp_mempool_heap, name_hash(pc_name), &iter);
+    if (NULL == p_iter) {
+        rslt = -E_NOT_EXISTED;
+
+        goto FINAL;
+    }
+    *pp_pool = CONTAINER_OF(*p_iter->mpp_child, mempool_t, m_map_node);
+
+FINAL:
+    return rslt;
+}
+
+int mempool_build(mempool_t *const THIS, char const *pc_name)
+{
+    int rslt = 0;
+
+    if ((NULL == THIS) || (NULL == pc_name)) {
+        rslt = -E_NULL_POINTER;
+
+        goto FINAL;
+    }
+
+    // 成员初始化
     THIS->mpc_name = pc_name;
+    init_avltree_frame(&THIS->m_map_node, name_hash(pc_name));
     for (int_t i = 0; i < OBJ_SIZE_COUNT; ++i) {
         THIS->ma_obj_cache[i].m_obj_size = A_OBJ_SIZE_SURPPORT[i];
         init_ldlist_frame_node(&THIS->ma_obj_cache[i].m_ldlist_partial);
@@ -218,7 +266,11 @@ void mempool_build(mempool_t *const THIS, char const *pc_name)
     }
     THIS->mp_bigobj_heap = NULL;
 
-    return;
+    // 注册
+    rslt = insert_avltree_frame(&sp_mempool_heap, &THIS->m_map_node);
+
+FINAL:
+    return rslt;
 }
 
 void *mempool_alloc(mempool_t *const THIS,

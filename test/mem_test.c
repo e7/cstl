@@ -24,19 +24,17 @@ int cstl_main(int argc, char *argv[])
         &binary_search,
     };
     sort_t sort_obj = {
-        &bubble_sort,
+        &insert_sort,
     };
     mempool_t mempool_for_test = {
-        {
-            {0},
-        }, // ma_obj_cache[0]
+        NULL,
     };
     ldlist_t list = {
         NULL,
     };
     int *pa_x = NULL;
 
-    if (0 != MEMPOOL_BUILD(&mempool_for_test)) {
+    if (0 != MEMPOOL_BUILD(&mempool_for_test, "test")) {
         rslt = -1;
         goto FINAL;
     }
@@ -355,12 +353,18 @@ int cstl_main(int argc, char *argv[])
         {0, NULL, 0, NULL, NULL, NULL}, // 50
     };*/
     mempool_t mempool_for_test;
+    mempool_t *p_pool;
 
     MEMPOOL_BUILD(&mempool_for_test, "test");
+    ASSERT(0 == find_mempool("test", &p_pool));
+    ASSERT(&mempool_for_test == p_pool);
+
     srand(time(NULL));
 
-    //p_nodes = MEMPOOL_ARRAY_ALLOC(&mempool_for_test, count, sizeof(rbtree_frame_node_t));
-    p_nodes = calloc(count, sizeof(avltree_frame_t));
+    p_nodes = MEMPOOL_ARRAY_ALLOC(&mempool_for_test,
+                                   count,
+                                   sizeof(avltree_frame_t));
+    //p_nodes = calloc(count, sizeof(avltree_frame_t));
 
     for (int i = 0; i < count; ++i) {
         p_keys[i] =  rand() % count;
@@ -388,6 +392,7 @@ int cstl_main(int argc, char *argv[])
             remove_avltree_frame(&p_tree, p_keys[i]);
         }
     }
+    MEMPOOL_FREE(&mempool_for_test, p_nodes);
 
     /*for (int i = 0; i < ARRAY_COUNT(keys); ++i) {
         nodes[i].m_key = keys[i];
