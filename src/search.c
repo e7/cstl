@@ -2,9 +2,9 @@
 
 
 // 顺序查找
-int sequential_search(int const A_BUF[], int size, int const KEY)
+int_t sequential_search(int_t const A_BUF[], ssize_t size, int_t const KEY)
 {
-    int index = INVALID_INDEX;
+    int_t index = INVALID_INDEX;
 
     if (NULL == A_BUF) {
         goto FINAL;
@@ -14,7 +14,7 @@ int sequential_search(int const A_BUF[], int size, int const KEY)
         goto FINAL;
     }
 
-    for (int i = 0; i < size; ++i) {
+    for (int_t i = 0; i < size; ++i) {
         if (KEY == A_BUF[i]) {
             index = i;
             break;
@@ -26,11 +26,11 @@ FINAL:
 }
 
 // 二分查找
-int binary_search(int const A_BUF[], int const SIZE, int const KEY)
+int_t binary_search(int_t const A_BUF[], ssize_t const SIZE, int_t const KEY)
 {
-    int index = INVALID_INDEX;
-    int tmp_size = 0;
-    int const *pc_tmp_buf = NULL;
+    int_t index = INVALID_INDEX;
+    int_t tmp_size = 0;
+    int_t const *pc_tmp_buf = NULL;
 
     if (NULL == A_BUF) {
         goto FINAL;
@@ -43,7 +43,7 @@ int binary_search(int const A_BUF[], int const SIZE, int const KEY)
     tmp_size = SIZE;
     pc_tmp_buf = A_BUF;
     while (tmp_size > 0) {
-        int i = tmp_size / 2;
+        int_t i = tmp_size / 2;
 
         ASSERT(NULL != pc_tmp_buf);
 

@@ -31,14 +31,14 @@ struct ldlist_node {
 struct ldlist_iterator {
     ldlist_frame_node_t *mp_node; // 结点
     iterator_t m_iter; // 迭代器接口
-    int m_element_size; // 元素大小
+    int_t m_element_size; // 元素大小
 };
 
 // 循环双链表
 struct ldlist {
     mempool_t *mp_mempool;
     ldlist_frame_head_t m_head;
-    int m_element_size; // 元素大小
+    int_t m_element_size; // 元素大小
     ldlist_iterator_t m_begin;
     ldlist_iterator_t m_end;
 };
@@ -47,13 +47,13 @@ struct ldlist {
 // ******************** 循环双链表接口 ********************
 extern void ldlist_build(ldlist_t *const THIS,
                          mempool_t *p_mempool,
-                         int element_size);
+                         int_t element_size);
 
 extern void ldlist_push_front(ldlist_t *const THIS, void const *pc_data);
 
 extern void ldlist_push_back(ldlist_t *const THIS, void const *pc_data);
 
-extern int ldlist_is_empty(ldlist_t *const THIS);
+extern int_t ldlist_is_empty(ldlist_t *const THIS);
 
 extern void *ldlist_first(ldlist_t *const THIS);
 

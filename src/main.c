@@ -20,9 +20,9 @@ static void build_permanent_mem(ssize_t size)
     sp_pm_left = size;
 }
 
-int alloc_permanent_mem(ssize_t size, void **pp_mem)
+int_t alloc_permanent_mem(ssize_t size, void **pp_mem)
 {
-    int rslt = 0;
+    int_t rslt = 0;
 
     ASSERT(NULL != sp_permanent_mem);
 
@@ -59,9 +59,9 @@ static void destroy_permanent_mem(void)
 
 // ********** 库本身的构造析构 **********
 
-static int build_cstl(void)
+static int_t build_cstl(void)
 {
-    int rslt = 0;
+    int_t rslt = 0;
     mempool_t *p_mp_public = NULL;
 
     // 申请持久内存
@@ -97,9 +97,9 @@ static void destroy_cstl(void)
 }
 
 
-int main(int argc, char *argv[])
+int_t main(int_t argc, char *argv[])
 {
-    int rslt = 0;
+    int_t rslt = 0;
 
     rslt = build_cstl();
     if (E_OK == rslt) {

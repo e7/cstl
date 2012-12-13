@@ -34,9 +34,9 @@ static inline void init_ldlist_frame_node(ldlist_frame_node_t *p_node)
 }
 
 // 结点是否落单
-static inline int ldlist_frame_node_alone(ldlist_frame_node_t const *p_node)
+static inline int_t ldlist_frame_node_alone(ldlist_frame_node_t const *p_node)
 {
-    int rslt = FALSE;
+    int_t rslt = FALSE;
 
     ASSERT (NULL != p_node);
 

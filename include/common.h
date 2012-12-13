@@ -60,12 +60,8 @@ extern "C" {
 // common types
 typedef signed char byte_t;
 typedef unsigned char ubyte_t;
-typedef signed short word_t;
-typedef unsigned short uword_t;
-typedef signed int int_t;
-typedef unsigned int uint_t;
-typedef signed long long_t;
-typedef unsigned long ulong_t;
+typedef intptr_t int_t;
+typedef uintptr_t uint_t;
 
 #define FALSE           (0)
 #define TRUE            (1)
@@ -123,13 +119,13 @@ enum {
 };
 
 typedef struct {
-    int (*mpf_compare)(void const *, void const *, int *);
-    int (*mpf_swap)(void *, void *);
+    int_t (*mpf_compare)(void const *, void const *, int_t *);
+    int_t (*mpf_swap)(void *, void *);
 } compare_swap_t;
 
 
 // 应用入口
-extern int cstl_main(int argc, char *argv[]);
+extern int_t cstl_main(int_t argc, char *argv[]);
 
 
 #ifdef __cplusplus

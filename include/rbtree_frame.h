@@ -26,8 +26,8 @@ enum {
 
 // ********** 红黑树框架结点 **********
 struct rbtree_frame_node {
-    int m_key;
-    int m_color; // 结点颜色
+    int_t m_key;
+    int_t m_color; // 结点颜色
     rbtree_frame_node_t *mp_father;
     rbtree_frame_node_t *mp_lchild;
     rbtree_frame_node_t *mp_rchild;
@@ -36,8 +36,8 @@ struct rbtree_frame_node {
             rbtree_frame_node_t name = {0, RB_BLACK, NULL, NULL, NULL}
 
 static inline void init_rbtree_frame_node_orig(rbtree_frame_node_t *p_node,
-                                               int key,
-                                               int color)
+                                               int_t key,
+                                               int_t color)
 {
     ASSERT(NULL != p_node);
 
@@ -51,7 +51,7 @@ static inline void init_rbtree_frame_node_orig(rbtree_frame_node_t *p_node,
 }
 
 static inline void init_rbtree_frame_node(rbtree_frame_node_t *p_node,
-                                          int key)
+                                          int_t key)
 {
     ASSERT(NULL != p_node);
 
@@ -60,12 +60,12 @@ static inline void init_rbtree_frame_node(rbtree_frame_node_t *p_node,
     return;
 }
 
-static inline int is_rbtree_frame_node_full(rbtree_frame_node_t *p_node)
+static inline int_t is_rbtree_frame_node_full(rbtree_frame_node_t *p_node)
 {
     return ((NULL != p_node->mp_lchild) && (NULL != p_node->mp_rchild));
 }
 
-static inline int is_rbtree_frame_node_empty(rbtree_frame_node_t *p_node)
+static inline int_t is_rbtree_frame_node_empty(rbtree_frame_node_t *p_node)
 {
     return ((NULL == p_node->mp_lchild) && (NULL == p_node->mp_rchild));
 }
@@ -74,13 +74,13 @@ static inline int is_rbtree_frame_node_empty(rbtree_frame_node_t *p_node)
 // ********** 红黑树框架 **********
 struct rbtree_frame {
     rbtree_frame_node_t *mp_root;
-    int m_size;
+    int_t m_size;
 };
 
 // ***** 内部函数 *****
 static inline
 rbtree_frame_node_t **find_first_red_node(rbtree_frame_t *p_tree,
-                                          int key)
+                                          int_t key)
 {
     rbtree_frame_node_t **pp_rslt = NULL;
 
@@ -107,7 +107,7 @@ rbtree_frame_node_t **find_first_red_node(rbtree_frame_t *p_tree,
 // 返回值：key结点的父节点中的左儿子或右儿子的地址
 static inline
 rbtree_frame_node_t **find_sub_tree_node(rbtree_frame_node_t **pp_sub_tree,
-                                         int key)
+                                         int_t key)
 {
     rbtree_frame_node_t **pp_pos = NULL;
 
@@ -183,7 +183,7 @@ static inline void init_rbtree_frame(rbtree_frame_t *p_tree)
     return;
 }
 
-static inline int is_rbtree_frame_empty(rbtree_frame_t *p_tree)
+static inline int_t is_rbtree_frame_empty(rbtree_frame_t *p_tree)
 {
     ASSERT(NULL != p_tree);
 
@@ -192,7 +192,7 @@ static inline int is_rbtree_frame_empty(rbtree_frame_t *p_tree)
 
 
 static inline rbtree_frame_node_t *find_rbtree_frame(rbtree_frame_t *p_tree,
-                                                     int key)
+                                                     int_t key)
 {
     rbtree_frame_node_t **pp_rslt = NULL;
 
@@ -203,10 +203,10 @@ static inline rbtree_frame_node_t *find_rbtree_frame(rbtree_frame_t *p_tree,
     return (NULL == pp_rslt) ? NULL : (*pp_rslt);
 }
 
-static inline int insert_rbtree_frame(rbtree_frame_t *p_tree,
+static inline int_t insert_rbtree_frame(rbtree_frame_t *p_tree,
                                       rbtree_frame_node_t *p_node)
 {
-    int rslt = 0;
+    int_t rslt = 0;
     rbtree_frame_node_t **pp_father = NULL;
 
     ASSERT(NULL != p_tree);
@@ -330,9 +330,9 @@ FINAL:
     return rslt;
 }
 
-static inline int remove_from_rbtree_frame(rbtree_frame_t *p_tree, int key)
+static inline int_t remove_from_rbtree_frame(rbtree_frame_t *p_tree, int_t key)
 {
-    int rslt = 0;
+    int_t rslt = 0;
     rbtree_frame_node_t **pp_del = NULL;
 
     pp_del = find_sub_tree_node(&p_tree->mp_root, key); // 寻找待删除的结点

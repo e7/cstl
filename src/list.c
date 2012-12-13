@@ -37,10 +37,10 @@ static void ldlist_iterator_set_data(iterator_t const *pc_iter,
     return;
 }
 
-static int ldlist_iterator_equal(iterator_t const *pc_iter1,
-                                 iterator_t const *pc_iter2)
+static int_t ldlist_iterator_equal(iterator_t const *pc_iter1,
+                                   iterator_t const *pc_iter2)
 {
-    int rslt = FALSE;
+    int_t rslt = FALSE;
     ldlist_iterator_t const *pc_ldlist_iter1 = NULL;
     ldlist_iterator_t const *pc_ldlist_iter2 = NULL;
 
@@ -82,8 +82,8 @@ static iterator_t *ldlist_iterator_get_prev(iterator_t const *pc_iter)
 
 // ******************** 循环双链表接口实现 ********************
 void ldlist_build(ldlist_t *const THIS,
-                 mempool_t *p_mempool,
-                 int element_size)
+                  mempool_t *p_mempool,
+                  int_t element_size)
 {
     const ldlist_iterator_t LDLIST_ITER_TPLT = {
         &THIS->m_head,
@@ -110,7 +110,7 @@ void ldlist_build(ldlist_t *const THIS,
     return;
 }
 
-int ldlist_is_empty(ldlist_t *const THIS)
+int_t ldlist_is_empty(ldlist_t *const THIS)
 {
     ASSERT(NULL != THIS);
 
@@ -147,8 +147,8 @@ enum {
 };
 
 static void ldlist_push(ldlist_t *const THIS,
-                       void const *pc_data,
-                       int push_type)
+                        void const *pc_data,
+                        int_t push_type)
 {
     ldlist_node_t *p_node = NULL;
 
@@ -199,7 +199,7 @@ void ldlist_push_back(ldlist_t *const THIS, void const *pc_data)
     return;
 }
 
-static void ldlist_pop(ldlist_t *const THIS, int pop_type)
+static void ldlist_pop(ldlist_t *const THIS, int_t pop_type)
 {
     ldlist_node_t *p_node = NULL;
     ldlist_frame_node_t *p_frame_node = NULL;

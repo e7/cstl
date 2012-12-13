@@ -9,14 +9,14 @@
 
 
 #if 0
-int cstl_main(int argc, char *argv[])
+int_t cstl_main(int_t argc, char *argv[])
 {
-    int rslt = 0;
-    int buf[] = {
+    int_t rslt = 0;
+    int_t buf[] = {
         4, 31, 92, 123, 545,
         873, 983, 1112, 7245, 9999,
     };
-    int buf2[] = {
+    int_t buf2[] = {
         354, 53, 422, 656, 23,
         323, 113, 5, 562, 90,
     };
@@ -32,35 +32,35 @@ int cstl_main(int argc, char *argv[])
     ldlist_t list = {
         NULL,
     };
-    int *pa_x = NULL;
+    int_t *pa_x = NULL;
 
     if (0 != MEMPOOL_BUILD(&mempool_for_test, "test")) {
         rslt = -1;
         goto FINAL;
     }
 
-    ldlist_build(&list, &mempool_for_test, sizeof(int));
+    ldlist_build(&list, &mempool_for_test, sizeof(int_t));
 
-    for (int i = 0; i < ARRAY_COUNT(buf2); ++i) {
+    for (int_t i = 0; i < ARRAY_COUNT(buf2); ++i) {
         ldlist_push_front(&list, &buf[2]);
     }
     for (iterator_t *p_iter = ldlist_begin(&list);
          ldlist_end(&list) != p_iter;
          p_iter = (*p_iter->mpf_get_next)(p_iter))
     {
-        //fprintf(stderr, "%d ", *(int *)(*p_iter->mpf_get_data(p_iter)));
+        //fprintf(stderr, "%d ", *(int_t *)(*p_iter->mpf_get_data(p_iter)));
     }
     fprintf(stderr, "\b\n");
 
     if (0 == (*sort_obj.mpf_sort)(buf2, ARRAY_COUNT(buf2))) {
-        for (int i = 0; i < ARRAY_COUNT(buf2); ++i) {
+        for (int_t i = 0; i < ARRAY_COUNT(buf2); ++i) {
             fprintf(stderr, "%d ", buf2[i]);
         }
         fprintf(stderr, "\n");
     }
     fprintf(stderr, "init success!\n");
 
-    pa_x = MEMPOOL_ARRAY_ALLOC(&mempool_for_test, sizeof(int), 4096);
+    pa_x = MEMPOOL_ARRAY_ALLOC(&mempool_for_test, sizeof(int_t), 4096);
     pa_x[4095] = 23;
     pa_x[0] = 45;
     //pa_x[4096] = 50;
@@ -88,10 +88,10 @@ FINAL:
 #endif
 
 #if 0
-int cstl_main(int argc, char *argv[])
+int_t cstl_main(int_t argc, char *argv[])
 {
-    int rslt = 0;
-    int buf[] = {
+    int_t rslt = 0;
+    int_t buf[] = {
         354, 53, 422, 656, 23,
         323, 113, 5, 562, 90,
     };
@@ -108,9 +108,9 @@ int cstl_main(int argc, char *argv[])
     };
 
     MEMPOOL_BUILD(&mempool_for_test);
-    ldlist_build(&list, &mempool_for_test, sizeof(int));
+    ldlist_build(&list, &mempool_for_test, sizeof(int_t));
 
-    for (int i = 0; i < ARRAY_COUNT(buf); ++i) {
+    for (int_t i = 0; i < ARRAY_COUNT(buf); ++i) {
         ldlist_push_back(&list, &buf[i]);
     }
     /*printf("some delete =====\n");
@@ -122,7 +122,7 @@ int cstl_main(int argc, char *argv[])
          !(*p_iter->mpf_equal)(ldlist_end(&list), p_iter);
          p_iter = (*p_iter->mpf_get_next)(p_iter))
     {
-        int *p_value = (*p_iter->mpf_get_data)(p_iter);
+        int_t *p_value = (*p_iter->mpf_get_data)(p_iter);
         fprintf(stderr, "%d ", *p_value);
     }
     fprintf(stderr, "\n");
@@ -135,7 +135,7 @@ int cstl_main(int argc, char *argv[])
 #endif
 
 #if 0
-int cstl_main(int argc, char *argv[])
+int_t cstl_main(int_t argc, char *argv[])
 {
     rbtree_frame_t tree;
     rbtree_frame_node_t nodes[] = {
@@ -176,11 +176,11 @@ int cstl_main(int argc, char *argv[])
     init_rbtree_frame(&tree);
 
     fprintf(stderr, "before insert size: %d\n", tree.m_size);
-    for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
+    for (int_t i = 0; i < ARRAY_COUNT(nodes); ++i) {
         insert_rbtree_frame(&tree, &nodes[i]);
     }
     fprintf(stderr, "after insert size: %d\n", tree.m_size);
-    for (int i = 0; i < ARRAY_COUNT(nodes) - 1; ++i) {
+    for (int_t i = 0; i < ARRAY_COUNT(nodes) - 1; ++i) {
         remove_from_rbtree_frame(&tree, nodes[i].m_key);
     }
     fprintf(stderr, "after remove size: %d\n", tree.m_size);
@@ -226,11 +226,11 @@ int cstl_main(int argc, char *argv[])
 #include <time.h>
 
 
-typedef int key_t;
+typedef int_t key_t;
 
-int cstl_main(int argc, char *argv[])
+int_t cstl_main(int_t argc, char *argv[])
 {
-    int i, count = 10000000;
+    int_t i, count = 10000000;
     struct timeval tpstart, tpend;
     float timeuse;
     rbtree_frame_t tree;
@@ -282,18 +282,18 @@ int cstl_main(int argc, char *argv[])
 #include <time.h>
 
 
-typedef int key_t;
+typedef int_t key_t;
 
-int cstl_main(int argc, char *argv[])
+int_t cstl_main(int_t argc, char *argv[])
 {
-    //int count = 10000000;
-    int count = 10000000;
+    //int_t count = 10000000;
+    int_t count = 10000000;
     struct timeval tpstart, tpend;
     float timeuse;
     avltree_frame_t *p_tree = NULL;
     avltree_frame_t *p_nodes = NULL;
-    int *p_keys = (int *)calloc(count, sizeof(int));
-    /*int keys[] = {
+    int_t *p_keys = (int_t *)calloc(count, sizeof(int_t));
+    /*int_t keys[] = {
         2, 2, 41, 8, 15, 3, 33, 47, 8, 28, 42,
         17, 47, 30, 26, 7, 24, 48, 22, 6, 6,
         42, 19, 42, 23, 25, 5, 28, 25, 12, 34,
@@ -364,7 +364,7 @@ int cstl_main(int argc, char *argv[])
                                   sizeof(avltree_frame_t));
     //p_nodes = calloc(count, sizeof(avltree_frame_t));
 
-    for (int i = 0; i < count; ++i) {
+    for (int_t i = 0; i < count; ++i) {
         p_keys[i] =  rand() % count;
 
         p_nodes[i].m_key = p_keys[i];
@@ -374,31 +374,31 @@ int cstl_main(int argc, char *argv[])
     }
 
     /*fprintf(stderr, "keys: ");
-    for (int i = 0; i < count; ++i) {
+    for (int_t i = 0; i < count; ++i) {
         fprintf(stderr, "%d, ", p_keys[i]);
     }*/
     fprintf(stderr, "\b\n");
 
     printf("start\n");
     gettimeofday(&tpstart, NULL);
-    for (int i = 0; i < count; ++i) {
+    for (int_t i = 0; i < count; ++i) {
         insert_avltree_frame(&p_tree, &p_nodes[i]);
     }
 
-    for (int i = 0; i < count; ++i) {
+    for (int_t i = 0; i < count; ++i) {
         if (NULL != p_tree) {
             remove_avltree_frame(&p_tree, p_keys[i]);
         }
     }
     MEMPOOL_FREE(p_pool, p_nodes);
 
-    /*for (int i = 0; i < ARRAY_COUNT(keys); ++i) {
+    /*for (int_t i = 0; i < ARRAY_COUNT(keys); ++i) {
         nodes[i].m_key = keys[i];
     }
-    for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
+    for (int_t i = 0; i < ARRAY_COUNT(nodes); ++i) {
         insert_avltree_frame(&p_tree, &nodes[i]);
     }
-    for (int i = 0; i < ARRAY_COUNT(nodes); ++i) {
+    for (int_t i = 0; i < ARRAY_COUNT(nodes); ++i) {
         fprintf(stderr, "remove[%d]: %d\n", i, keys[i]);
         remove_avltree_frame(&p_tree, keys[i]);
         if (NULL == p_tree) {
@@ -425,9 +425,9 @@ int cstl_main(int argc, char *argv[])
 #include "sort.h"
 
 
-int cstl_main(int argc, char *argv[])
+int_t cstl_main(int_t argc, char *argv[])
 {
-    int x[] = {
+    int_t x[] = {
         9, 4, 12, 8, 1, 99, 47, 8,
     };
     sort_t sort = {
@@ -441,7 +441,7 @@ int cstl_main(int argc, char *argv[])
                                  sizeof(x),
                                  &CMP_SWAP_OF_INT))
     {
-        for (int i = 0; i < ARRAY_COUNT(x); ++i) {
+        for (int_t i = 0; i < ARRAY_COUNT(x); ++i) {
             fprintf(stderr, "%d\n", x[i]);
         }
     }

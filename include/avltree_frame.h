@@ -16,9 +16,9 @@ extern "C" {
 
 typedef struct avltree_frame avltree_frame_t;
 struct avltree_frame {
-    intptr_t m_key; // 键
+    int_t m_key; // 键
     void *mp_value; // 值
-    int m_balance_factor; // 平衡因子
+    int_t m_balance_factor; // 平衡因子
     avltree_frame_t *mp_ftree; // 父树
     avltree_frame_t *mp_ltree; // 左子树
     avltree_frame_t *mp_rtree; // 右子树
@@ -185,7 +185,7 @@ avl_iter_t *find_rmin_avltree_frame(avltree_frame_t **pp_tree,
 
 // ********** avl树接口 **********
 static inline
-void init_avltree_frame(avltree_frame_t *p_tree, intptr_t key)
+void init_avltree_frame(avltree_frame_t *p_tree, int_t key)
 {
     ASSERT(NULL != p_tree);
 
@@ -198,10 +198,10 @@ void init_avltree_frame(avltree_frame_t *p_tree, intptr_t key)
 }
 
 static inline
-int insert_avltree_frame(avltree_frame_t **pp_tree,
+int_t insert_avltree_frame(avltree_frame_t **pp_tree,
                          avltree_frame_t *p_subtree)
 {
-    int rslt = 0;
+    int_t rslt = 0;
     avltree_frame_t **pp_orig = NULL; // 树根指针真身
     avltree_frame_t **pp_vacancy = NULL; //待插位置
     avltree_frame_t *p_child_tree = NULL;
@@ -315,7 +315,7 @@ FINAL:
 
 static inline
 avl_iter_t *find_avltree_frame(avltree_frame_t **pp_tree,
-                               intptr_t key,
+                               int_t key,
                                avl_iter_t *p_iter)
 {
     ASSERT(NULL != pp_tree);
@@ -346,9 +346,9 @@ avl_iter_t *find_avltree_frame(avltree_frame_t **pp_tree,
 }
 
 static inline
-int remove_avltree_frame(avltree_frame_t **pp_tree, intptr_t key)
+int_t remove_avltree_frame(avltree_frame_t **pp_tree, int_t key)
 {
-    int rslt = 0;
+    int_t rslt = 0;
     avl_iter_t del = {
         NULL, NULL,
     };

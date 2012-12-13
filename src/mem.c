@@ -9,11 +9,11 @@
 // 内存池堆
 static avltree_frame_t *sp_mempool_heap = NULL;
 
-static intptr_t name_hash(char const *pc_name)
+static int_t name_hash(char const *pc_name)
 {
-    intptr_t key = 0;
+    int_t key = 0;
 
-    for (int i = 0; '\0' != pc_name[i]; ++i) {
+    for (int_t i = 0; '\0' != pc_name[i]; ++i) {
         key = (key << 5) + pc_name[i];
     }
 
@@ -21,7 +21,7 @@ static intptr_t name_hash(char const *pc_name)
 }
 
 // ******************** 对象页 ********************
-static page_t *new_page(int const OBJ_SIZE)
+static page_t *new_page(int_t const OBJ_SIZE)
 {
     int_t const OBJ_SHELL_SIZE = sizeof(obj_shell_t) + OBJ_SIZE;
     int_t const PAGE_SIZE = sizeof(page_t) + OBJ_SHELL_SIZE * OBJS_PER_PAGE;
@@ -64,7 +64,7 @@ FINAL:
     return p_page;
 }
 
-static int is_page_full(page_t *p_page)
+static int_t is_page_full(page_t *p_page)
 {
     int_t rslt = FALSE;
 
@@ -81,14 +81,15 @@ static int is_page_full(page_t *p_page)
     return rslt;
 }
 
-static int is_page_empty(page_t *const THIS)
+static int_t is_page_empty(page_t *const THIS)
 {
     ASSERT(NULL != THIS);
 
     return (0 == THIS->m_use_count);
 }
 
-static obj_shell_t *do_provide_obj_sh(page_t *const THIS, int const OBJ_SIZE)
+static obj_shell_t *do_provide_obj_sh(page_t *const THIS,
+                                      ssize_t const OBJ_SIZE)
 {
     obj_shell_t *p_obj_sh = NULL;
 
@@ -219,9 +220,9 @@ static void recycle_obj_sh(page_base_t *const THIS, obj_shell_t *p_obj_sh)
 
 
 // ******************** 内存池接口 ********************
-int find_mempool(char const *pc_name, mempool_t **pp_pool)
+int_t find_mempool(char const *pc_name, mempool_t **pp_pool)
 {
-    int rslt = 0;
+    int_t rslt = 0;
     avl_iter_t *p_iter = NULL;
     avl_iter_t iter = {
         NULL, NULL,
@@ -245,9 +246,9 @@ FINAL:
     return rslt;
 }
 
-int mempool_build(mempool_t *const THIS, char const *pc_name)
+int_t mempool_build(mempool_t *const THIS, char const *pc_name)
 {
-    int rslt = 0;
+    int_t rslt = 0;
 
     if ((NULL == THIS) || (NULL == pc_name)) {
         rslt = -E_NULL_POINTER;
@@ -274,18 +275,18 @@ FINAL:
 }
 
 void *mempool_alloc(mempool_t *const THIS,
-                    int obj_size,
+                    ssize_t obj_size,
                     char const *pc_file,
-                    int line)
+                    int_t line)
 {
     return mempool_array_alloc(THIS, 1, obj_size, pc_file, line);
 }
 
 void *mempool_array_alloc(mempool_t *const THIS,
-                          int obj_count,
-                          int obj_size,
+                          int_t obj_count,
+                          ssize_t obj_size,
                           char const *pc_file,
-                          int line)
+                          int_t line)
 {
     void *p_rslt = NULL;
     int_t const OBJS_SIZE = obj_size * obj_count;
@@ -305,7 +306,7 @@ void *mempool_array_alloc(mempool_t *const THIS,
 
         // 对象地址作为key
         init_avltree_frame(&p_bigobj_sh->m_heap_node,
-                           (intptr_t)p_bigobj_sh->m_obj_sh.m_obj);
+                           (int_t)p_bigobj_sh->m_obj_sh.m_obj);
         p_bigobj_sh->m_obj_sh.m_intptr.m_size = OBJS_SIZE;
 
         ASSERT(0 == insert_avltree_frame(&THIS->mp_bigobj_heap,
@@ -313,7 +314,7 @@ void *mempool_array_alloc(mempool_t *const THIS,
 
         p_rslt = (void *)(p_bigobj_sh->m_obj_sh.m_obj);
     } else {
-        int index = 0;
+        int_t index = 0;
 
         // 寻找合适大小的页仓库
         for (index = 0; index < OBJ_SIZE_COUNT; ++index) {
@@ -344,12 +345,12 @@ FINAL:
     return p_rslt;
 }
 
-int mempool_free(mempool_t *const THIS,
+int_t mempool_free(mempool_t *const THIS,
                  void *p_obj,
                  char const *pc_file,
-                 int line)
+                 int_t line)
 {
-    int rslt = 0;
+    int_t rslt = 0;
     obj_shell_t *p_obj_sh = NULL;
 
     ASSERT(NULL != THIS);
@@ -366,7 +367,7 @@ int mempool_free(mempool_t *const THIS,
                                                    bigobj_shell_t,
                                                    m_obj_sh);
         rslt = remove_avltree_frame(&THIS->mp_bigobj_heap,
-                                    (intptr_t)p_obj);
+                                    (int_t)p_obj);
         if (E_OK == rslt) {
             free(p_bigobj_sh);
         }
@@ -401,9 +402,9 @@ int mempool_free(mempool_t *const THIS,
     return rslt;
 }
 
-int mempool_destroy(mempool_t *const THIS)
+int_t mempool_destroy(mempool_t *const THIS)
 {
-    int rslt = 0;
+    int_t rslt = 0;
 
     if (NULL == THIS) {
         rslt = -E_NULL_POINTER;

@@ -6,11 +6,12 @@
 #include "sort.h"
 
 
-// 整型比较交换体
+// ********** 常用比较交换体 **********
+// ***** 整型比较交换体 *****
 // error_info: E_NULL_POINTER;
-static int compare_int(int const *pc_a, int const *pc_b, int *p_rslt)
+static int_t compare_int(int_t const *pc_a, int_t const *pc_b, int_t *p_rslt)
 {
-    int rslt = E_OK;
+    int_t rslt = E_OK;
 
     if ((NULL == pc_a) || (NULL == pc_b)) {
         rslt = -E_NULL_POINTER;
@@ -30,9 +31,9 @@ FINAL:
     return rslt;
 }
 
-static int swap_int(int *p_a, int *p_b)
+static int_t swap_int(int_t *p_a, int_t *p_b)
 {
-    int rslt = E_OK;
+    int_t rslt = E_OK;
 
     if ((NULL == p_a) || (NULL == p_b)) {
         rslt = -E_NULL_POINTER;
@@ -48,19 +49,20 @@ FINAL:
 }
 
 compare_swap_t const CMP_SWAP_OF_INT = {
-    (int (*)(void const *, void const *, int *))&compare_int,
-    (int (*)(void *, void *))&swap_int,
+    (int_t (*)(void const *, void const *, int_t *))&compare_int,
+    (int_t (*)(void *, void *))&swap_int,
 };
 
 
-// ****** 插入排序 *****
+// ********** 内排序 **********
+// ***** 插入排序 *****
 // error_info: E_NULL_POINTER, E_OUT_OF_RANGE
-int insert_sort(void *pa_data,
-                int ele_size,
-                int total_size,
-                compare_swap_t const *pc_compare)
+int_t insert_sort(void *pa_data,
+                  ssize_t ele_size,
+                  ssize_t total_size,
+                  compare_swap_t const *pc_compare)
 {
-    int rslt = E_OK;
+    int_t rslt = E_OK;
 
     if (NULL == pa_data) {
         rslt = -E_NULL_POINTER;
@@ -88,11 +90,11 @@ int insert_sort(void *pa_data,
         goto FINAL;
     }
 
-    for (int i = 0; i < (total_size - ele_size); i += ele_size) {
+    for (int_t i = 0; i < (total_size - ele_size); i += ele_size) {
         byte_t *p_i =  &((byte_t *)pa_data)[i];
 
-        for (int j = i + ele_size; j < total_size; j += ele_size) {
-            int cmp_rslt = 0;
+        for (int_t j = i + ele_size; j < total_size; j += ele_size) {
+            int_t cmp_rslt = 0;
             byte_t *p_j =  &((byte_t *)pa_data)[j];
 
             rslt = (*pc_compare->mpf_compare)(p_i, p_j, &cmp_rslt);
@@ -113,14 +115,14 @@ FINAL:
 // ***** 快速排序 *****
 static inline
 void *prepare_pivot(void *pa_data,
-                    int ele_size,
-                    int total_size,
+                    int_t ele_size,
+                    int_t total_size,
                     compare_swap_t const *pc_compare)
 {
-    int cmp_rslt = 0;
-    int const LEFT = 0;
-    int const CENTER = total_size / ele_size / 2;
-    int const RIGHT = total_size - ele_size;
+    int_t cmp_rslt = 0;
+    int_t const LEFT = 0;
+    int_t const CENTER = total_size / ele_size / 2;
+    int_t const RIGHT = total_size - ele_size;
     byte_t *pa_data_tmp = (byte_t *)pa_data;
 
     ASSERT(NULL != pa_data);
@@ -158,13 +160,13 @@ void *prepare_pivot(void *pa_data,
 }
 
 // error_info: E_NULL_POINTER, E_OUT_OF_RANGE
-int quick_sort(void *pa_data,
-               int ele_size,
-               int total_size,
-               compare_swap_t const *pc_compare)
+int_t quick_sort(void *pa_data,
+                 ssize_t ele_size,
+                 ssize_t total_size,
+                 compare_swap_t const *pc_compare)
 {
-    int rslt = 0;
-    byte_t *p_pivot = NULL;
+    int_t rslt = 0;
+    byte_t *p_pivot = NULL; // 枢纽元
     byte_t *p_i = NULL;
     byte_t *p_j = NULL;
 
@@ -199,6 +201,7 @@ int quick_sort(void *pa_data,
     }
 
 
+    // start work
     p_pivot = (byte_t *)prepare_pivot(pa_data,
                                       ele_size,
                                       total_size,
