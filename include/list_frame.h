@@ -21,7 +21,7 @@ struct ldlist_frame_node {
     ldlist_frame_node_t *mp_next;
 };
 
-// 结点初始化
+// 结点初始化，需自旋
 #define LDLIST_FRAME_HEAD_INIT(name)        {&(name), &(name)}
 #define LDLIST_FRAME_HEAD(name)             \
             ldlist_frame_head_t name = LDLIST_FRAME_HEAD_INIT(name)
@@ -87,7 +87,7 @@ static inline void ldlist_frame_add_tail(ldlist_frame_head_t *p_head,
 
 // 访问链表结点数据
 static inline
-ldlist_frame_head_t *ldlist_frame_first(ldlist_frame_head_t const *pc_list)
+ldlist_frame_node_t *ldlist_frame_first(ldlist_frame_head_t const *pc_list)
 {
     ASSERT(NULL != pc_list);
 
@@ -111,7 +111,7 @@ ldlist_frame_node_t *ldlist_frame_next(ldlist_frame_node_t const *pc_node)
 }
 
 static inline
-ldlist_frame_head_t *ldlist_frame_last(ldlist_frame_head_t const *pc_list)
+ldlist_frame_node_t *ldlist_frame_last(ldlist_frame_head_t const *pc_list)
 {
     ASSERT(NULL != pc_list);
 

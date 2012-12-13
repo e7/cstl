@@ -56,51 +56,7 @@ compare_swap_t const CMP_SWAP_OF_INT = {
 
 
 // ********** 内排序 **********
-#define COUNT_CUTOFF            20
-
-int_t default_sort(void *pa_data,
-                   ssize_t ele_size,
-                   ssize_t total_size,
-                   compare_swap_t const *pc_compare)
-{
-    int_t rslt = E_OK;
-
-    if (NULL == pa_data) {
-        rslt = -E_NULL_POINTER;
-
-        goto FINAL;
-    }
-
-    if ((ele_size < 0) || (total_size < ele_size)) {
-        rslt = -E_OUT_OF_RANGE;
-
-        goto FINAL;
-    }
-
-    if (NULL == pc_compare) {
-        rslt = -E_NULL_POINTER;
-
-        goto FINAL;
-    }
-
-    if ( (NULL == pc_compare->mpf_compare) ||
-            (NULL == pc_compare->mpf_swap))
-    {
-        rslt = -E_NULL_POINTER;
-
-        goto FINAL;
-    }
-
-    if ((total_size / ele_size) < COUNT_CUTOFF) {
-        rslt = insert_sort(pa_data, ele_size, total_size, pc_compare);
-    } else {
-        rslt = quick_sort(pa_data, ele_size, total_size, pc_compare);
-    }
-
-FINAL:
-    return rslt;
-}
-
+#define COUNT_CUTOFF            5
 
 // ***** 插入排序 *****
 // error_info: E_NULL_POINTER, E_OUT_OF_RANGE
@@ -211,8 +167,8 @@ int_t quick_sort(void *pa_data,
 {
     typedef struct {
         ldlist_frame_node_t m_node;
-        void *mpa_data;
-        ssize_t total_size;
+        byte_t *mpa_data;
+        ssize_t m_total_size;
     } qs_frame_t; // 快排帧
 
     int_t rslt = 0;
@@ -220,17 +176,18 @@ int_t quick_sort(void *pa_data,
     byte_t *p_i = NULL;
     byte_t *p_j = NULL;
     mempool_t *p_public_pool = NULL; // 公共内存池
+    LDLIST_FRAME_HEAD(recursion_stack); // 递归栈
+    qs_frame_t *p_in_frame = NULL;
+    qs_frame_t *p_out_frame = NULL;
 
+    // 参数检查
     if (NULL == pa_data) {
         rslt = -E_NULL_POINTER;
 
         goto FINAL;
     }
 
-    // 元素数目小于3时不能做快速排序
-    if ((ele_size < 0) ||
-            (total_size < ele_size) ||
-            ((total_size / ele_size) < 3))
+    if ((ele_size < 0) || (total_size < ele_size))
     {
         rslt = -E_OUT_OF_RANGE;
 
@@ -253,15 +210,99 @@ int_t quick_sort(void *pa_data,
 
     // start work
     ASSERT(0 == find_mempool(PUBLIC_MEMPOOL, &p_public_pool));
-    while (TRUE) {
-        p_pivot = (byte_t *)prepare_pivot(pa_data,
-                                          ele_size,
-                                          total_size,
-                                          pc_compare);
-        p_i = &((byte_t *)pa_data)[0];
-        p_j = &((byte_t *)pa_data)[total_size - 2 * ele_size];
 
-        fprintf(stderr, "[i] %p, [j] %p, [pivot] %p", p_i, p_j, p_pivot);
+    // 初始化递归栈
+    p_in_frame = (qs_frame_t *)MEMPOOL_ALLOC(p_public_pool,
+                                             sizeof(qs_frame_t));
+    init_ldlist_frame_node(&p_in_frame->m_node);
+    p_in_frame->mpa_data = pa_data;
+    p_in_frame->m_total_size = total_size;
+    ldlist_frame_add_head(&recursion_stack, &p_in_frame->m_node);
+
+    // 循环处理递归栈
+    while (!ldlist_frame_node_alone(&recursion_stack)) {
+        // 从栈中取出递归体
+        p_out_frame = CONTAINER_OF(ldlist_frame_first(&recursion_stack),
+                                   qs_frame_t,
+                                   m_node);
+        ldlist_frame_del(&p_out_frame->m_node);
+        ASSERT(NULL != p_out_frame);
+
+        // 排序
+        do {
+            if ((p_out_frame->m_total_size / ele_size) > COUNT_CUTOFF) {
+                p_pivot = (byte_t *)prepare_pivot(p_out_frame->mpa_data,
+                                                  ele_size,
+                                                  p_out_frame->m_total_size,
+                                                  pc_compare);
+                p_i = &((byte_t *)p_out_frame->mpa_data)[0];
+                p_j = &((byte_t *)p_out_frame->mpa_data)[
+                          p_out_frame->m_total_size - 2 * ele_size
+                      ];
+
+                while (TRUE) {
+                    int_t cmp_rslt = 0;
+
+                    while (TRUE) {
+                        ASSERT(0 == (*pc_compare->mpf_compare)(p_i,
+                                                               p_pivot,
+                                                               &cmp_rslt));
+                        if (CMP_LESS_THAN != cmp_rslt) {
+                            break;
+                        }
+                        p_i += ele_size;
+                    }
+
+                    while (TRUE) {
+                        ASSERT(0 == (*pc_compare->mpf_compare)(p_j,
+                                                               p_pivot,
+                                                               &cmp_rslt));
+                        if (CMP_GREATER_THAN != cmp_rslt) {
+                            break;
+                        }
+                        p_j -= ele_size;
+                    }
+
+                    if (p_i < p_j) {
+                       ASSERT(0 == (*pc_compare->mpf_swap)(p_i, p_j));
+                    } else {
+                        break;
+                    }
+                }
+
+                // 枢纽元归位
+                ASSERT(0 == (*pc_compare->mpf_swap)(p_i, p_pivot));
+
+                // 压入新的递归体，现在p_i是枢纽元
+                // left
+                p_in_frame = (qs_frame_t *)MEMPOOL_ALLOC(p_public_pool,
+                                                         sizeof(qs_frame_t));
+                init_ldlist_frame_node(&p_in_frame->m_node);
+                p_in_frame->mpa_data = p_out_frame->mpa_data;
+                p_in_frame->m_total_size = p_i - p_out_frame->mpa_data;
+                ldlist_frame_add_head(&recursion_stack, &p_in_frame->m_node);
+
+                // right
+                p_in_frame = (qs_frame_t *)MEMPOOL_ALLOC(p_public_pool,
+                                                         sizeof(qs_frame_t));
+                init_ldlist_frame_node(&p_in_frame->m_node);
+                p_in_frame->mpa_data = p_i + ele_size;
+                p_in_frame->m_total_size
+                    = p_out_frame->m_total_size
+                          - (p_i + ele_size - p_out_frame->mpa_data);
+                ldlist_frame_add_head(&recursion_stack, &p_in_frame->m_node);
+
+                break;
+            } else {
+                rslt = insert_sort(p_out_frame->mpa_data,
+                                   ele_size,
+                                   p_out_frame->m_total_size,
+                                   pc_compare);
+            }
+        } while (0);
+
+        // 释放递归体
+        ASSERT(0 == MEMPOOL_FREE(p_public_pool, p_out_frame));
     }
 
 FINAL:
@@ -269,5 +310,5 @@ FINAL:
 }
 
 sort_t const DEFAULT_SORT = {
-    &default_sort,
-};
+    &quick_sort, // 默认使用快速排序
+}; // 默认排序体

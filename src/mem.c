@@ -346,9 +346,9 @@ FINAL:
 }
 
 int_t mempool_free(mempool_t *const THIS,
-                 void *p_obj,
-                 char const *pc_file,
-                 int_t line)
+                   void *p_obj,
+                   char const *pc_file,
+                   int_t line)
 {
     int_t rslt = 0;
     obj_shell_t *p_obj_sh = NULL;

@@ -429,6 +429,7 @@ int_t cstl_main(int_t argc, char *argv[])
 {
     int_t x[] = {
         9, 4, 12, 8, 1, 99, 47, 8,
+        45, 2, 83, 80, 5, 3, 32, 19,
     };
 
     fprintf(stderr, "[%d]\n", MID(5, 4, 2));

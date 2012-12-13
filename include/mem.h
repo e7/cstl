@@ -97,9 +97,9 @@ extern void *mempool_array_alloc(mempool_t *const THIS,
                                  char const *pc_file,
                                  int_t line);
 extern int_t mempool_free(mempool_t *const THIS,
-                        void *p_obj,
-                        char const *pc_file,
-                        int_t line);
+                          void *p_obj,
+                          char const *pc_file,
+                          int_t line);
 extern int_t mempool_destroy(mempool_t *const THIS);
 
 #define MEMPOOL_BUILD           mempool_build
