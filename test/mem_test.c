@@ -272,7 +272,7 @@ int_t cstl_main(int_t argc, char *argv[])
 }
 #endif
 
-#if 1
+#if 0
 // avl树性能测试
 #include <sys/time.h>
 
@@ -419,7 +419,7 @@ int_t cstl_main(int_t argc, char *argv[])
 #endif
 
 
-#if 0
+#if 1
 // 插入排序测试
 #include <stdio.h>
 #include "sort.h"
@@ -430,13 +430,10 @@ int_t cstl_main(int_t argc, char *argv[])
     int_t x[] = {
         9, 4, 12, 8, 1, 99, 47, 8,
     };
-    sort_t sort = {
-        &insert_sort,
-    };
 
     fprintf(stderr, "[%d]\n", MID(5, 4, 2));
 
-    if (E_OK == (*sort.mpf_sort)(x,
+    if (E_OK == (*DEFAULT_SORT.mpf_sort)(x,
                                  sizeof(x[0]),
                                  sizeof(x),
                                  &CMP_SWAP_OF_INT))

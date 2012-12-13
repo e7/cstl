@@ -199,7 +199,7 @@ void init_avltree_frame(avltree_frame_t *p_tree, int_t key)
 
 static inline
 int_t insert_avltree_frame(avltree_frame_t **pp_tree,
-                         avltree_frame_t *p_subtree)
+                           avltree_frame_t *p_subtree)
 {
     int_t rslt = 0;
     avltree_frame_t **pp_orig = NULL; // 树根指针真身

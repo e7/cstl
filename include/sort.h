@@ -19,6 +19,8 @@ typedef struct {
     int_t (*mpf_sort)(void *, ssize_t, ssize_t, compare_swap_t const *);
 } sort_t;
 
+extern sort_t const DEFAULT_SORT; // 默认排序体
+
 
 // 常用排序实现
 extern compare_swap_t const CMP_SWAP_OF_INT;

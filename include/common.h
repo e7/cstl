@@ -128,6 +128,9 @@ typedef struct {
 extern int_t cstl_main(int_t argc, char *argv[]);
 
 
+#include "error_info.h"
+
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

@@ -2,7 +2,6 @@
 // author: e7, ryuuzaki.uchiha@gmail.com
 
 #include "mem.h"
-#include "error_info.h"
 
 
 // ********** 持久内存 **********

@@ -2,8 +2,9 @@
 // author: e7, ryuuzaki.uchiha@gmail.com
 
 
-#include "error_info.h"
+#include "mem.h"
 #include "sort.h"
+#include "list_frame.h"
 
 
 // ********** 常用比较交换体 **********
@@ -55,6 +56,52 @@ compare_swap_t const CMP_SWAP_OF_INT = {
 
 
 // ********** 内排序 **********
+#define COUNT_CUTOFF            20
+
+int_t default_sort(void *pa_data,
+                   ssize_t ele_size,
+                   ssize_t total_size,
+                   compare_swap_t const *pc_compare)
+{
+    int_t rslt = E_OK;
+
+    if (NULL == pa_data) {
+        rslt = -E_NULL_POINTER;
+
+        goto FINAL;
+    }
+
+    if ((ele_size < 0) || (total_size < ele_size)) {
+        rslt = -E_OUT_OF_RANGE;
+
+        goto FINAL;
+    }
+
+    if (NULL == pc_compare) {
+        rslt = -E_NULL_POINTER;
+
+        goto FINAL;
+    }
+
+    if ( (NULL == pc_compare->mpf_compare) ||
+            (NULL == pc_compare->mpf_swap))
+    {
+        rslt = -E_NULL_POINTER;
+
+        goto FINAL;
+    }
+
+    if ((total_size / ele_size) < COUNT_CUTOFF) {
+        rslt = insert_sort(pa_data, ele_size, total_size, pc_compare);
+    } else {
+        rslt = quick_sort(pa_data, ele_size, total_size, pc_compare);
+    }
+
+FINAL:
+    return rslt;
+}
+
+
 // ***** 插入排序 *****
 // error_info: E_NULL_POINTER, E_OUT_OF_RANGE
 int_t insert_sort(void *pa_data,
@@ -98,12 +145,9 @@ int_t insert_sort(void *pa_data,
             byte_t *p_j =  &((byte_t *)pa_data)[j];
 
             rslt = (*pc_compare->mpf_compare)(p_i, p_j, &cmp_rslt);
-            if (0 == (*pc_compare->mpf_compare)(p_i, p_j, &cmp_rslt)) {
-                if (CMP_GREATER_THAN == cmp_rslt) {
-                    (*pc_compare->mpf_swap)(p_i, p_j);
-                }
-            } else {
-                goto FINAL; // like exit(-1);
+            ASSERT(0 == (*pc_compare->mpf_compare)(p_i, p_j, &cmp_rslt));
+            if (CMP_GREATER_THAN == cmp_rslt) {
+                (*pc_compare->mpf_swap)(p_i, p_j);
             }
         }
     }
@@ -165,10 +209,17 @@ int_t quick_sort(void *pa_data,
                  ssize_t total_size,
                  compare_swap_t const *pc_compare)
 {
+    typedef struct {
+        ldlist_frame_node_t m_node;
+        void *mpa_data;
+        ssize_t total_size;
+    } qs_frame_t; // 快排帧
+
     int_t rslt = 0;
     byte_t *p_pivot = NULL; // 枢纽元
     byte_t *p_i = NULL;
     byte_t *p_j = NULL;
+    mempool_t *p_public_pool = NULL; // 公共内存池
 
     if (NULL == pa_data) {
         rslt = -E_NULL_POINTER;
@@ -200,18 +251,23 @@ int_t quick_sort(void *pa_data,
         goto FINAL;
     }
 
-
     // start work
-    p_pivot = (byte_t *)prepare_pivot(pa_data,
-                                      ele_size,
-                                      total_size,
-                                      pc_compare);
-    p_i = &((byte_t *)pa_data)[0];
-    p_j = &((byte_t *)pa_data)[total_size - 2 * ele_size];
+    ASSERT(0 == find_mempool(PUBLIC_MEMPOOL, &p_public_pool));
     while (TRUE) {
+        p_pivot = (byte_t *)prepare_pivot(pa_data,
+                                          ele_size,
+                                          total_size,
+                                          pc_compare);
+        p_i = &((byte_t *)pa_data)[0];
+        p_j = &((byte_t *)pa_data)[total_size - 2 * ele_size];
+
         fprintf(stderr, "[i] %p, [j] %p, [pivot] %p", p_i, p_j, p_pivot);
     }
 
 FINAL:
     return rslt;
 }
+
+sort_t const DEFAULT_SORT = {
+    &default_sort,
+};
