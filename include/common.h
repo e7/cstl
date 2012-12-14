@@ -63,6 +63,9 @@ typedef unsigned char ubyte_t;
 typedef intptr_t int_t;
 typedef uintptr_t uint_t;
 
+typedef intptr_t handle_t;
+
+
 #define FALSE           (0)
 #define TRUE            (1)
 

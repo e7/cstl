@@ -419,7 +419,7 @@ int_t cstl_main(int_t argc, char *argv[])
 #endif
 
 
-#if 1
+#if 0
 // 插入排序测试
 #include <stdio.h>
 #include "sort.h"
@@ -445,5 +445,24 @@ int_t cstl_main(int_t argc, char *argv[])
     }
 
     return 0;
+}
+#endif
+
+#if 1
+
+#include "adv_string.h"
+
+int_t cstl_main(int_t argc, char *argv[])
+{
+    int rslt = 0;
+    ADV_STRING(test1);
+    ADV_STRING(test2);
+
+    rslt = build_adv_string(&test1, "");
+    rslt = build_adv_string(&test2, "abc");
+    rslt = destroy_adv_string(&test1);
+    rslt = destroy_adv_string(&test2);
+
+    return rslt;
 }
 #endif

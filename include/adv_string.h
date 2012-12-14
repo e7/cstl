@@ -14,13 +14,20 @@ extern "C" {
 #endif
 
 
-#define DEFAULT_STRING_CAPACITY             32
-
 typedef struct {
-    char *mp_data;
     int_t m_size; // 字符串长度
     int_t m_capacity; // 缓冲大小
+    char *mp_data;
 } adv_string_t;
+#define ADV_STRING(name)                    \
+            adv_string_t name = {\
+                0, 0, NULL,\
+            }
+
+// 高级字符串接口
+extern int_t build_adv_string(adv_string_t *const THIS,
+                              char const *pc_string);
+extern int_t destroy_adv_string(adv_string_t *const THIS);
 
 
 #ifdef __cplusplus
