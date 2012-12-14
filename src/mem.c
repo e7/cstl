@@ -38,7 +38,7 @@ static page_t *new_page(int_t const OBJ_SIZE)
     }
 
     // ***** 页初始化 *****
-    memset(p_page, 0, PAGE_SIZE);
+    (void)memset(p_page, 0, PAGE_SIZE);
 
     init_ldlist_frame_node(&p_page->m_ldlist_node); // 页节点
 
@@ -303,6 +303,7 @@ void *mempool_array_alloc(mempool_t *const THIS,
 
         p_bigobj_sh = (bigobj_shell_t *)malloc(sizeof(bigobj_shell_t)
                                                    + OBJS_SIZE);
+        (void)memset(p_bigobj_sh, 0, sizeof(bigobj_shell_t) + OBJS_SIZE);
 
         // 对象地址作为key
         init_avltree_frame(&p_bigobj_sh->m_heap_node,
