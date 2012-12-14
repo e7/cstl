@@ -272,7 +272,7 @@ int_t cstl_main(int_t argc, char *argv[])
 }
 #endif
 
-#if 0
+#if 1
 // avl树性能测试
 #include <sys/time.h>
 
@@ -420,7 +420,7 @@ int_t cstl_main(int_t argc, char *argv[])
 
 
 #if 0
-// 插入排序测试
+// 排序测试
 #include <stdio.h>
 #include "sort.h"
 
@@ -448,7 +448,7 @@ int_t cstl_main(int_t argc, char *argv[])
 }
 #endif
 
-#if 1
+#if 0
 
 #include "adv_string.h"
 
@@ -458,10 +458,10 @@ int_t cstl_main(int_t argc, char *argv[])
     ADV_STRING(test1);
     ADV_STRING(test2);
 
-    rslt = build_adv_string(&test1, "");
-    rslt = build_adv_string(&test2, "abc");
-    rslt = destroy_adv_string(&test1);
-    rslt = destroy_adv_string(&test2);
+    build_adv_string(&test1);
+    build_adv_string(&test2);
+    destroy_adv_string(&test1);
+    destroy_adv_string(&test2);
 
     return rslt;
 }

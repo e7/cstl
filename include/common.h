@@ -63,6 +63,7 @@ typedef unsigned char ubyte_t;
 typedef intptr_t int_t;
 typedef uintptr_t uint_t;
 
+typedef intptr_t bool_t;
 typedef intptr_t handle_t;
 
 
@@ -114,6 +115,8 @@ typedef intptr_t handle_t;
             )
 #define MIN(a, b)               (((a) > (b)) ? (b) : (a))
 
+#define DO_NOTHING()            do {} while (0)
+
 // 比较交换接口
 enum {
     CMP_GREATER_THAN = 2,
@@ -122,8 +125,8 @@ enum {
 };
 
 typedef struct {
-    int_t (*mpf_compare)(void const *, void const *, int_t *);
-    int_t (*mpf_swap)(void *, void *);
+    int_t (*mpf_compare)(void const *, void const *);
+    void (*mpf_swap)(void *, void *);
 } compare_swap_t;
 
 

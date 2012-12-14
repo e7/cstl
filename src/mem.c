@@ -228,11 +228,8 @@ int_t find_mempool(char const *pc_name, mempool_t **pp_pool)
         NULL, NULL,
     };
 
-    if ((NULL == pc_name) || (NULL == pp_pool)) {
-        rslt = -E_NULL_POINTER;
-
-        goto FINAL;
-    }
+    ASSERT(NULL != pc_name);
+    ASSERT(NULL != pp_pool);
 
     p_iter = find_avltree_frame(&sp_mempool_heap, name_hash(pc_name), &iter);
     if (NULL == p_iter) {
@@ -248,13 +245,8 @@ FINAL:
 
 int_t mempool_build(mempool_t *const THIS, char const *pc_name)
 {
-    int_t rslt = 0;
-
-    if ((NULL == THIS) || (NULL == pc_name)) {
-        rslt = -E_NULL_POINTER;
-
-        goto FINAL;
-    }
+    ASSERT(NULL != THIS);
+    ASSERT(NULL != pc_name);
 
     // 成员初始化
     THIS->mpc_name = pc_name;
@@ -268,10 +260,7 @@ int_t mempool_build(mempool_t *const THIS, char const *pc_name)
     THIS->mp_bigobj_heap = NULL;
 
     // 注册
-    rslt = insert_avltree_frame(&sp_mempool_heap, &THIS->m_map_node);
-
-FINAL:
-    return rslt;
+    return insert_avltree_frame(&sp_mempool_heap, &THIS->m_map_node);
 }
 
 void *mempool_alloc(mempool_t *const THIS,
@@ -296,6 +285,9 @@ void *mempool_array_alloc(mempool_t *const THIS,
 
 #if MEMPOOL_ISOLATION
     p_rslt = calloc(obj_count, obj_size);
+    if (NULL == p_rslt) {
+        goto FINAL;
+    }
 #else
     // ********** 分配内存 **********
     if (OBJS_SIZE > MAX_OBJ_SIZE) { // 大对象
@@ -303,6 +295,9 @@ void *mempool_array_alloc(mempool_t *const THIS,
 
         p_bigobj_sh = (bigobj_shell_t *)malloc(sizeof(bigobj_shell_t)
                                                    + OBJS_SIZE);
+        if (NULL == p_bigobj_sh) {
+            goto FINAL;
+        }
         (void)memset(p_bigobj_sh, 0, sizeof(bigobj_shell_t) + OBJS_SIZE);
 
         // 对象地址作为key
@@ -340,7 +335,6 @@ void *mempool_array_alloc(mempool_t *const THIS,
             pc_file,
             line,
             (uint_t)p_rslt);
-    goto FINAL; // 为了内存池隔离版本消除警告
 
 FINAL:
     return p_rslt;
@@ -403,15 +397,9 @@ int_t mempool_free(mempool_t *const THIS,
     return rslt;
 }
 
-int_t mempool_destroy(mempool_t *const THIS)
+void mempool_destroy(mempool_t *const THIS)
 {
-    int_t rslt = 0;
-
-    if (NULL == THIS) {
-        rslt = -E_NULL_POINTER;
-
-        goto FINAL;
-    }
+    ASSERT(NULL != THIS);
 
     for (int_t i = 0; i < OBJ_SIZE_COUNT; ++i) {
         ldlist_frame_head_t *p_list = NULL;
@@ -437,6 +425,5 @@ int_t mempool_destroy(mempool_t *const THIS)
     }
     ASSERT(NULL == THIS->mp_bigobj_heap); // 暗示内存泄露
 
-FINAL:
-    return rslt;
+    return;
 }

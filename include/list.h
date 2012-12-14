@@ -49,9 +49,9 @@ extern void ldlist_build(ldlist_t *const THIS,
                          mempool_t *p_mempool,
                          int_t element_size);
 
-extern void ldlist_push_front(ldlist_t *const THIS, void const *pc_data);
+extern int_t ldlist_push_front(ldlist_t *const THIS, void const *pc_data);
 
-extern void ldlist_push_back(ldlist_t *const THIS, void const *pc_data);
+extern int_t ldlist_push_back(ldlist_t *const THIS, void const *pc_data);
 
 extern int_t ldlist_is_empty(ldlist_t *const THIS);
 

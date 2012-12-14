@@ -146,10 +146,11 @@ enum {
     POP_BACK  = 0x21,
 };
 
-static void ldlist_push(ldlist_t *const THIS,
-                        void const *pc_data,
-                        int_t push_type)
+static int_t ldlist_push(ldlist_t *const THIS,
+                         void const *pc_data,
+                         int_t push_type)
 {
+    int_t rslt = 0;
     ldlist_node_t *p_node = NULL;
 
     ASSERT(NULL != THIS);
@@ -158,7 +159,17 @@ static void ldlist_push(ldlist_t *const THIS,
 
     /* 构造结点 */
     p_node = MEMPOOL_ALLOC(THIS->mp_mempool, sizeof(ldlist_node_t));
+    if (NULL == p_node) {
+        rslt = -E_OUT_OF_MEM;
+
+        goto FINAL;
+    }
     p_node->mp_data = MEMPOOL_ALLOC(THIS->mp_mempool, THIS->m_element_size);
+    if (NULL == p_node->mp_data) {
+        rslt = -E_OUT_OF_MEM;
+
+        goto FINAL;
+    }
     (void)memcpy(p_node->mp_data, pc_data, THIS->m_element_size);
 
     /* 伤一敌可连其百 */
@@ -172,31 +183,28 @@ static void ldlist_push(ldlist_t *const THIS,
 
     ASSERT(!ldlist_is_empty(THIS));
 
-    return;
+FINAL:
+    return rslt;
 }
 
-void ldlist_push_front(ldlist_t *const THIS, void const *pc_data)
+int_t ldlist_push_front(ldlist_t *const THIS, void const *pc_data)
 {
     /* 条件检查 */
     ASSERT(NULL != THIS);
     ASSERT(NULL != THIS->mp_mempool);
     ASSERT(NULL != pc_data);
 
-    ldlist_push(THIS, pc_data, PUSH_FRONT);
-
-    return;
+    return ldlist_push(THIS, pc_data, PUSH_FRONT);
 }
 
-void ldlist_push_back(ldlist_t *const THIS, void const *pc_data)
+int_t ldlist_push_back(ldlist_t *const THIS, void const *pc_data)
 {
     /* 条件检查 */
     ASSERT(NULL != THIS);
     ASSERT(NULL != THIS->mp_mempool);
     ASSERT(NULL != pc_data);
 
-    ldlist_push(THIS, pc_data, PUSH_BACK);
-
-    return;
+    return ldlist_push(THIS, pc_data, PUSH_BACK);
 }
 
 static void ldlist_pop(ldlist_t *const THIS, int_t pop_type)
@@ -216,8 +224,8 @@ static void ldlist_pop(ldlist_t *const THIS, int_t pop_type)
     }
     ldlist_frame_del(p_frame_node);
     p_node = CONTAINER_OF(p_frame_node, ldlist_node_t, m_node);
-    MEMPOOL_FREE(THIS->mp_mempool, p_node->mp_data);
-    MEMPOOL_FREE(THIS->mp_mempool, p_node);
+    ASSERT(0 == MEMPOOL_FREE(THIS->mp_mempool, p_node->mp_data));
+    ASSERT(0 == MEMPOOL_FREE(THIS->mp_mempool, p_node));
 }
 
 void ldlist_pop_front(ldlist_t *const THIS)
@@ -284,9 +292,9 @@ void ldlist_clean(ldlist_t *const THIS)
         ldlist_frame_del(p_pos);
 
         // 释放
-        MEMPOOL_FREE(THIS->mp_mempool, p_node->mp_data);
+        ASSERT(0 == MEMPOOL_FREE(THIS->mp_mempool, p_node->mp_data));
         p_node->mp_data = NULL;
-        MEMPOOL_FREE(THIS->mp_mempool, p_node);
+        ASSERT(0 == MEMPOOL_FREE(THIS->mp_mempool, p_node));
     }
     ASSERT(ldlist_frame_node_alone(&THIS->m_head));
 

@@ -25,9 +25,8 @@ typedef struct {
             }
 
 // 高级字符串接口
-extern int_t build_adv_string(adv_string_t *const THIS,
-                              char const *pc_string);
-extern int_t destroy_adv_string(adv_string_t *const THIS);
+extern int_t build_adv_string(adv_string_t *const THIS);
+extern void destroy_adv_string(adv_string_t *const THIS);
 
 
 #ifdef __cplusplus
