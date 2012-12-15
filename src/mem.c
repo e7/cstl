@@ -401,6 +401,11 @@ void mempool_destroy(mempool_t *const THIS)
 {
     ASSERT(NULL != THIS);
 
+    // 注销
+    ASSERT(0 == remove_avltree_frame(&sp_mempool_heap,
+                                     name_hash(THIS->mpc_name)));
+
+    // 释放内存池所有内存页
     for (int_t i = 0; i < OBJ_SIZE_COUNT; ++i) {
         ldlist_frame_head_t *p_list = NULL;
         ldlist_frame_node_t *p_pos = NULL;
@@ -423,7 +428,7 @@ void mempool_destroy(mempool_t *const THIS)
             del_page(p_page);
         }
     }
-    ASSERT(NULL == THIS->mp_bigobj_heap); // 暗示内存泄露
+    ASSERT(NULL == THIS->mp_bigobj_heap); // 暗示大对象内存泄露
 
     return;
 }

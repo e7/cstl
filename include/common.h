@@ -17,9 +17,6 @@
     #error unsurpported platform!
 #endif
 
-#if !defined(DEBUG_EDITION)
-    #error macro DEBUG_EDITION undefined!
-#endif
 
 #if !defined(MEMPOOL_ISOLATION)
     #error macro MEMPOOL_ISOLATION undefined!
@@ -77,10 +74,19 @@ typedef intptr_t handle_t;
 // common macros
 #define NONE            ((void)0)
 
-#if DEBUG_EDITION
-    #define ASSERT(cond)        assert(cond)
+#ifdef NDEBUG
+    #define ASSERT(cond)        \
+                do {\
+                    if (!(cond)) {\
+                        (void)fprintf(stderr, \
+                                      "[Assert Failed] %s: %d\n", \
+                                      __FILE__, \
+                                      __LINE__);\
+                        abort();\
+                    }\
+                } while (0)
 #else
-    #define ASSERT(cond)        ((void)0)
+    #define ASSERT(cond)        assert(cond)
 #endif // DEBUG_EDITION
 
 #define OFFSET_OF(s, m)         ((size_t)&(((s *)0)->m ))

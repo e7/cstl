@@ -16,8 +16,6 @@ extern "C" {
 #define LINUX_PLATFORM          0x00000020
 #define PLATFORM_CFG            LINUX_PLATFORM
 
-#define DEBUG_EDITION           0x00000001
-
 #define MEMPOOL_ISOLATION       0x00000000
 
 

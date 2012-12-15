@@ -24,9 +24,18 @@ typedef struct {
                 0, 0, NULL,\
             }
 
-// 高级字符串接口
-extern int_t build_adv_string(adv_string_t *const THIS);
-extern void destroy_adv_string(adv_string_t *const THIS);
+// ***** 高级字符串接口 *****
+extern int_t adv_string_build(adv_string_t *const THIS);
+
+// 替换字符串
+// pc_old: 被替换的字符串，如果为NULL，表示替换所有字符串，
+//         如果为空串（""），也就是替换原串的'\0'，换句话
+//         说就是在原串上追加
+// pc_new: 替换进的字符串
+extern int_t adv_string_replace(adv_string_t *const THIS,
+                                char const *pc_old,
+                                char const *pc_new);
+extern void adv_string_destroy(adv_string_t *const THIS);
 
 
 #ifdef __cplusplus
