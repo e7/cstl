@@ -448,8 +448,10 @@ int_t cstl_main(int_t argc, char *argv[])
 }
 #endif
 
+
 #if 1
 
+// 字符串测试
 #include "adv_string.h"
 
 int_t cstl_main(int_t argc, char *argv[])
@@ -460,7 +462,6 @@ int_t cstl_main(int_t argc, char *argv[])
 
     adv_string_build(&test1);
     adv_string_build(&test2);
-    adv_string_build(NULL);
     adv_string_destroy(&test1);
     adv_string_destroy(&test2);
 

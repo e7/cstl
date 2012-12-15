@@ -75,19 +75,23 @@ typedef intptr_t handle_t;
 #define NONE            ((void)0)
 
 #ifdef NDEBUG
-    #define ASSERT(cond)        \
-                do {\
-                    if (!(cond)) {\
-                        (void)fprintf(stderr, \
-                                      "[Assert Failed] %s: %d\n", \
-                                      __FILE__, \
-                                      __LINE__);\
-                        abort();\
-                    }\
-                } while (0)
+    #ifdef NASSERT
+        #define ASSERT(cond)    do {} while (0)
+    #else
+        #define ASSERT(cond)        \
+                    do {\
+                        if (!(cond)) {\
+                            (void)fprintf(stderr, \
+                                          "[Assert Failed] %s: %d\n", \
+                                          __FILE__, \
+                                          __LINE__);\
+                            abort();\
+                        }\
+                    } while (0)
+    #endif // NASSERT
 #else
     #define ASSERT(cond)        assert(cond)
-#endif // DEBUG_EDITION
+#endif // NDEBUG
 
 #define OFFSET_OF(s, m)         ((size_t)&(((s *)0)->m ))
 #define CONTAINER_OF(ptr, type, member)     \
@@ -136,7 +140,7 @@ typedef struct {
 } compare_swap_t;
 
 
-// 应用入口
+// 应用程序入口
 extern int_t cstl_main(int_t argc, char *argv[]);
 
 

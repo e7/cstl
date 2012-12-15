@@ -364,7 +364,7 @@ int_t remove_avltree_frame(avltree_frame_t **pp_tree, int_t key)
     // 查找待删除的结点
     p_del = find_avltree_frame(pp_tree, key, &del);
     if (NULL == p_del) {
-        rslt = -E_NOT_EXISTED;
+        rslt = -E_NOT_EXIST;
         goto FINAL;
     }
 

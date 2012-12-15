@@ -233,7 +233,7 @@ int_t find_mempool(char const *pc_name, mempool_t **pp_pool)
 
     p_iter = find_avltree_frame(&sp_mempool_heap, name_hash(pc_name), &iter);
     if (NULL == p_iter) {
-        rslt = -E_NOT_EXISTED;
+        rslt = -E_NOT_EXIST;
 
         goto FINAL;
     }
@@ -379,7 +379,7 @@ int_t mempool_free(mempool_t *const THIS,
         if (NULL != p_base) {
             recycle_obj_sh(p_base, p_obj_sh);
         } else {
-            rslt = -E_NOT_EXISTED;
+            rslt = -E_NOT_EXIST;
         }
     }
 

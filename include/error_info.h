@@ -20,7 +20,7 @@ typedef enum {
     E_OUT_OF_MEM = 4096,
     E_OUT_OF_RANGE,
     E_EXISTED,
-    E_NOT_EXISTED,
+    E_NOT_EXIST,
 } errno_t;
 
 
