@@ -111,19 +111,40 @@ int_t adv_string_replace(adv_string_t *const THIS,
                          char const *pc_old,
                          char const *pc_new)
 {
-    int rslt = 0;
+    int_t rslt = 0;
+    size_t new_str_len = 0;
+    mempool_t *p_public_pool = NULL;
 
     ASSERT(NULL != THIS);
     ASSERT(NULL != pc_new);
 
-    if (NULL == pc_old) {
-    } else if (0 == strlen(pc_old)) {
-    } else {
-        ASSERT(NULL != THIS->mp_data);
+    new_str_len = strlen(pc_new);
+    ASSERT(NULL != THIS->mp_data);
+    ASSERT(0 == find_mempool(PUBLIC_MEMPOOL, &p_public_pool));
+    if (NULL == pc_old) { // 完全替换
+        if (THIS->m_capacity < (new_str_len + 1)) {
+            ASSERT(0 == MEMPOOL_FREE(p_public_pool, THIS->mp_data));
+            THIS->mp_data = MEMPOOL_ALLOC(p_public_pool, 2 * new_str_len);
+            if (NULL == THIS->mp_data) {
+                rslt = -E_OUT_OF_MEM;
 
-        find_string_kmp(THIS->mp_data, pc_old);
+                goto FINAL;
+            }
+        }
+        (void)memcpy(THIS->mp_data, pc_new, new_str_len);
+        THIS->mp_data[new_str_len] = '\0';
+    } else if (0 == strlen(pc_old)) { // 追加
+
+    } else { // 替换第一次匹配
+        rslt = find_string_kmp(THIS->mp_data, pc_old);
+
+        if (rslt < 0) {
+            goto FINAL;
+        }
+        
     }
 
+FINAL:
     return rslt;
 }
 

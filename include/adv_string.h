@@ -35,6 +35,13 @@ extern int_t adv_string_build(adv_string_t *const THIS);
 extern int_t adv_string_replace(adv_string_t *const THIS,
                                 char const *pc_old,
                                 char const *pc_new);
+static inline
+char const *adv_string_cstr(adv_string_t *const THIS)
+{
+    ASSERT(NULL != THIS);
+
+    return THIS->mp_data;
+}
 extern void adv_string_destroy(adv_string_t *const THIS);
 
 
