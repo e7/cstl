@@ -94,8 +94,8 @@ int_t adv_string_append(adv_string_t *const THIS, char const *pc_str)
 
     // 追加
     (void)memmove(&THIS->mp_data[THIS->m_size], pc_str, str_len);
-    THIS->mp_data[THIS->m_size + str_len] = '\0';
-    THIS->m_size = THIS->m_size + str_len;
+    THIS->mp_data[new_size] = '\0';
+    THIS->m_size = new_size;
 
 FINAL:
     return rslt;
@@ -205,7 +205,7 @@ int_t adv_string_replace(adv_string_t *const THIS,
         if (rslt < 0) {
             goto FINAL;
         }
-        
+
     }
 
 FINAL:
