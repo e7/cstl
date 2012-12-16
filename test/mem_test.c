@@ -462,7 +462,12 @@ int_t cstl_main(int_t argc, char *argv[])
 
     adv_string_build(&test1);
     adv_string_build(&test2);
-    adv_string_replace(&test1, "", "abc");
+    adv_string_append(&test1, "123");
+    adv_string_append(&test1, "abcdefg");
+    adv_string_append(&test1, "abcdefg");
+    adv_string_append(&test1, "afg");
+    adv_string_append(&test1, "abcdefg");
+    adv_string_append(&test1, "abcdefg");
     fprintf(stderr, "%s\n", adv_string_cstr(&test1));
     adv_string_destroy(&test1);
     adv_string_destroy(&test2);

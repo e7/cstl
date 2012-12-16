@@ -327,6 +327,7 @@ void *mempool_array_alloc(mempool_t *const THIS,
     }
 #endif // mempool_array_alloc's MEMPOOL_ISOLATION
 
+#ifndef NDEBUG
     fprintf(stdout,
             "[INFO][%s 0x%08x]: "
                 "memory alloced in file %s at line %d: 0x%08x\n",
@@ -335,6 +336,7 @@ void *mempool_array_alloc(mempool_t *const THIS,
             pc_file,
             line,
             (uint_t)p_rslt);
+#endif
 
 FINAL:
     return p_rslt;
@@ -385,6 +387,7 @@ int_t mempool_free(mempool_t *const THIS,
 
 #endif // mempool_free's MEMPOOL_ISOLATION
 
+#ifndef NDEBUG
     fprintf(stdout,
             "[INFO][%s 0x%08x]: "
                 "memory freed in file %s at line %d: 0x%08x\n",
@@ -393,6 +396,7 @@ int_t mempool_free(mempool_t *const THIS,
             pc_file,
             line,
             (uint_t)p_obj);
+#endif
 
     return rslt;
 }

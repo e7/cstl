@@ -7,11 +7,13 @@
 static int_t find_max_repeat(char const *pc_str, int_t pass_len);
 static int_t find_string_kmp(char const *pc_str, char const *pc_sub);
 
+static int_t adv_string_reserve(adv_string_t *const THIS, size_t capacity);
+
 
 // ***** 高级字符串接口实现 *****
 int_t adv_string_build(adv_string_t *const THIS)
 {
-    #define DEFAULT_STRING_CAPACITY             64
+    #define DEFAULT_STRING_CAPACITY             4
 
     int_t rslt = 0;
     mempool_t *p_public_pool = NULL;
@@ -35,6 +37,68 @@ int_t adv_string_build(adv_string_t *const THIS)
     return rslt;
 
     #undef DEFAULT_STRING_CAPACITY
+}
+
+
+int_t adv_string_reserve(adv_string_t *const THIS, size_t const CAPACITY)
+{
+    int_t rslt = 0;
+    char *p_tmp = NULL;
+    mempool_t *p_public_pool = NULL;
+
+    ASSERT(NULL != THIS);
+    ASSERT(CAPACITY > THIS->m_capacity);
+
+    // 分配内存
+    ASSERT(0 == find_mempool(PUBLIC_MEMPOOL, &p_public_pool));
+    p_tmp = (char *)MEMPOOL_ALLOC(p_public_pool, CAPACITY);
+    if (NULL == p_tmp) {
+        rslt = -E_OUT_OF_MEM;
+        goto FINAL;
+    }
+
+    // 拷贝
+    ASSERT(NULL != THIS->mp_data);
+    (void)memmove(p_tmp, THIS->mp_data, THIS->m_size);
+    p_tmp[THIS->m_size] = '\0';
+
+    // 释放原内存并接管新内存
+    ASSERT(0 == MEMPOOL_FREE(p_public_pool, THIS->mp_data));
+    THIS->mp_data = p_tmp;
+    THIS->m_capacity = CAPACITY;
+
+FINAL:
+    return rslt;
+}
+
+
+int_t adv_string_append(adv_string_t *const THIS, char const *pc_str)
+{
+    int_t rslt = 0;
+    size_t str_len = 0;
+    size_t new_size = 0;
+
+    ASSERT(NULL != THIS);
+    ASSERT(NULL != pc_str);
+
+    str_len = strlen(pc_str);
+    new_size = THIS->m_size + str_len;
+
+    ASSERT(NULL != THIS->mp_data);
+    if ((THIS->m_capacity - THIS->m_size) < (str_len + 1)) { // 剩余空间不够
+        rslt = adv_string_reserve(THIS, 2 * (THIS->m_size + str_len));
+        if (0 != rslt) {
+            goto FINAL;
+        }
+    }
+
+    // 追加
+    (void)memmove(&THIS->mp_data[THIS->m_size], pc_str, str_len);
+    THIS->mp_data[THIS->m_size + str_len] = '\0';
+    THIS->m_size = THIS->m_size + str_len;
+
+FINAL:
+    return rslt;
 }
 
 
