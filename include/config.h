@@ -12,11 +12,7 @@ extern "C" {
 
 
 // configuration
-#define WINDOWS_PLATFORM        0x00000010
-#define LINUX_PLATFORM          0x00000020
-#define PLATFORM_CFG            LINUX_PLATFORM
-
-#define MEMPOOL_ISOLATION       0x00000000
+// #define MEMPOOL_ISOLATION
 
 
 #ifdef __cplusplus

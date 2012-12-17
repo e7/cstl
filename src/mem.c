@@ -278,27 +278,23 @@ void *mempool_array_alloc(mempool_t *const THIS,
                           int_t line)
 {
     void *p_rslt = NULL;
-    int_t const OBJS_SIZE = obj_size * obj_count;
+    int_t const OBJS_SIZE = obj_size * obj_count; // 应用使用的内存大小
+    int_t const TOTAL_SIZE = (OBJS_SIZE > MAX_OBJ_SIZE)
+                                 ? (sizeof(bigobj_shell_t) + OBJS_SIZE)
+                                 : (sizeof(obj_shell_t) + OBJS_SIZE);
 
     ASSERT(NULL != THIS);
     ASSERT(NULL != pc_file);
 
-#if MEMPOOL_ISOLATION
-    p_rslt = calloc(obj_count, obj_size);
-    if (NULL == p_rslt) {
-        goto FINAL;
-    }
-#else
     // ********** 分配内存 **********
     if (OBJS_SIZE > MAX_OBJ_SIZE) { // 大对象
         bigobj_shell_t *p_bigobj_sh = NULL;
 
-        p_bigobj_sh = (bigobj_shell_t *)malloc(sizeof(bigobj_shell_t)
-                                                   + OBJS_SIZE);
+        p_bigobj_sh = (bigobj_shell_t *)malloc(TOTAL_SIZE);
         if (NULL == p_bigobj_sh) {
             goto FINAL;
         }
-        (void)memset(p_bigobj_sh, 0, sizeof(bigobj_shell_t) + OBJS_SIZE);
+        (void)memset(p_bigobj_sh, 0, TOTAL_SIZE);
 
         // 对象地址作为key
         init_avltree_frame(&p_bigobj_sh->m_heap_node,
@@ -325,9 +321,8 @@ void *mempool_array_alloc(mempool_t *const THIS,
                      provide_obj_sh(&THIS->ma_obj_cache[index])->m_obj
                  );
     }
-#endif // mempool_array_alloc's MEMPOOL_ISOLATION
 
-#ifndef NDEBUG
+#if !defined(NDEBUG)
     fprintf(stdout,
             "[INFO][%s 0x%08x]: "
                 "memory alloced in file %s at line %d: 0x%08x\n",
@@ -348,17 +343,19 @@ int_t mempool_free(mempool_t *const THIS,
                    int_t line)
 {
     int_t rslt = 0;
+    int_t total_size = 0;
     obj_shell_t *p_obj_sh = NULL;
 
     ASSERT(NULL != THIS);
     ASSERT(NULL != p_obj);
     ASSERT(NULL != pc_file);
 
-#if MEMPOOL_ISOLATION
-    free(p_obj);
-#else
     p_obj_sh = CONTAINER_OF(p_obj, obj_shell_t, m_obj);
     ASSERT(NULL != p_obj_sh);
+    total_size = (p_obj_sh->m_intptr.m_size > MAX_OBJ_SIZE)
+                     ? sizeof(bigobj_shell_t) + p_obj_sh->m_intptr.m_size
+                     : sizeof(obj_shell_t) + p_obj_sh->m_intptr.m_size;
+
     if (p_obj_sh->m_intptr.m_size > MAX_OBJ_SIZE) { // 大对象
         bigobj_shell_t *p_bigobj_sh = CONTAINER_OF(p_obj_sh,
                                                    bigobj_shell_t,
@@ -367,6 +364,8 @@ int_t mempool_free(mempool_t *const THIS,
                                     (int_t)p_obj);
         if (E_OK == rslt) {
             free(p_bigobj_sh);
+        } else {
+            rslt = -E_NOT_EXIST; // 对象不属于该内存池
         }
     } else {
         int_t const OBJ_SIZE = p_obj_sh->m_intptr.m_size;
@@ -381,13 +380,11 @@ int_t mempool_free(mempool_t *const THIS,
         if (NULL != p_base) {
             recycle_obj_sh(p_base, p_obj_sh);
         } else {
-            rslt = -E_NOT_EXIST;
+            rslt = -E_NOT_EXIST; // 对象不属于该内存池
         }
     }
 
-#endif // mempool_free's MEMPOOL_ISOLATION
-
-#ifndef NDEBUG
+#if !defined(NDEBUG)
     fprintf(stdout,
             "[INFO][%s 0x%08x]: "
                 "memory freed in file %s at line %d: 0x%08x\n",
@@ -397,6 +394,7 @@ int_t mempool_free(mempool_t *const THIS,
             line,
             (uint_t)p_obj);
 #endif
+
 
     return rslt;
 }

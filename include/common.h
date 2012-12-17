@@ -9,20 +9,6 @@
 #include "config.h"
 
 
-// check configuration
-#if !defined(PLATFORM_CFG)
-    #error macro PLATFORM_CFG undefined!
-#endif
-#if (PLATFORM_CFG != LINUX_PLATFORM) && (PLATFORM_CFG != WINDOWS_PLATFORM)
-    #error unsurpported platform!
-#endif
-
-
-#if !defined(MEMPOOL_ISOLATION)
-    #error macro MEMPOOL_ISOLATION undefined!
-#endif
-
-
 // common headers
 #include <stddef.h>
 #include <stdint.h>
@@ -30,11 +16,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#if (LINUX_PLATFORM == PLATFORM_CFG)
-    #include <unistd.h>
-#endif
-#if (WINDOWS_PLATFORM == PLATFORM_CFG)
+#ifdef _WIN32
     #include <windows.h>
+#else
+    #include <unistd.h>
 #endif
 
 

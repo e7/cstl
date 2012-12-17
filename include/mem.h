@@ -102,18 +102,32 @@ extern int_t mempool_free(mempool_t *const THIS,
                           int_t line);
 extern void mempool_destroy(mempool_t *const THIS);
 
-#define MEMPOOL_BUILD           mempool_build
-#define MEMPOOL_ALLOC(pc_mempool, obj_size)      \
-            mempool_alloc(pc_mempool, obj_size, __FILE__, __LINE__)
-#define MEMPOOL_ARRAY_ALLOC(pc_mempool, obj_count, obj_size)     \
-            mempool_array_alloc(pc_mempool,\
-                                obj_count,\
-                                obj_size,\
-                                __FILE__,\
-                                __LINE__)
-#define MEMPOOL_FREE(pc_mempool, p_obj)          \
-            mempool_free(pc_mempool, p_obj, __FILE__, __LINE__)
-#define MEMPOOL_DESTROY         mempool_destroy
+
+#if !defined(MEMPOOL_ISOLATION)
+
+    #define MEMPOOL_BUILD(pool, name)           mempool_build(pool, name)
+    #define MEMPOOL_ALLOC(pc_mempool, obj_size)     \
+                mempool_alloc(pc_mempool, obj_size, __FILE__, __LINE__)
+    #define MEMPOOL_ARRAY_ALLOC(pc_mempool, obj_count, obj_size)        \
+                mempool_array_alloc(pc_mempool, \
+                                    obj_count, \
+                                    obj_size, \
+                                    __FILE__, \
+                                    __LINE__)
+    #define MEMPOOL_FREE(pc_mempool, p_obj)         \
+                mempool_free(pc_mempool, p_obj, __FILE__, __LINE__)
+    #define MEMPOOL_DESTROY(pool)       mempool_destroy(pool)
+
+#else
+
+    #define MEMPOOL_BUILD(pool, name)               do {} while(0)
+    #define MEMPOOL_ALLOC(pc_mempool, obj_size)     malloc(obj_size)
+    #define MEMPOOL_ARRAY_ALLOC(pc_mempool, obj_count, obj_size)    \
+                malloc(obj_size * obj_count)
+    #define MEMPOOL_FREE(pc_mempool, p_obj)         (free(p_obj), 0)
+    #define MEMPOOL_DESTROY(pool)                   do {} while (0)
+
+#endif // MEMPOOL_ISOLATION
 
 
 // ******************** 持久内存接口 ********************
