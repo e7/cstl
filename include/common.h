@@ -128,6 +128,6 @@ extern int_t cstl_main(int_t argc, char *argv[]);
 
 
 #ifdef __cplusplus
-} // extern "C"
-#endif
+}
+#endif // end of extern "C"
 #endif // __COMMON_H__

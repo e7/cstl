@@ -136,6 +136,6 @@ extern int_t alloc_permanent_mem(int_t size, void **pp_mem);
 
 
 #ifdef __cplusplus
-} // extern "C"
-#endif
+}
+#endif // end of extern "C"
 #endif // __MEM_H__

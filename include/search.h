@@ -32,6 +32,6 @@ extern int_t binary_search(int_t const A_BUF[],
 
 
 #ifdef __cplusplus
-} // extern "C"
-#endif
+}
+#endif // end of extern "C"
 #endif // __SEARCH_H__

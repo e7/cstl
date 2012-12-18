@@ -26,6 +26,6 @@ struct iterator {
 
 
 #ifdef __cplusplus
-} // extern "C"
-#endif
+}
+#endif // end of extern "C"
 #endif // __STD_ITERATOR_H__

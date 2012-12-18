@@ -41,6 +41,6 @@ extern void adv_string_destroy(adv_string_t *const THIS);
 
 
 #ifdef __cplusplus
-} // extern "C"
-#endif
+}
+#endif // end of extern "C"
 #endif // __ADV_STRING_H__

@@ -154,6 +154,6 @@ static inline void ldlist_frame_del(ldlist_frame_node_t *p_node)
 
 
 #ifdef __cplusplus
-} // extern "C"
-#endif
+}
+#endif // end of extern "C"
 #endif // __LIST_FRAME_H__

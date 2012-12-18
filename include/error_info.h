@@ -25,6 +25,6 @@ typedef enum {
 
 
 #ifdef __cplusplus
-} // extern "C"
-#endif
+}
+#endif // end of extern "C"
 #endif // __ERROR_INFO_H__

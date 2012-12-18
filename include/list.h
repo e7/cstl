@@ -74,6 +74,6 @@ extern void ldlist_destroy(ldlist_t *const THIS);
 
 
 #ifdef __cplusplus
-} // extern "C"
-#endif
+}
+#endif // end of extern "C"
 #endif // __LIST_H__

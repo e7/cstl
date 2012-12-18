@@ -16,6 +16,6 @@ extern "C" {
 
 
 #ifdef __cplusplus
-} // extern "C"
-#endif
+}
+#endif // end of extern "C"
 #endif // __CONFIG_H__

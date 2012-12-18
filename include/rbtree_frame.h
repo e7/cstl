@@ -454,6 +454,6 @@ FINAL:
 
 
 #ifdef __cplusplus
-} // extern "C"
-#endif
-#endif
+}
+#endif // end of extern "C"
+#endif // __RBTREE_FRAME_H__

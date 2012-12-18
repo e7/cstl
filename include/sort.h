@@ -36,6 +36,6 @@ extern int_t quick_sort(void *pa_data,
 
 
 #ifdef __cplusplus
-} // extern "C"
-#endif
+}
+#endif // end of extern "C"
 #endif
