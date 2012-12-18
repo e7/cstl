@@ -52,8 +52,8 @@ compare_swap_t const CMP_SWAP_OF_INT = {
 // ***** 插入排序 *****
 // error_info: E_NULL_POINTER, E_OUT_OF_RANGE
 int_t insert_sort(void *pa_data,
-                  ssize_t ele_size,
-                  ssize_t total_size,
+                  int_t ele_size,
+                  int_t total_size,
                   compare_swap_t const *pc_compare)
 {
     // 参数检查
@@ -126,14 +126,14 @@ void *prepare_pivot(void *pa_data,
 
 // error_info: E_NULL_POINTER, E_OUT_OF_RANGE
 int_t quick_sort(void *pa_data,
-                 ssize_t ele_size,
-                 ssize_t total_size,
+                 int_t ele_size,
+                 int_t total_size,
                  compare_swap_t const *pc_compare)
 {
     typedef struct {
         ldlist_frame_node_t m_node;
         byte_t *mpa_data;
-        ssize_t m_total_size;
+        int_t m_total_size;
     } qs_frame_t; // 快排帧
 
     int_t rslt = 0;

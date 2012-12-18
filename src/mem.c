@@ -89,7 +89,7 @@ static int_t is_page_empty(page_t *const THIS)
 }
 
 static obj_shell_t *do_provide_obj_sh(page_t *const THIS,
-                                      ssize_t const OBJ_SIZE)
+                                      int_t const OBJ_SIZE)
 {
     obj_shell_t *p_obj_sh = NULL;
 
@@ -264,7 +264,7 @@ int_t mempool_build(mempool_t *const THIS, char const *pc_name)
 }
 
 void *mempool_alloc(mempool_t *const THIS,
-                    ssize_t obj_size,
+                    int_t obj_size,
                     char const *pc_file,
                     int_t line)
 {
@@ -273,7 +273,7 @@ void *mempool_alloc(mempool_t *const THIS,
 
 void *mempool_array_alloc(mempool_t *const THIS,
                           int_t obj_count,
-                          ssize_t obj_size,
+                          int_t obj_size,
                           char const *pc_file,
                           int_t line)
 {

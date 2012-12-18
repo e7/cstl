@@ -10,13 +10,13 @@
 // ********** 持久内存 **********
 static byte_t *sp_permanent_mem = NULL;
 static byte_t *sp_pm_current = NULL;
-static ssize_t sp_pm_left = 0;
+static int_t sp_pm_left = 0;
 
 
 // 构建持久内存
 // 返回值：成功 - E_OK
 //         内存耗尽 - E_OUT_OF_MEM
-static int_t build_permanent_mem(ssize_t size)
+static int_t build_permanent_mem(int_t size)
 {
     int_t rslt = E_OK;
 
@@ -39,7 +39,7 @@ FINAL:
 // 分配持久内存
 // 返回值：成功 - E_OK
 //         内存耗尽 - E_OUT_OF_MEM
-int_t alloc_permanent_mem(ssize_t size, void **pp_mem)
+int_t alloc_permanent_mem(int_t size, void **pp_mem)
 {
     int_t rslt = 0;
 

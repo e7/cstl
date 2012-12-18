@@ -132,7 +132,7 @@ extern void mempool_destroy(mempool_t *const THIS);
 
 // ******************** 持久内存接口 ********************
 #define PERMANENT_MEM_SIZE          (1024 * 4)
-extern int_t alloc_permanent_mem(ssize_t size, void **pp_mem);
+extern int_t alloc_permanent_mem(int_t size, void **pp_mem);
 
 
 #ifdef __cplusplus

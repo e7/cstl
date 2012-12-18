@@ -16,11 +16,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#ifdef _WIN32
-    #include <windows.h>
-#else
-    #include <unistd.h>
-#endif
 
 
 #ifndef __GNUC__
@@ -78,7 +73,7 @@ typedef intptr_t handle_t;
     #define ASSERT(cond)        assert(cond)
 #endif // NDEBUG
 
-#define OFFSET_OF(s, m)         ((size_t)&(((s *)0)->m ))
+#define OFFSET_OF(s, m)         ((int_t)&(((s *)0)->m ))
 #define CONTAINER_OF(ptr, type, member)     \
             ({\
                 const __typeof__(((type *)0)->member) *p_mptr = (ptr);\

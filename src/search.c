@@ -2,7 +2,7 @@
 
 
 // 顺序查找
-int_t sequential_search(int_t const A_BUF[], ssize_t size, int_t const KEY)
+int_t sequential_search(int_t const A_BUF[], int_t size, int_t const KEY)
 {
     int_t index = INVALID_INDEX;
 
@@ -26,7 +26,7 @@ FINAL:
 }
 
 // 二分查找
-int_t binary_search(int_t const A_BUF[], ssize_t const SIZE, int_t const KEY)
+int_t binary_search(int_t const A_BUF[], int_t const SIZE, int_t const KEY)
 {
     int_t index = INVALID_INDEX;
     int_t tmp_size = 0;
