@@ -343,7 +343,6 @@ int_t mempool_free(mempool_t *const THIS,
                    int_t line)
 {
     int_t rslt = 0;
-    int_t total_size = 0;
     obj_shell_t *p_obj_sh = NULL;
 
     ASSERT(NULL != THIS);
@@ -352,9 +351,6 @@ int_t mempool_free(mempool_t *const THIS,
 
     p_obj_sh = CONTAINER_OF(p_obj, obj_shell_t, m_obj);
     ASSERT(NULL != p_obj_sh);
-    total_size = (p_obj_sh->m_intptr.m_size > MAX_OBJ_SIZE)
-                     ? sizeof(bigobj_shell_t) + p_obj_sh->m_intptr.m_size
-                     : sizeof(obj_shell_t) + p_obj_sh->m_intptr.m_size;
 
     if (p_obj_sh->m_intptr.m_size > MAX_OBJ_SIZE) { // 大对象
         bigobj_shell_t *p_bigobj_sh = CONTAINER_OF(p_obj_sh,

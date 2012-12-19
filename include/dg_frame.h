@@ -51,6 +51,30 @@ struct s_graph_edge {
     graph_edge_t *mp_next;
 };
 
+static inline
+void graph_edge_init(graph_edge_t *const THIS, graph_vertex_t *p_vertex)
+{
+    ASSERT(NULL != THIS);
+    ASSERT(NULL != p_vertex);
+
+    THIS->m_weight = 0;
+    THIS->mp_vertex = p_vertex;
+    THIS->mp_next = NULL;
+}
+
+static inline
+void graph_edge_add_edge(graph_edge_t *const THIS, graph_edge_t *p_edge)
+{
+    graph_edge_t *p_tmp_edge = NULL;
+
+    ASSERT(NULL != THIS);
+    ASSERT(NULL != p_edge);
+
+    p_tmp_edge = THIS->mp_next;
+    THIS->mp_next = p_edge;
+    p_edge->mp_next = p_tmp_edge;
+}
+
 // 图
 struct s_graph {
 //    ldlist_frame_head_t m_vertex_buf; // 顶点缓冲
@@ -73,16 +97,25 @@ void graph_build(graph_t *const THIS, graph_vertex_t *p_vertex)
 }
 
 static inline
-int_t graph_add_graph(graph_t *const THIS, graph_t *p_next_graph)
+void graph_add_graph(graph_t *const THIS, graph_t *p_graph)
 {
     graph_t *p_tmp_graph = NULL;
 
     ASSERT(NULL != THIS);
-    ASSERT(NULL != p_next_graph);
+    ASSERT(NULL != p_graph);
 
     p_tmp_graph = THIS->mp_next;
-    THIS->mp_next = p_next_graph;
-    p_next_graph->mp_next = p_tmp_graph;
+    THIS->mp_next = p_graph;
+    p_graph->mp_next = p_tmp_graph;
+}
+
+static inline
+void graph_add_edge(graph_t *const THIS, graph_edge_t *p_edge)
+{
+    ASSERT(NULL != THIS);
+    ASSERT(NULL != p_edge);
+
+    graph_edge_add_edge(THIS->mp_first_edge, p_edge);
 }
 
 static inline
