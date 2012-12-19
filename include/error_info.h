@@ -6,9 +6,6 @@
 #define __ERROR_INFO_H__
 
 
-#include "common.h"
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif

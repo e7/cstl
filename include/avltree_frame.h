@@ -1,4 +1,4 @@
-// avltree_frame.h: avl树实现。
+// avltree_frame.h: avl树实现
 // author: e7, ryuuzaki.uchiha@gmail.com
 
 

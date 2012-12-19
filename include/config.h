@@ -1,4 +1,4 @@
-// config.h: configuration for compilation.
+// config.h: configuration for compilation
 // author: e7, ryuuzaki.uchiha@gmail.com
 
 
