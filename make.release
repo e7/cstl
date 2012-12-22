@@ -12,4 +12,4 @@ if [ ! -x "m4" ]; then
     ./configure
 fi
 
-make CFLAGS="-Wall -Werror -std=c99 -DNDEBUG -I$(pwd)/include"
+make CFLAGS="-Wall -Werror -std=c99 -I$(pwd)/include"

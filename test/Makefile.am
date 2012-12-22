@@ -6,7 +6,7 @@ if DEBUG
 mem_test_CFLAGS = -g -O0
 other_rbtree_CFLAGS = -g -O0
 else
-mem_test_CFLAGS = -O2
-other_rbtree_CFLAGS = -O2
+mem_test_CFLAGS = -NDEBUG -O2
+other_rbtree_CFLAGS = -NDEBUG -O2
 endif
 mem_test_LDFLAGS = -L$(top_srcdir)/src/.libs -lcstl
