@@ -1,0 +1,7 @@
+#! /bin/bash
+
+if [ ! -x "Makefile" ]; then
+    make clean
+fi
+
+rm -rvf m4
