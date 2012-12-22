@@ -9,7 +9,7 @@ if [ ! -x "m4" ]; then
     autoconf &&
     automake --add-missing &&
 
-    ./configure
+    ./configure --enable-debug
 fi
 
-make CFLAGS="-Wall -Werror -g -O0 -std=c99" LDFLAGS="-L${PWD}/src/.libs"
+make CFLAGS="-Wall -Werror -std=c99 -I$(pwd)/include"
