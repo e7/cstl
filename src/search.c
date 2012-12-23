@@ -6,9 +6,7 @@ int_t sequential_search(int_t const A_BUF[], int_t size, int_t const KEY)
 {
     int_t index = INVALID_INDEX;
 
-    if (NULL == A_BUF) {
-        goto FINAL;
-    }
+    ASSERT(NULL != A_BUF);
 
     if (size < 1) {
         goto FINAL;
@@ -32,9 +30,7 @@ int_t binary_search(int_t const A_BUF[], int_t const SIZE, int_t const KEY)
     int_t tmp_size = 0;
     int_t const *pc_tmp_buf = NULL;
 
-    if (NULL == A_BUF) {
-        goto FINAL;
-    }
+    ASSERT(NULL != A_BUF);
 
     if (SIZE < 1) {
         goto FINAL;

@@ -7,7 +7,7 @@
 static int_t find_max_repeat(char const *pc_str, int_t pass_len);
 static int_t find_string_kmp(char const *pc_str, char const *pc_sub);
 
-static int_t adv_string_reserve(adv_string_t *const THIS, size_t capacity);
+static int_t adv_string_reserve(adv_string_t *const THIS, int_t capacity);
 
 
 // ***** 高级字符串接口实现 *****
@@ -28,7 +28,7 @@ int_t adv_string_build(adv_string_t *const THIS)
     if (NULL == THIS->mp_data) {
         THIS->mp_data = MEMPOOL_ALLOC(p_public_pool, THIS->m_capacity);
     } else {
-        ASSERT(0); // 不允许重复初始化
+        ASSERT(0); // 不允许重复构造
     }
     if (NULL == THIS->mp_data) {
         rslt = -E_OUT_OF_MEM;
@@ -40,7 +40,7 @@ int_t adv_string_build(adv_string_t *const THIS)
 }
 
 
-int_t adv_string_reserve(adv_string_t *const THIS, size_t const CAPACITY)
+int_t adv_string_reserve(adv_string_t *const THIS, int_t const CAPACITY)
 {
     int_t rslt = 0;
     char *p_tmp = NULL;
@@ -224,7 +224,7 @@ void adv_string_destroy(adv_string_t *const THIS)
     ASSERT(0 == find_mempool(PUBLIC_MEMPOOL, &p_public_pool));
 
     // 析构
-    ASSERT(NULL != THIS->mp_data);
+    ASSERT(NULL != THIS->mp_data); // 不允许重复析构
     ASSERT(0 == MEMPOOL_FREE(p_public_pool, THIS->mp_data));
     THIS->mp_data = NULL;
     THIS->m_size = 0;

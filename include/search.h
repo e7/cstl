@@ -15,7 +15,7 @@ extern "C" {
 
 
 // 查找接口
-#define INVALID_INDEX           (-1)
+#define INVALID_INDEX               (-1)
 
 typedef struct {
     int_t (*mpf_search)(int_t const [], int_t const, int_t const);
