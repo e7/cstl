@@ -47,7 +47,7 @@ rb_node_t* rb_erase(key_t key, rb_node_t* root);
 int main()
 {
     int i, count = 10000000;
-    key_t *p_key = malloc(count * sizeof(key_t));
+    key_t *p_key = calloc(count , sizeof(key_t));
     rb_node_t* root = NULL;
     //rb_node_t* node = NULL;
     struct timeval tpstart, tpend;
@@ -118,11 +118,11 @@ int main()
 
 static rb_node_t* rb_new_node(key_t key, data_t data)
 {
-    rb_node_t *node = (rb_node_t*)malloc(sizeof(struct rb_node_t));
+    rb_node_t *node = (rb_node_t*)calloc(1, sizeof(struct rb_node_t));
 
     if (!node)
     {
-        printf("malloc error!\n");
+        printf("calloc error!\n");
         exit(-1);
     }
     node->key = key, node->data = data;

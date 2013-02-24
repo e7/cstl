@@ -356,6 +356,7 @@ int_t mempool_free(mempool_t *const THIS,
         bigobj_shell_t *p_bigobj_sh = CONTAINER_OF(p_obj_sh,
                                                    bigobj_shell_t,
                                                    m_obj_sh);
+
         rslt = remove_avltree_frame(&THIS->mp_bigobj_heap,
                                     (int_t)p_obj);
         if (E_OK == rslt) {

@@ -88,7 +88,7 @@ static bool_t build_cstl(void)
         rslt = FALSE;
 
         // log
-        (void)fprintf(stderr, "out of mem!\n");
+        (void)fprintf(stderr, "run out of mem!\n");
 
         goto FINAL;
     } else {

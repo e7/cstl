@@ -273,7 +273,7 @@ int_t cstl_main(int_t argc, char *argv[])
 }
 #endif
 
-#if 0
+#if 1
 // avl树性能测试
 #include <sys/time.h>
 
@@ -365,6 +365,12 @@ int_t cstl_main(int_t argc, char *argv[])
                                   sizeof(avltree_frame_t));
     //p_nodes = calloc(count, sizeof(avltree_frame_t));
 
+    if (NULL == p_nodes) {
+        fprintf(stderr, "run out of memory!\n");
+
+        return -1;
+    }
+
     for (int_t i = 0; i < count; ++i) {
         p_keys[i] =  rand() % count;
 
@@ -388,10 +394,12 @@ int_t cstl_main(int_t argc, char *argv[])
 
     for (int_t i = 0; i < count; ++i) {
         if (NULL != p_tree) {
+            ASSERT(NULL != p_tree);
             remove_avltree_frame(&p_tree, p_keys[i]);
         }
     }
     MEMPOOL_FREE(p_pool, p_nodes);
+    // mempool_free(p_pool, p_nodes, __FILE__, __LINE__);
 
     /*for (int_t i = 0; i < ARRAY_COUNT(keys); ++i) {
         nodes[i].m_key = keys[i];
@@ -450,7 +458,7 @@ int_t cstl_main(int_t argc, char *argv[])
 #endif
 
 
-#if 1
+#if 0
 
 // 字符串测试
 #include "adv_string.h"
