@@ -511,4 +511,4 @@ FINAL:
 #ifdef __cplusplus
 }
 #endif // end of extern "C"
-#endif // __AVLTREE_FRAME_H_结点_
+#endif // __AVLTREE_FRAME_H__
