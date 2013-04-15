@@ -7,6 +7,7 @@
 #include "adv_string.h"
 #include "error_info.h"
 #include "dg_frame.h"
+#include "hash_base.h"
 
 
 #if 0
